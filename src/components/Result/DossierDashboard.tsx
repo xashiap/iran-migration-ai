@@ -1,0 +1,379 @@
+'use client';
+
+import React, { useState } from 'react';
+import { AnalysisResult, CountryRecommendation } from '@/types/migration';
+import { RoadmapTimeline } from './RoadmapTimeline';
+import { CostEstimator } from './CostEstimator';
+import { 
+  AlertTriangle, 
+  CheckCircle2, 
+  Printer, 
+  ArrowRight, 
+  DollarSign, 
+  MapPin, 
+  Brain, 
+  ShieldCheck 
+} from 'lucide-react';
+
+interface DossierDashboardProps {
+  result: AnalysisResult;
+  onEditProfile: () => void;
+  onReset: () => void;
+}
+
+export const DossierDashboard: React.FC<DossierDashboardProps> = ({
+  result,
+  onEditProfile,
+  onReset,
+}) => {
+  const [activeTab, setActiveTab] = useState<'roadmap' | 'finance' | 'ai_insights'>('roadmap');
+  const [selectedCountry, setSelectedCountry] = useState<CountryRecommendation>(result.topCountries[0]);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* سربرگ گزارش رسمی */}
+      <div className="bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+          <div className="space-y-3 max-w-3xl">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>پرونده با موفقیت تحلیل شد</span>
+              </span>
+              <span className="bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-xs font-medium">
+                {result.profilePersona}
+              </span>
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight">
+              داشبورد برنامه جامع مهاجرت شما از ایران
+            </h2>
+
+            <p className="text-sm text-slate-300 leading-relaxed">
+              {result.overallSummary}
+            </p>
+          </div>
+
+          {/* شاخص آمادگی پرونده */}
+          <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-5 flex flex-col items-center justify-center text-center flex-shrink-0 shadow-lg min-w-[180px]">
+            <div className="text-xs text-slate-400 mb-1">نمره آمادگی پرونده:</div>
+            <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-300 to-emerald-400 font-mono">
+              {result.readinessScore}/۱۰۰
+            </div>
+            <div className="text-[11px] text-emerald-400 font-bold mt-1.5 flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>پتانسیل موفقیت عالی</span>
+            </div>
+          </div>
+        </div>
+
+        {/* دکمه‌های پرینت و عملیات */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-6 mt-6 border-t border-slate-800/80 no-print">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onEditProfile}
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
+            >
+              <ArrowRight className="w-4 h-4" />
+              <span>ویرایش پاسخ‌های فرم</span>
+            </button>
+            <button
+              onClick={onReset}
+              className="px-4 py-2 bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-xl text-xs transition"
+            >
+              شروع ارزیابی جدید
+            </button>
+          </div>
+
+          <button
+            onClick={handlePrint}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-indigo-600/20"
+          >
+            <Printer className="w-4 h-4" />
+            <span>چاپ و ذخیره گزارش (PDF)</span>
+          </button>
+        </div>
+      </div>
+
+      {/* هشدارهای ویژه شهروندان ایرانی */}
+      {result.iranSpecificAlerts && result.iranSpecificAlerts.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-400 px-1">
+            <AlertTriangle className="w-4 h-4 text-amber-400" />
+            <span>هشدارهای حقوقی، اداری و مالی مختص شرایط فعلی در ایران:</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {result.iranSpecificAlerts.map((alert, idx) => (
+              <div
+                key={idx}
+                className={`p-4 rounded-2xl border text-right transition ${
+                  alert.severity === 'critical'
+                    ? 'bg-rose-500/10 border-rose-500/30 text-rose-200'
+                    : alert.severity === 'warning'
+                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-200'
+                    : 'bg-indigo-500/10 border-indigo-500/30 text-indigo-200'
+                }`}
+              >
+                <div className="font-bold text-xs sm:text-sm mb-1.5 flex items-center justify-between">
+                  <span>{alert.title}</span>
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded-full font-mono ${
+                      alert.severity === 'critical'
+                        ? 'bg-rose-500/20 text-rose-300'
+                        : alert.severity === 'warning'
+                        ? 'bg-amber-500/20 text-amber-300'
+                        : 'bg-indigo-500/20 text-indigo-300'
+                    }`}
+                  >
+                    {alert.severity === 'critical' ? 'حیاتی' : alert.severity === 'warning' ? 'مهم' : 'راهنما'}
+                  </span>
+                </div>
+                <p className="text-[11px] leading-relaxed opacity-90">{alert.content}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* بخش رتبه‌بندی کشورهای پیشنهادی */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-indigo-400" />
+            <span>بهترین کشورهای متناسب با شرایط شما (رتبه‌بندی شده):</span>
+          </h3>
+          <span className="text-xs text-slate-400">روی هر کشور کلیک کنید تا جزئیات نمایش یابد</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          {result.topCountries.map((c, index) => {
+            const isSelected = selectedCountry.countryId === c.countryId;
+
+            return (
+              <button
+                key={c.countryId}
+                onClick={() => setSelectedCountry(c)}
+                className={`p-4 rounded-2xl border text-right transition group relative flex flex-col justify-between ${
+                  isSelected
+                    ? 'bg-indigo-600/15 border-indigo-500 text-white shadow-xl shadow-indigo-500/10 ring-1 ring-indigo-500'
+                    : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-850 hover:border-slate-700'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-2xl">{c.flag}</span>
+                    <span
+                      className={`text-xs font-bold font-mono px-2 py-0.5 rounded-full ${
+                        index === 0
+                          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                          : 'bg-slate-800 text-slate-300'
+                      }`}
+                    >
+                      {c.matchScore}٪ تطابق
+                    </span>
+                  </div>
+
+                  <h4 className="font-bold text-sm sm:text-base text-white group-hover:text-indigo-300 transition">
+                    {c.countryName}
+                  </h4>
+                  <div className="text-[11px] text-indigo-400 font-semibold mt-0.5 line-clamp-1">
+                    {c.recommendedPathway}
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-center justify-between">
+                  <span>زمان تقریبی:</span>
+                  <span className="font-bold text-slate-200">{c.estimatedTimeMonths}</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* نمایش جزئیات کشور انتخاب شده */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl sm:text-4xl">{selectedCountry.flag}</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-lg sm:text-xl font-black text-white">
+                  {selectedCountry.countryName} ({selectedCountry.countryNameEn})
+                </h4>
+                <span className="text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-bold">
+                  {selectedCountry.matchScore}٪ تطابق هوشمند
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                روش پیشنهادی: <strong className="text-slate-200">{selectedCountry.recommendedPathway}</strong>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="text-left bg-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-800">
+              <div className="text-[10px] text-slate-400">حداقل سرمایه تخمینی:</div>
+              <div className="text-xs sm:text-sm font-bold text-emerald-400 font-mono">
+                {selectedCountry.estimatedCostUSD}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* نقاط قوت و ضعف این کشور */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4">
+            <div className="text-xs font-bold text-emerald-400 mb-2 flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>مزایای اصلی این انتخاب برای شما:</span>
+            </div>
+            <ul className="space-y-1.5 text-xs text-slate-300">
+              {selectedCountry.pros.map((p, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="text-emerald-400">✓</span>
+                  <span>{p}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="bg-rose-500/5 border border-rose-500/20 rounded-2xl p-4">
+            <div className="text-xs font-bold text-rose-400 mb-2 flex items-center gap-1.5">
+              <AlertTriangle className="w-4 h-4" />
+              <span>چالش‌ها و نکات نیازمند دقت:</span>
+            </div>
+            <ul className="space-y-1.5 text-xs text-slate-300">
+              {selectedCountry.cons.map((c, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="text-rose-400">!</span>
+                  <span>{c}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* تب‌های اصلی محتوا (نقشه راه، برآورد هزینه‌ها، تحلیل هوش مصنوعی) */}
+      <div className="space-y-6">
+        <div className="flex border-b border-slate-800 no-print">
+          <button
+            onClick={() => setActiveTab('roadmap')}
+            className={`px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 ${
+              activeTab === 'roadmap'
+                ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <span>نقشه راه گام‌به‌گام (فاز ۰ تا فرودگاه)</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('finance')}
+            className={`px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 ${
+              activeTab === 'finance'
+                ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <DollarSign className="w-4 h-4" />
+            <span>برآورد هزینه‌ها و تمکن بانکی</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('ai_insights')}
+            className={`px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 ${
+              activeTab === 'ai_insights'
+                ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Brain className="w-4 h-4 text-cyan-400" />
+            <span>تحلیل هوش مصنوعی و شاه‌کلیدها</span>
+          </button>
+        </div>
+
+        {/* تب ۱: نقشه راه */}
+        {activeTab === 'roadmap' && (
+          <RoadmapTimeline
+            phases={result.primaryRoadmap.phases}
+            targetCountry={selectedCountry.countryName}
+            pathwayTitle={selectedCountry.recommendedPathway}
+          />
+        )}
+
+        {/* تب ۲: هزینه‌ها */}
+        {activeTab === 'finance' && (
+          <CostEstimator
+            financials={result.financialEstimate}
+            targetCountry={selectedCountry.countryName}
+          />
+        )}
+
+        {/* تب ۳: تحلیل هوش مصنوعی */}
+        {activeTab === 'ai_insights' && (
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+            <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                <Brain className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-white">
+                  تحلیل موشکافانه و استراتژی اختصاصی هوش مصنوعی
+                </h3>
+                <p className="text-xs text-slate-400">
+                  راهنمای اختصاصی نگارش شده بر اساس نقاط ضعف و قوت پرونده شما
+                </p>
+              </div>
+            </div>
+
+            <div className="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-line bg-slate-950/80 p-5 rounded-2xl border border-slate-800/80">
+              {result.aiGeneratedAdvice}
+            </div>
+
+            {/* نقاط قوت کلیدی */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                <div className="text-xs font-bold text-emerald-400 mb-2 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>نقاط قوت کلیدی پرونده شما:</span>
+                </div>
+                <ul className="space-y-2 text-xs text-slate-300">
+                  {result.keyStrengths.map((str, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-emerald-400">•</span>
+                      <span>{str}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                <div className="text-xs font-bold text-amber-400 mb-2 flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>مواردی که باید در آنها دقت کنید:</span>
+                </div>
+                <ul className="space-y-2 text-xs text-slate-300">
+                  {result.keyChallenges.map((ch, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-amber-400">•</span>
+                      <span>{ch}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
