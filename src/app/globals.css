@@ -42,8 +42,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #080c16;
-  --foreground: #f1f5f9;
+  --background: #0a0c10;
+  --foreground: #ededed;
 }
 
 html, body, button, input, select, textarea {
@@ -52,11 +52,10 @@ html, body, button, input, select, textarea {
 
 body {
   color: var(--foreground);
-  background-color: #080c16;
+  background-color: #0a0c10;
   background-image: 
-    radial-gradient(at 15% 15%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
-    radial-gradient(at 85% 85%, rgba(14, 165, 233, 0.07) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(168, 85, 247, 0.04) 0px, transparent 60%);
+    radial-gradient(at 50% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 65%),
+    radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.02) 0px, transparent 50%);
   background-attachment: fixed;
   direction: rtl;
   text-align: right;
@@ -64,93 +63,94 @@ body {
 }
 
 /* ==============================================================
-   استایل گلس‌مورفیسم عمیق و خستگی‌ناپذیر چشم (Dark Glassmorphism)
+   استایل مینیمال، مدرن و سه‌بعدی با تعداد رنگ کنترل‌شده (Eye-Comfort 3D)
    ============================================================== */
 
-/* کارت‌های شیشه‌ای نرم با بوردر ظریف */
+/* کارت‌های سه‌بعدی با لبه‌های ظریف و عمق لمسی (Tactile 3D Cards) */
 .glass-panel {
-  background: rgba(13, 19, 33, 0.65) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.09) !important;
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  background: rgba(16, 20, 29, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
 }
 
-/* کارت‌های داخلی ثانویه */
+/* کارت‌های داخلی ثانویه مینیمال */
 .glass-panel-subtle {
-  background: rgba(10, 15, 28, 0.7) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background: rgba(12, 15, 22, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
 }
 
-/* بازنویسی رنگ‌های پیش‌فرض برای گلس‌مورفیسم یکدست */
+/* بازنویسی رنگ‌های پنل‌ها برای یکدستی مینیمال تیره و مدرن */
 .bg-slate-900,
 .bg-slate-900\/60,
 .bg-slate-900\/70,
 .bg-slate-900\/80,
 .bg-slate-900\/90 {
-  background-color: rgba(13, 19, 34, 0.65) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+  background-color: rgba(16, 20, 29, 0.82) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
 }
 
 .bg-slate-950,
 .bg-slate-950\/60,
 .bg-slate-950\/70,
 .bg-slate-950\/80 {
-  background-color: rgba(9, 13, 23, 0.75) !important;
-  border-color: rgba(255, 255, 255, 0.07) !important;
+  background-color: rgba(12, 15, 22, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
 }
 
 .border-slate-800,
 .border-slate-850,
 .border-slate-700 {
-  border-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
 }
 
-/* اصلاح متون به رنگ‌های نرم غیرزننده برای محافظت از چشم */
+/* رنگ متون اصلاح‌شده برای راحتی کامل چشم در مطالعه طولانی */
 .text-white {
-  color: #f8fafc !important;
+  color: #f3f4f6 !important;
 }
 
 .text-slate-100 {
-  color: #f1f5f9 !important;
+  color: #e5e7eb !important;
 }
 
 .text-slate-200 {
-  color: #e2e8f0 !important;
+  color: #d1d5db !important;
 }
 
 .text-slate-300 {
-  color: #cbd5e1 !important;
+  color: #9ca3af !important;
 }
 
 .text-slate-400 {
-  color: #94a3b8 !important;
+  color: #6b7280 !important;
 }
 
-/* اینپوت‌ها و سلکت‌های شیشه‌ای */
+/* ورودی‌ها و سلکت‌های هماهنگ با تم تیره مینیمال */
 input, select, textarea {
-  background-color: rgba(9, 14, 25, 0.85) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-  color: #f1f5f9 !important;
+  background-color: rgba(12, 15, 22, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f3f4f6 !important;
 }
 
 input:focus, select:focus, textarea:focus {
   border-color: rgba(99, 102, 241, 0.6) !important;
-  box-shadow: 0 0 15px rgba(99, 102, 241, 0.2) !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15) !important;
 }
 
-/* دکمه‌های اصلی نرم با درخشش ملایم */
+/* دکمه‌های اصلی مدرن با رنگ نیلی ملایم و عمق سه‌بعدی */
 .bg-indigo-600 {
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%) !important;
-  box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.35) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background: #4f46e5 !important;
+  box-shadow: 0 4px 14px -2px rgba(79, 70, 229, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 .hover\:bg-indigo-500:hover {
-  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%) !important;
+  background: #4338ca !important;
 }
 
 /* ==============================================================

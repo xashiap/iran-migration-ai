@@ -180,38 +180,38 @@ export default function Home() {
         ) : (
           /* فرم چندمرحله‌ای ارزیابی */
           <div className="space-y-8">
-            {/* هیرو بنر معرفی */}
-            <div className="bg-gradient-to-r from-indigo-950/60 via-slate-900 to-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-              <div className="max-w-3xl space-y-3 relative z-10">
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full text-xs font-bold">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            {/* هیرو بنر معرفی مدرن و مینیمال با عمق سه‌بعدی */}
+            <div className="bg-[#11141d]/90 border border-white/[0.08] rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md">
+              <div className="max-w-3xl space-y-3.5 relative z-10">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-3 py-1 rounded-full text-xs font-medium">
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
                     <span>طراحی اختصاصی برای متقاضیان ساکن ایران</span>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => setIsRadarOpen(!isRadarOpen)}
-                    className="inline-flex items-center gap-2 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer"
+                    className="inline-flex items-center gap-2 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-300 border border-zinc-700/60 px-3 py-1 rounded-full text-xs font-medium transition cursor-pointer"
                   >
-                    <Radio className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
-                    <span>رادار زنده بخشنامه‌ها و وقت سفارت‌ها ({isRadarOpen ? 'بستن رادار' : 'مشاهده'})</span>
+                    <Radio className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+                    <span>رادار بخشنامه‌ها و وقت‌های سفارت ({isRadarOpen ? 'بستن' : 'مشاهده'})</span>
                   </button>
                 </div>
 
-                <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug">
+                <h1 className="text-2xl sm:text-4xl font-black text-[#f3f4f6] tracking-tight leading-snug">
                   برنامه جامع مهاجرت شما از ایران، طراحی شده با هوش مصنوعی
                 </h1>
 
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-2xl">
                   اطلاعات تحصیلی، شغلی، سطح زبان و تمکن مالی خود را وارد کنید. هوش مصنوعی با در نظر گرفتن کلیه محدودیت‌های داخلی ایران (نظام وظیفه، سامانه سجاد و لغو تعهد رایگان، تمکن ریالی و چالش‌های وقت سفارت)، بهترین کشورها، مناسب‌ترین روش مهاجرتی و نقشه راه قدم‌به‌قدم از نقطه صفر تا فرودگاه را برای شما تدوین می‌کند.
                 </p>
               </div>
 
               {/* کارت‌های نمونه آزمایشی سریع */}
-              <div className="mt-6 pt-5 border-t border-slate-800/80">
-                <div className="text-xs font-bold text-slate-400 mb-2.5 flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5 text-amber-400" />
+              <div className="mt-6 pt-5 border-t border-white/[0.06]">
+                <div className="text-xs font-semibold text-zinc-400 mb-2.5 flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5 text-indigo-400" />
                   <span>آزمون سریع با پروفایل‌های واقعی ایرانیان (یک کلیک برای تحلیل فوری):</span>
                 </div>
 
@@ -221,18 +221,18 @@ export default function Home() {
                       key={sample.id}
                       onClick={() => handleQuickAnalyzeSample(sample)}
                       disabled={isLoading}
-                      className="text-right p-3 rounded-xl bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 hover:border-indigo-500/50 transition group flex items-center justify-between gap-2"
+                      className="text-right p-3 rounded-xl bg-[#0c0f16]/90 hover:bg-[#141824] border border-white/[0.06] hover:border-indigo-500/40 transition-all duration-200 group flex items-center justify-between gap-2 shadow-sm hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
                     >
                       <div className="min-w-0">
-                        <div className="text-xs font-bold text-slate-200 group-hover:text-indigo-300 flex items-center gap-1.5">
+                        <div className="text-xs font-bold text-zinc-200 group-hover:text-indigo-300 flex items-center gap-1.5">
                           <span>{sample.icon}</span>
                           <span className="truncate">{sample.label}</span>
                         </div>
-                        <div className="text-[10px] text-slate-500 truncate mt-0.5">
+                        <div className="text-[10px] text-zinc-500 truncate mt-0.5">
                           {sample.description}
                         </div>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-indigo-400 flex-shrink-0" />
+                      <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-indigo-400 flex-shrink-0" />
                     </button>
                   ))}
                 </div>

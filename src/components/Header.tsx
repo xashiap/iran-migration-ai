@@ -30,23 +30,23 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 no-print">
+    <header className="border-b border-white/[0.07] bg-[#0c0f16]/90 backdrop-blur-md sticky top-0 z-50 no-print">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Logo & Branding */}
         <div className="flex items-center space-x-3 space-x-reverse">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-            <Compass className="w-7 h-7 text-white animate-pulse" />
+          <div className="w-11 h-11 rounded-2xl bg-indigo-600 border border-white/10 flex items-center justify-center shadow-md shadow-indigo-600/20">
+            <Compass className="w-6 h-6 text-white animate-pulse" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-1.5">
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-[#f3f4f6] flex items-center gap-1.5">
                 <span>کوچ‌یار هوشمند</span>
-                <span className="text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full font-mono font-medium">
+                <span className="text-xs bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded-full font-mono font-medium">
                   AI 2.0
                 </span>
               </h1>
             </div>
-            <p className="text-xs text-slate-400 hidden sm:block">
+            <p className="text-xs text-zinc-400 hidden sm:block">
               سامانه جامع ارزیابی و نقشه راه مهاجرت از ایران با تحلیل اختصاصی چالش‌ها
             </p>
           </div>
@@ -60,12 +60,12 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={onToggleRadar}
               className={`flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium rounded-xl border transition ${
                 isRadarOpen
-                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 shadow-md shadow-rose-500/10'
-                  : 'bg-rose-500/10 hover:bg-rose-500/15 text-rose-300 border-rose-500/30'
+                  ? 'bg-zinc-800 text-zinc-100 border-zinc-600 shadow-sm'
+                  : 'bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 border-zinc-800'
               }`}
               title="رادار زنده اخبار، بخشنامه‌ها و وقت سفارت‌ها"
             >
-              <Radio className="w-4 h-4 text-rose-400 animate-pulse" />
+              <Radio className="w-4 h-4 text-indigo-400 animate-pulse" />
               <span className="hidden sm:inline">رادار قوانین روز</span>
               <span className="sm:hidden">رادار</span>
             </button>
@@ -75,17 +75,17 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="relative">
             <button
               onClick={() => setShowSampleDropdown(!showSampleDropdown)}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium rounded-xl bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition"
               title="بارگذاری نمونه‌های آماده برای تست سریع"
             >
-              <Sparkles className="w-4 h-4 text-amber-400" />
+              <Sparkles className="w-4 h-4 text-indigo-400" />
               <span className="hidden md:inline">نمونه‌های آماده</span>
               <span className="md:hidden">نمونه‌ها</span>
             </button>
 
             {showSampleDropdown && (
-              <div className="absolute left-0 sm:right-0 sm:left-auto mt-2 w-72 sm:w-80 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95">
-                <div className="text-xs font-semibold text-slate-400 px-3 py-1.5 border-b border-slate-800 mb-1">
+              <div className="absolute left-0 sm:right-0 sm:left-auto mt-2 w-72 sm:w-80 bg-[#11141d] border border-white/[0.08] rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95">
+                <div className="text-xs font-semibold text-zinc-400 px-3 py-1.5 border-b border-white/[0.06] mb-1">
                   انتخاب پروفایل پیش‌فرض برای تست سریع:
                 </div>
                 {SAMPLE_PROFILES.map((sample) => (
@@ -95,14 +95,14 @@ export const Header: React.FC<HeaderProps> = ({
                       onSelectSample(sample);
                       setShowSampleDropdown(false);
                     }}
-                    className="w-full text-right p-2.5 rounded-xl hover:bg-slate-800 flex items-start gap-2.5 transition text-slate-200 group"
+                    className="w-full text-right p-2.5 rounded-xl hover:bg-zinc-800/60 flex items-start gap-2.5 transition text-zinc-200 group"
                   >
-                    <span className="text-xl bg-slate-800 group-hover:bg-slate-700 p-2 rounded-lg">{sample.icon}</span>
+                    <span className="text-xl bg-zinc-850 p-2 rounded-lg">{sample.icon}</span>
                     <div>
-                      <div className="text-xs sm:text-sm font-bold text-white group-hover:text-indigo-400">
+                      <div className="text-xs sm:text-sm font-bold text-zinc-100 group-hover:text-indigo-300">
                         {sample.label}
                       </div>
-                      <div className="text-[11px] text-slate-400 leading-snug line-clamp-2">
+                      <div className="text-[11px] text-zinc-400 leading-snug line-clamp-2">
                         {sample.description}
                       </div>
                     </div>
@@ -117,19 +117,19 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setShowKeyModal(true)}
             className={`flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium rounded-xl border transition ${
               apiKey
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
+                ? 'bg-indigo-950/40 text-indigo-300 border-indigo-500/40'
+                : 'bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 border-zinc-800'
             }`}
             title="تنظیم کلید هوش مصنوعی جمینای (اختیاری)"
           >
-            <Key className="w-4 h-4" />
-            <span className="hidden lg:inline">{apiKey ? 'کلید هوش مصنوعی فعال' : 'کلید Gemini (اختیاری)'}</span>
+            <Key className="w-4 h-4 text-zinc-400" />
+            <span className="hidden lg:inline">{apiKey ? 'کلید Gemini فعال' : 'کلید Gemini (اختیاری)'}</span>
           </button>
 
           {/* Reset Button */}
           <button
             onClick={onReset}
-            className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-xl transition border border-transparent hover:border-slate-700"
+            className="p-2 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/80 rounded-xl transition border border-transparent hover:border-zinc-700/60"
             title="شروع مجدد و پاک کردن فرم"
           >
             <RefreshCw className="w-4 h-4" />

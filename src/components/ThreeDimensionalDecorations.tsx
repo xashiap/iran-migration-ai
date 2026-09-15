@@ -3,96 +3,126 @@
 import React from 'react';
 
 /**
- * المان‌های سه‌بعدی و بلورین در ۴ گوشه صفحه
- * طراحی شده به صورت سبک، نرم، چشم‌نواز با جلوه گلس‌مورفیسم
- * غیرمزاحم (pointer-events-none) با تطابق کامل در موبایل و دسکتاپ
+ * تم مینیمال، مدرن و سه‌بعدی (Minimalist Modern 3D Theme)
+ * - تعداد رنگ بسیار محدود (پالت مونوکروم مشکی/گرافیتی/زینک با یک رنگ مکمل نیلی ملایم)
+ * - المان‌های ژئومتریک سه‌بعدی و ایزومتریک در ۴ گوشه صفحه با خطوط مدرن
+ * - بهینه‌سازی شده برای جلوگیری از خستگی چشم در گوشی و مانیتور
+ * - کاملاً سبک، بدون لگ و با قابلیت هماهنگی در سایزهای مختلف نمایشگر
  */
 export const ThreeDimensionalDecorations: React.FC = () => {
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
-      {/* -------------------------------------------------------------
-          گوشه ۱: بالا - راست (مکعب منشوری شیشه‌ای ۳بعدی شناور)
-          ------------------------------------------------------------- */}
-      <div className="absolute -top-6 -right-6 sm:top-6 sm:right-6 opacity-60 sm:opacity-75 animate-float-slow">
-        <div className="relative w-28 h-28 sm:w-36 sm:h-36 [perspective:800px]">
-          <div className="w-full h-full relative [transform-style:preserve-3d] rotate-12 hover:rotate-45 transition-transform duration-700">
-            {/* وجه جلویی شیشه‌ای */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/20 via-slate-800/40 to-cyan-500/10 backdrop-blur-md border border-white/15 shadow-[0_15px_35px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.2)] flex items-center justify-center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-500/30 to-cyan-400/20 border border-white/20 transform rotate-45 shadow-inner" />
-            </div>
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none" aria-hidden="true">
+      {/* ۱. صفحه پرسپکتیو سه‌بعدی مینیمال در پس‌زمینه (شبکه هندسی با افق نرم) */}
+      <div 
+        className="absolute inset-0 opacity-[0.03] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_40%,#000_60%,transparent_100%)]"
+        style={{
+          backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)`,
+          backgroundSize: '40px 40px',
+          transform: 'perspective(900px) rotateX(28deg) translateY(-50px)',
+          transformOrigin: 'center top',
+        }}
+      />
 
-            {/* لایه پرسپکتیو عقبی */}
-            <div className="absolute inset-1 rounded-2xl border border-indigo-400/20 transform -translate-z-6 -rotate-6" />
+      {/* ۲. تک‌نور امبینت بسیار ملایم در بالای صفحه (تک‌رنگ، بدون آزار چشم) */}
+      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-indigo-600/[0.04] rounded-full blur-3xl" />
 
-            {/* هاله نور ملایم پشت المان */}
-            <div className="absolute -inset-4 bg-indigo-600/15 rounded-full blur-2xl -z-10" />
+      {/* ==============================================================
+          گوشه ۱: بالا - راست (مکعب ایزومتریک خطی سه‌بعدی)
+          نمایش در دسکتاپ و موبایل (در موبایل کوچک‌تر و بدون تداخل با محتوا)
+          ============================================================== */}
+      <div className="absolute top-16 right-3 sm:top-24 sm:right-10 opacity-30 sm:opacity-40 transition-opacity">
+        <div className="w-14 h-14 sm:w-20 sm:h-20 [perspective:800px]">
+          <div 
+            className="w-full h-full relative [transform-style:preserve-3d] animate-float-slow"
+            style={{ transform: 'rotateX(30deg) rotateY(-45deg)' }}
+          >
+            {/* وجه پایه مکعب */}
+            <div className="absolute inset-0 border border-zinc-600/60 rounded-xl bg-zinc-900/30 shadow-lg shadow-black/40" />
+            {/* وجه معلق بالاتر با عمق سه‌بعدی */}
+            <div 
+              className="absolute inset-1.5 sm:inset-2 border border-indigo-400/40 rounded-lg bg-indigo-950/10"
+              style={{ transform: 'translateZ(20px)' }}
+            />
+            {/* خطوط اتصال‌دهنده پرسپکتیو */}
+            <div 
+              className="absolute w-2 h-2 rounded-full bg-indigo-400/60"
+              style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%) translateZ(28px)' }}
+            />
           </div>
         </div>
       </div>
 
-      {/* -------------------------------------------------------------
-          گوشه ۲: بالا - چپ (کره ژئودزیک / رینگ قطب‌نمای ۳بعدی مهاجرت)
-          ------------------------------------------------------------- */}
-      <div className="absolute -top-8 -left-8 sm:top-8 sm:left-8 opacity-50 sm:opacity-70 animate-float-reverse">
-        <div className="relative w-32 h-32 sm:w-40 sm:h-40 [perspective:800px]">
-          <div className="w-full h-full relative flex items-center justify-center [transform-style:preserve-3d] -rotate-12">
-            {/* حلقه بیرونی ۳بعدی */}
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-dashed border-cyan-400/30 animate-spin-very-slow" />
-
-            {/* کره شیشه‌ای مرکزی با شکست نور */}
-            <div className="absolute w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-slate-900/80 via-indigo-950/50 to-cyan-400/20 backdrop-blur-lg border border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.3)] flex items-center justify-center">
-              <div className="w-6 h-6 rounded-full bg-cyan-400/30 blur-xs animate-pulse" />
-            </div>
-
-            {/* مدار بیضوی شناور */}
-            <div className="absolute w-28 h-10 border border-indigo-400/30 rounded-[100%] transform rotate-45" />
-
-            {/* هاله نور فیروزه‌ای ملایم */}
-            <div className="absolute -inset-4 bg-cyan-500/10 rounded-full blur-2xl -z-10" />
+      {/* ==============================================================
+          گوشه ۲: بالا - چپ (مدار و حلقه ژیروسکوپی ایزومتریک سه‌بعدی)
+          ============================================================== */}
+      <div className="absolute top-16 left-3 sm:top-24 sm:left-10 opacity-25 sm:opacity-35 transition-opacity">
+        <div className="w-14 h-14 sm:w-20 sm:h-20 [perspective:800px]">
+          <div 
+            className="w-full h-full relative [transform-style:preserve-3d] animate-float-reverse"
+            style={{ transform: 'rotateX(55deg) rotateZ(20deg)' }}
+          >
+            {/* حلقه بیرونی */}
+            <div className="w-full h-full rounded-full border border-zinc-600/60 shadow-sm" />
+            {/* حلقه داخلی با زاویه سه‌بعدی معکوس */}
+            <div 
+              className="absolute inset-2 sm:inset-3 rounded-full border border-dashed border-zinc-500/50"
+              style={{ transform: 'translateZ(12px) rotateY(25deg)' }}
+            />
+            {/* نقطه کانونی */}
+            <div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-zinc-400/50"
+              style={{ transform: 'translateZ(18px)' }}
+            />
           </div>
         </div>
       </div>
 
-      {/* -------------------------------------------------------------
-          گوشه ۳: پایین - راست (لوزی / منشور ۳بعدی کریستالی)
-          ------------------------------------------------------------- */}
-      <div className="absolute -bottom-8 -right-8 sm:bottom-10 sm:right-10 opacity-50 sm:opacity-70 animate-float-slow">
-        <div className="relative w-32 h-32 sm:w-40 sm:h-40 [perspective:900px]">
-          <div className="w-full h-full relative [transform-style:preserve-3d] rotate-45">
-            {/* منشور شیشه‌ای دولایه */}
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-bl from-indigo-600/20 via-slate-900/60 to-purple-600/15 backdrop-blur-md border border-white/15 shadow-[0_20px_40px_rgba(0,0,0,0.6),inset_0_1px_2px_rgba(255,255,255,0.25)] mx-auto mt-4" />
-            
-            {/* لایه انعکاس خطی */}
-            <div className="absolute inset-4 rounded-2xl border border-purple-400/20 transform -translate-x-2 -translate-y-2" />
-
-            {/* هاله نور بنفش تیره آرامش‌بخش */}
-            <div className="absolute -inset-4 bg-purple-600/10 rounded-full blur-3xl -z-10" />
+      {/* ==============================================================
+          گوشه ۳: پایین - راست (صفحه پله‌ای ژئومتریک سه‌بعدی)
+          ============================================================== */}
+      <div className="absolute bottom-16 right-3 sm:bottom-20 sm:right-10 opacity-25 sm:opacity-35 transition-opacity">
+        <div className="w-14 h-14 sm:w-18 sm:h-18 [perspective:700px]">
+          <div 
+            className="w-full h-full relative [transform-style:preserve-3d] animate-float-reverse"
+            style={{ transform: 'rotateX(40deg) rotateY(35deg)' }}
+          >
+            {/* لایه پایه */}
+            <div className="absolute inset-0 border border-zinc-700/60 rounded-xl bg-zinc-900/20" />
+            {/* لایه میانی با عمق سه‌بعدی */}
+            <div 
+              className="absolute inset-2 border border-zinc-600/50 rounded-lg"
+              style={{ transform: 'translateZ(14px)' }}
+            />
+            {/* لایه بالایی نیلی ملایم */}
+            <div 
+              className="absolute inset-4 border border-indigo-400/40 rounded-md"
+              style={{ transform: 'translateZ(24px)' }}
+            />
           </div>
         </div>
       </div>
 
-      {/* -------------------------------------------------------------
-          گوشه ۴: پایین - چپ (سپر محافظتی ۳بعدی و ژئومتریک شیشه‌ای)
-          ------------------------------------------------------------- */}
-      <div className="absolute -bottom-8 -left-8 sm:bottom-10 sm:left-10 opacity-55 sm:opacity-75 animate-float-reverse">
-        <div className="relative w-28 h-28 sm:w-36 sm:h-36 [perspective:800px]">
-          <div className="w-full h-full relative [transform-style:preserve-3d] -rotate-6">
-            {/* صفحات شیشه‌ای لایه‌لایه با پرسپکتیو */}
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-slate-900/90 via-indigo-900/30 to-emerald-400/15 backdrop-blur-md border border-white/15 shadow-[0_15px_35px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.2)] flex items-center justify-center transform rotate-6">
-              <div className="w-8 h-8 rounded-lg border border-emerald-400/30 bg-emerald-500/10 rotate-12" />
-            </div>
-
-            {/* بازتاب زیرین */}
-            <div className="absolute inset-2 rounded-2xl border border-indigo-400/20 transform translate-x-2 translate-y-2 -z-10" />
-
-            {/* هاله نور زمردی/نیلی بسیار ملایم */}
-            <div className="absolute -inset-4 bg-emerald-500/10 rounded-full blur-2xl -z-10" />
+      {/* ==============================================================
+          گوشه ۴: پایین - چپ (منشور و نگین لوزی سه‌بعدی مینیمال)
+          ============================================================== */}
+      <div className="absolute bottom-16 left-3 sm:bottom-20 sm:left-10 opacity-25 sm:opacity-35 transition-opacity">
+        <div className="w-14 h-14 sm:w-18 sm:h-18 [perspective:700px]">
+          <div 
+            className="w-full h-full relative [transform-style:preserve-3d] animate-float-slow"
+            style={{ transform: 'rotateX(35deg) rotateZ(45deg)' }}
+          >
+            <div className="absolute inset-0 border border-zinc-600/60 rounded-lg bg-zinc-900/20 shadow-md" />
+            <div 
+              className="absolute inset-2 border border-zinc-500/40 rounded-md"
+              style={{ transform: 'translateZ(16px)' }}
+            />
+            <div 
+              className="absolute inset-3 border border-indigo-400/30 rounded-sm"
+              style={{ transform: 'translateZ(26px)' }}
+            />
           </div>
         </div>
       </div>
-
-      {/* گرادیان پس‌زمینه بسیار نرم برای خستگی‌ناپذیری چشم */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.12),rgba(255,255,255,0))] pointer-events-none" />
     </div>
   );
 };
