@@ -13,8 +13,9 @@ import { StepFinance } from '@/components/Wizard/StepFinance';
 import { StepPreferences } from '@/components/Wizard/StepPreferences';
 import { DossierDashboard } from '@/components/Result/DossierDashboard';
 import { CurrencyBar } from '@/components/CurrencyBar';
+import { ImmigrationRadar } from '@/components/Radar/ImmigrationRadar';
 import { CurrencyData, DEFAULT_CURRENCY } from '@/lib/currency';
-import { Sparkles, ChevronRight, Zap } from 'lucide-react';
+import { Sparkles, ChevronRight, Zap, Radio } from 'lucide-react';
 
 export default function Home() {
   const [profile, setProfile] = useState<UserProfile>(INITIAL_EMPTY_PROFILE);
@@ -25,6 +26,7 @@ export default function Home() {
   const [apiKey, setApiKey] = useState<string>('');
   const [currency, setCurrency] = useState<CurrencyData>(DEFAULT_CURRENCY);
   const [isCurrencyLoading, setIsCurrencyLoading] = useState<boolean>(false);
+  const [isRadarOpen, setIsRadarOpen] = useState<boolean>(false);
 
   const fetchCurrency = async () => {
     setIsCurrencyLoading(true);
@@ -137,6 +139,8 @@ export default function Home() {
         onReset={handleReset}
         apiKey={apiKey}
         onSaveApiKey={handleSaveApiKey}
+        onToggleRadar={() => setIsRadarOpen(!isRadarOpen)}
+        isRadarOpen={isRadarOpen}
       />
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -150,6 +154,13 @@ export default function Home() {
             >
               بستن
             </button>
+          </div>
+        )}
+
+        {/* رادار زنده بخشنامه‌ها و وقت‌های سفارت */}
+        {isRadarOpen && (
+          <div className="mb-8 animate-in fade-in zoom-in-95 duration-200">
+            <ImmigrationRadar onClose={() => setIsRadarOpen(false)} />
           </div>
         )}
 
@@ -168,9 +179,20 @@ export default function Home() {
             {/* هیرو بنر معرفی */}
             <div className="bg-gradient-to-r from-indigo-950/60 via-slate-900 to-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
               <div className="max-w-3xl space-y-3 relative z-10">
-                <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full text-xs font-bold">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  <span>طراحی اختصاصی برای متقاضیان ساکن ایران</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full text-xs font-bold">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>طراحی اختصاصی برای متقاضیان ساکن ایران</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsRadarOpen(!isRadarOpen)}
+                    className="inline-flex items-center gap-2 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer"
+                  >
+                    <Radio className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
+                    <span>رادار زنده بخشنامه‌ها و وقت سفارت‌ها ({isRadarOpen ? 'بستن رادار' : 'مشاهده'})</span>
+                  </button>
                 </div>
 
                 <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug">

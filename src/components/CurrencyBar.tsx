@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { CurrencyData, convertUsdToTomanText } from '@/lib/currency';
-import { RefreshCw, ExternalLink, Calculator, DollarSign, ArrowLeftRight, TrendingUp } from 'lucide-react';
+import { RefreshCw, ExternalLink, Calculator, ArrowLeftRight } from 'lucide-react';
 
 interface CurrencyBarProps {
   currency: CurrencyData;

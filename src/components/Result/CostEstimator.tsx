@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { AnalysisResult } from '@/types/migration';
-import { Coins, ShieldAlert, TrendingUp, Calculator } from 'lucide-react';
-import { formatCostStringWithToman, convertUsdToTomanText } from '@/lib/currency';
+import { Coins, ShieldAlert, TrendingUp } from 'lucide-react';
+import { formatCostStringWithToman } from '@/lib/currency';
 
 interface CostEstimatorProps {
   financials: AnalysisResult['financialEstimate'];

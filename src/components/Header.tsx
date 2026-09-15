@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Compass, Key, Sparkles, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { Compass, Key, Sparkles, RefreshCw, CheckCircle2, Radio } from 'lucide-react';
 import { SAMPLE_PROFILES, SampleProfileItem } from '@/data/sampleProfiles';
 
 interface HeaderProps {
@@ -9,6 +9,8 @@ interface HeaderProps {
   onReset: () => void;
   apiKey: string;
   onSaveApiKey: (key: string) => void;
+  onToggleRadar?: () => void;
+  isRadarOpen?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,6 +18,8 @@ export const Header: React.FC<HeaderProps> = ({
   onReset,
   apiKey,
   onSaveApiKey,
+  onToggleRadar,
+  isRadarOpen,
 }) => {
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState(apiKey);
@@ -51,6 +55,23 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Live Immigration Radar Button */}
+          {onToggleRadar && (
+            <button
+              onClick={onToggleRadar}
+              className={`flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium rounded-xl border transition ${
+                isRadarOpen
+                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 shadow-md shadow-rose-500/10'
+                  : 'bg-rose-500/10 hover:bg-rose-500/15 text-rose-300 border-rose-500/30'
+              }`}
+              title="رادار زنده اخبار، بخشنامه‌ها و وقت سفارت‌ها"
+            >
+              <Radio className="w-4 h-4 text-rose-400 animate-pulse" />
+              <span className="hidden sm:inline">رادار قوانین روز</span>
+              <span className="sm:hidden">رادار</span>
+            </button>
+          )}
+
           {/* Sample Profiles Dropdown */}
           <div className="relative">
             <button
