@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { UserProfile } from '@/types/migration';
 import { evaluateImmigrationProfile } from '@/lib/scoringEngine';
 import { generateGeminiInsights } from '@/lib/geminiAI';
+import { saveApplicant } from '@/lib/db';
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,6 +23,13 @@ export async function POST(req: NextRequest) {
     // ۲. تحلیل تکمیلی عمیق هوش مصنوعی
     const aiInsights = await generateGeminiInsights(profile, analysisResult, customApiKey);
     analysisResult.aiGeneratedAdvice = aiInsights;
+
+    // ۳. ثبت پرونده در بانک داده جامعه آماری
+    try {
+      saveApplicant(profile, analysisResult);
+    } catch (dbErr) {
+      console.warn('Failed to persist applicant record:', dbErr);
+    }
 
     return NextResponse.json({
       success: true,

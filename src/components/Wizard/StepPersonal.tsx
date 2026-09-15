@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { UserProfile, MilitaryStatus, MaritalStatus } from '@/types/migration';
-import { AlertCircle, ShieldCheck, Info } from 'lucide-react';
+import { AlertCircle, ShieldCheck, Info, Phone, UserCheck } from 'lucide-react';
 
 interface StepPersonalProps {
   profile: UserProfile;
@@ -12,8 +12,10 @@ interface StepPersonalProps {
 
 export const StepPersonal: React.FC<StepPersonalProps> = ({ profile, onChange, onNext }) => {
   const p = profile.personal;
+  const [error, setError] = useState<string | null>(null);
 
   const update = (fields: Partial<UserProfile['personal']>) => {
+    if (error) setError(null);
     onChange({
       ...profile,
       personal: {
@@ -25,30 +27,81 @@ export const StepPersonal: React.FC<StepPersonalProps> = ({ profile, onChange, o
 
   const isMale = p.gender === 'male';
 
+  const handleNext = () => {
+    if (!p.fullName || p.fullName.trim().length < 3) {
+      setError('وارد کردن «نام و نام خانوادگی» جهت تشکیل و ثبت پرونده اجباری است.');
+      return;
+    }
+    const cleanPhone = (p.phone || '').trim().replace(/[\s-]/g, '');
+    const phoneRegex = /^09[0-9]{9}$/;
+    if (!cleanPhone || !phoneRegex.test(cleanPhone)) {
+      setError('شماره موبایل وارد شده معتبر نیست. لطفاً شماره ۱۱ رقمی (شروع با ۰۹) وارد کنید.');
+      return;
+    }
+    setError(null);
+    onNext();
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="border-b border-slate-800 pb-4">
         <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-          <span>مرحله ۱: اطلاعات هویتی و وضعیت نظام وظیفه</span>
+          <UserCheck className="w-5 h-5 text-indigo-400" />
+          <span>مرحله ۱: اطلاعات هویتی، تماس و وضعیت نظام وظیفه</span>
         </h2>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          این اطلاعات پایه برای محاسبه سن در سیستم امتیازدهی (CRS و Chancenkarte) و امکان‌سنجی خروج قانونی از کشور استفاده می‌شود.
+          مشخصات هویتی و شماره تماس شما برای تشکیل پرونده، گزارش‌های آماری و محاسبه سن در سیستم‌های مهاجرتی استفاده می‌شود.
         </p>
       </div>
+
+      {error && (
+        <div className="bg-rose-500/15 border border-rose-500/30 text-rose-300 p-3.5 rounded-xl text-xs sm:text-sm flex items-center gap-2.5 animate-in fade-in">
+          <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {/* نام و نام خانوادگی */}
         <div>
           <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-            نام یا عنوان شما (اختیاری):
+            نام و نام خانوادگی <span className="text-rose-400 font-bold">* (اجباری)</span>:
           </label>
           <input
             type="text"
             value={p.fullName || ''}
             onChange={(e) => update({ fullName: e.target.value })}
             placeholder="مثال: علی رضایی"
-            className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
+            className={`w-full bg-slate-900 border rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition ${
+              error && (!p.fullName || p.fullName.trim().length < 3)
+                ? 'border-rose-500/60 ring-1 ring-rose-500/30'
+                : 'border-slate-800'
+            }`}
           />
+        </div>
+
+        {/* شماره موبایل */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+            <span>شماره موبایل ایران <span className="text-rose-400 font-bold">* (اجباری)</span>:</span>
+            <span className="text-[10px] text-zinc-500 font-mono">09xxxxxxxxx</span>
+          </label>
+          <div className="relative">
+            <input
+              type="tel"
+              dir="ltr"
+              value={p.phone || ''}
+              onChange={(e) => update({ phone: e.target.value.replace(/[^0-9]/g, '') })}
+              maxLength={11}
+              placeholder="09123456789"
+              className={`w-full bg-slate-900 border rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition font-mono ${
+                error && (!p.phone || !/^09[0-9]{9}$/.test(p.phone.trim()))
+                  ? 'border-rose-500/60 ring-1 ring-rose-500/30'
+                  : 'border-slate-800'
+              }`}
+            />
+            <Phone className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
         </div>
 
         {/* سن */}
@@ -234,8 +287,8 @@ export const StepPersonal: React.FC<StepPersonalProps> = ({ profile, onChange, o
       <div className="flex justify-end pt-2">
         <button
           type="button"
-          onClick={onNext}
-          className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs sm:text-sm font-bold transition shadow-lg shadow-indigo-600/20"
+          onClick={handleNext}
+          className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs sm:text-sm font-bold transition shadow-lg shadow-indigo-600/20 cursor-pointer"
         >
           مرحله بعد: تحصیلات و سجاد ←
         </button>

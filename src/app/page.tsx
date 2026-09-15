@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile, AnalysisResult } from '@/types/migration';
 import { INITIAL_EMPTY_PROFILE, SAMPLE_PROFILES, SampleProfileItem } from '@/data/sampleProfiles';
+import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { StepIndicator } from '@/components/Wizard/StepIndicator';
 import { StepPersonal } from '@/components/Wizard/StepPersonal';
@@ -101,7 +102,40 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const validateStep = (stepNumber: number): string | null => {
+    if (stepNumber === 1) {
+      if (!profile.personal.fullName || profile.personal.fullName.trim().length < 3) {
+        return 'وارد کردن «نام و نام خانوادگی» در مرحله اول جهت ثبت پرونده اجباری است.';
+      }
+      const cleanPhone = (profile.personal.phone || '').trim().replace(/[\s-]/g, '');
+      if (!cleanPhone || !/^09[0-9]{9}$/.test(cleanPhone)) {
+        return 'وارد کردن «شماره موبایل» معتبر ایران (۱۱ رقمی با ۰۹) در مرحله اول اجباری است.';
+      }
+    }
+    return null;
+  };
+
+  const handleStepNavigation = (targetStep: number) => {
+    if (targetStep > currentStep) {
+      const err = validateStep(currentStep);
+      if (err) {
+        setError(err);
+        return;
+      }
+    }
+    setError(null);
+    setCurrentStep(targetStep);
+  };
+
   const handleSubmit = async () => {
+    const err = validateStep(1);
+    if (err) {
+      setError(err);
+      setCurrentStep(1);
+      window.scrollTo({ top: 350, behavior: 'smooth' });
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -242,7 +276,7 @@ export default function Home() {
             {/* نوار مراحل فرم */}
             <StepIndicator
               currentStep={currentStep}
-              onStepClick={(step) => setCurrentStep(step)}
+              onStepClick={handleStepNavigation}
             />
 
             {/* بدنه فرم مراحل */}
@@ -251,7 +285,7 @@ export default function Home() {
                 <StepPersonal
                   profile={profile}
                   onChange={setProfile}
-                  onNext={() => setCurrentStep(2)}
+                  onNext={() => handleStepNavigation(2)}
                 />
               )}
 
@@ -259,8 +293,8 @@ export default function Home() {
                 <StepEducation
                   profile={profile}
                   onChange={setProfile}
-                  onPrev={() => setCurrentStep(1)}
-                  onNext={() => setCurrentStep(3)}
+                  onPrev={() => handleStepNavigation(1)}
+                  onNext={() => handleStepNavigation(3)}
                 />
               )}
 
@@ -268,8 +302,8 @@ export default function Home() {
                 <StepWork
                   profile={profile}
                   onChange={setProfile}
-                  onPrev={() => setCurrentStep(2)}
-                  onNext={() => setCurrentStep(4)}
+                  onPrev={() => handleStepNavigation(2)}
+                  onNext={() => handleStepNavigation(4)}
                 />
               )}
 
@@ -277,8 +311,8 @@ export default function Home() {
                 <StepLanguage
                   profile={profile}
                   onChange={setProfile}
-                  onPrev={() => setCurrentStep(3)}
-                  onNext={() => setCurrentStep(5)}
+                  onPrev={() => handleStepNavigation(3)}
+                  onNext={() => handleStepNavigation(5)}
                 />
               )}
 
@@ -286,8 +320,8 @@ export default function Home() {
                 <StepFinance
                   profile={profile}
                   onChange={setProfile}
-                  onPrev={() => setCurrentStep(4)}
-                  onNext={() => setCurrentStep(6)}
+                  onPrev={() => handleStepNavigation(4)}
+                  onNext={() => handleStepNavigation(6)}
                   usdTomanRate={currency.usdToman}
                 />
               )}
@@ -296,7 +330,7 @@ export default function Home() {
                 <StepPreferences
                   profile={profile}
                   onChange={setProfile}
-                  onPrev={() => setCurrentStep(5)}
+                  onPrev={() => handleStepNavigation(5)}
                   onSubmit={handleSubmit}
                   isLoading={isLoading}
                 />
@@ -308,13 +342,21 @@ export default function Home() {
 
       {/* فوتر سامانه */}
       <footer className="border-t border-slate-850 bg-slate-950 py-6 text-center text-xs text-slate-400 no-print mt-12">
-        <div className="max-w-6xl mx-auto px-4 space-y-1.5">
+        <div className="max-w-6xl mx-auto px-4 space-y-2">
           <p className="font-medium text-slate-300">
             سامانه هوشمند «کوچ‌یار هوشمند (IraMigrate AI)» | راهنمای استراتژیک مهاجرت از ایران
           </p>
           <p className="text-[11px] text-slate-400">
             توجه: قوانین مهاجرتی کشورهای مختلف پیوسته در حال تغییر است. این سامانه با تلفیق آخرین قوانین رسمی و هوش مصنوعی، بهترین نقشه راه ممکن را تدوین می‌کند.
           </p>
+          <div className="pt-2">
+            <Link 
+              href="/admin" 
+              className="text-[11px] text-zinc-500 hover:text-indigo-400 transition inline-flex items-center gap-1 opacity-75 hover:opacity-100"
+            >
+              <span>ورود به پنل آمار و مدیریت متقاضیان (Admin)</span>
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

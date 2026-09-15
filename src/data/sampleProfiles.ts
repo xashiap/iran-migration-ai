@@ -17,6 +17,7 @@ export const SAMPLE_PROFILES: SampleProfileItem[] = [
     data: {
       personal: {
         fullName: 'سامان محمدی',
+        phone: '09121112233',
         age: 28,
         gender: 'male',
         maritalStatus: 'single',
@@ -75,6 +76,7 @@ export const SAMPLE_PROFILES: SampleProfileItem[] = [
     data: {
       personal: {
         fullName: 'سارا رضایی',
+        phone: '09193334455',
         age: 23,
         gender: 'female',
         maritalStatus: 'single',
@@ -133,6 +135,7 @@ export const SAMPLE_PROFILES: SampleProfileItem[] = [
     data: {
       personal: {
         fullName: 'امید نجفی',
+        phone: '09355556677',
         age: 31,
         gender: 'male',
         maritalStatus: 'married',
@@ -188,6 +191,7 @@ export const SAMPLE_PROFILES: SampleProfileItem[] = [
 export const INITIAL_EMPTY_PROFILE: UserProfile = {
   personal: {
     fullName: '',
+    phone: '',
     age: 26,
     gender: 'male',
     maritalStatus: 'single',

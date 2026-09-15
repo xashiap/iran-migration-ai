@@ -52,7 +52,8 @@ export type TimelinePreference = 'immediate' | 'under_1_year' | '1_to_2_years' |
 export interface UserProfile {
   // فاز ۱: اطلاعات فردی
   personal: {
-    fullName?: string;
+    fullName: string;
+    phone: string;
     age: number;
     gender: Gender;
     maritalStatus: MaritalStatus;
@@ -180,4 +181,39 @@ export interface AnalysisResult {
     totalStartingBudgetUSD: string;
   };
   aiGeneratedAdvice?: string;
+}
+
+export type TimeRangeFilter = '1m' | '2m' | '3m' | 'all';
+
+export interface ApplicantRecord {
+  id: string;
+  createdAt: string; // ISO 8601
+  shamsiDate: string; // تاریخ شمسی مانند ۱۴۰۵/۰۶/۲۴
+  fullName: string;
+  phone: string;
+  age: number;
+  gender: Gender;
+  militaryStatus: MilitaryStatus;
+  degree: DegreeLevel;
+  field: string;
+  jobTitle: string;
+  yearsExperience: number;
+  englishLevel: string;
+  liquidBudgetUSD: number;
+  topCountry: string;
+  matchScore: number;
+  recommendedPathway: string;
+  profile: UserProfile;
+}
+
+export interface ApplicantStatistics {
+  totalCount: number;
+  filteredCount: number;
+  averageAge: number;
+  averageBudgetUSD: number;
+  militaryBreakdown: Record<string, number>;
+  degreeBreakdown: Record<string, number>;
+  countryDistribution: Record<string, number>;
+  recentCountToday: number;
+  recentCountWeek: number;
 }
