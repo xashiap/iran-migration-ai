@@ -1,8 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { UserProfile, EnglishGeneralLevel, EnglishExamType, LanguageLevel } from '@/types/migration';
-import { Flame, Check } from 'lucide-react';
+import { Flame, Check, Sparkles, CheckCircle2, Award } from 'lucide-react';
+import { LanguageQuizModal } from './LanguageQuizModal';
+import { QuizResultData } from '@/data/languageQuizData';
 
 interface StepLanguageProps {
   profile: UserProfile;
@@ -13,6 +15,8 @@ interface StepLanguageProps {
 
 export const StepLanguage: React.FC<StepLanguageProps> = ({ profile, onChange, onPrev, onNext }) => {
   const lang = profile.languages;
+  const [isQuizOpen, setIsQuizOpen] = useState<boolean>(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const update = (fields: Partial<UserProfile['languages']>) => {
     onChange({
@@ -24,6 +28,31 @@ export const StepLanguage: React.FC<StepLanguageProps> = ({ profile, onChange, o
     });
   };
 
+  const handleApplyQuizResult = (result: QuizResultData) => {
+    const updates: Partial<UserProfile['languages']> = {};
+    if (result.formFieldsToUpdate.englishLevel) {
+      updates.englishLevel = result.formFieldsToUpdate.englishLevel;
+    }
+    if (result.formFieldsToUpdate.englishExam) {
+      updates.englishExam = result.formFieldsToUpdate.englishExam;
+    }
+    if (result.formFieldsToUpdate.englishScore !== undefined) {
+      updates.englishScore = result.formFieldsToUpdate.englishScore;
+    }
+    if (result.formFieldsToUpdate.germanLevel) {
+      updates.germanLevel = result.formFieldsToUpdate.germanLevel;
+    }
+    if (result.formFieldsToUpdate.frenchLevel) {
+      updates.frenchLevel = result.formFieldsToUpdate.frenchLevel;
+    }
+    if (result.formFieldsToUpdate.italianLevel) {
+      updates.italianLevel = result.formFieldsToUpdate.italianLevel;
+    }
+
+    update(updates);
+    setSuccessMessage(`کارنامه آزمون (${result.levelLabelFa}) با موفقیت در فرم شما اعمال شد.`);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="border-b border-slate-800 pb-4">
@@ -33,6 +62,53 @@ export const StepLanguage: React.FC<StepLanguageProps> = ({ profile, onChange, o
         <p className="text-xs sm:text-sm text-slate-400 mt-1">
           مدرک زبان، موتور محرک پرونده مهاجرتی است. حتی داشتن مدرک مقدماتی A1 آلمانی یا آیلتس عمومی، مسیرهای متعددی را باز می‌کند.
         </p>
+      </div>
+
+      {/* اعلان موفقیت ثبت سطح زبان از طریق کوییز */}
+      {successMessage && (
+        <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs flex items-center justify-between animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+            <span>{successMessage}</span>
+          </div>
+          <button
+            onClick={() => setSuccessMessage(null)}
+            className="text-emerald-400 hover:text-white text-xs underline mr-2"
+          >
+            بستن
+          </button>
+        </div>
+      )}
+
+      {/* بنر جذاب آزمون هوشمند تعیین سطح زبان */}
+      <div className="bg-gradient-to-r from-indigo-950/80 via-slate-900 to-slate-900 border border-indigo-500/30 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl relative overflow-hidden">
+        <div className="flex items-start sm:items-center gap-3 relative z-10">
+          <div className="w-11 h-11 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center flex-shrink-0 shadow-inner">
+            <Sparkles className="w-5 h-5 text-amber-400 animate-pulse" />
+          </div>
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-sm sm:text-base font-bold text-white">
+                سطح دقیق زبان خود را نمی‌دانید؟
+              </h3>
+              <span className="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-bold">
+                ۴ زبان: 🇬🇧 🇩🇪 🇫🇷 🇮🇹
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              در کوییز ۱۵ سوالی تصادفی شرکت کنید تا سیستم سطح استاندارد اروپایی (CEFR) شما را تشخیص دهد و فرم را خودکار پر کند.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsQuizOpen(true)}
+          className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold rounded-xl transition shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 flex-shrink-0 cursor-pointer"
+        >
+          <Award className="w-4 h-4 text-amber-300" />
+          <span>شروع کوییز تعیین سطح هوشمند</span>
+        </button>
       </div>
 
       {/* سطح انگلیسی عمومی */}
@@ -197,6 +273,13 @@ export const StepLanguage: React.FC<StepLanguageProps> = ({ profile, onChange, o
           مرحله بعد: تمکن و بودجه مالی ←
         </button>
       </div>
+
+      {/* مودال کوییز تعیین سطح هوشمند */}
+      <LanguageQuizModal
+        isOpen={isQuizOpen}
+        onClose={() => setIsQuizOpen(false)}
+        onApplyResult={handleApplyQuizResult}
+      />
     </div>
   );
 };
