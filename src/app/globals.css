@@ -1,31 +1,298 @@
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap');
 
+/* فونت ایران یکان (IRANYekan) */
+@font-face {
+  font-family: 'IRANYekan';
+  src: url('https://cdn.jsdelivr.net/gh/rastikerdar/iran-yekan-font@v1.0.0/dist/IRANYekanRegular.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/gh/rastikerdar/iran-yekan-font@v1.0.0/dist/IRANYekanRegular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IRANYekan';
+  src: url('https://cdn.jsdelivr.net/gh/rastikerdar/iran-yekan-font@v1.0.0/dist/IRANYekanMedium.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/gh/rastikerdar/iran-yekan-font@v1.0.0/dist/IRANYekanMedium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IRANYekan';
+  src: url('https://cdn.jsdelivr.net/gh/rastikerdar/iran-yekan-font@v1.0.0/dist/IRANYekanBold.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/gh/rastikerdar/iran-yekan-font@v1.0.0/dist/IRANYekanBold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IRANYekan';
+  src: url('https://cdn.jsdelivr.net/gh/rastikerdar/iran-yekan-font@v1.0.0/dist/IRANYekanBlack.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/gh/rastikerdar/iran-yekan-font@v1.0.0/dist/IRANYekanBlack.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #0f172a;
+  --background: #020617;
   --foreground: #f8fafc;
+}
+
+html, body, button, input, select, textarea {
+  font-family: 'IRANYekan', 'IRANYekanX', 'Iran Yekan', 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
 body {
   color: var(--foreground);
   background-color: var(--background);
-  font-family: 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   direction: rtl;
   text-align: right;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Custom scrollbars */
+/* ==============================================================
+   قالب ۱: Cyber Dark Console (کنسول سایبرنتیک تیره پیش‌فرض)
+   ============================================================== */
+[data-theme="cyber-dark"] {
+  --background: #020617;
+  --foreground: #f8fafc;
+}
+
+/* ==============================================================
+   قالب ۲: Clean Luxury Editorial (مینیمال لوکس و ادیتوریال روشن)
+   ============================================================== */
+[data-theme="clean-luxury"] {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+[data-theme="clean-luxury"] .min-h-screen {
+  background-color: #f8fafc !important;
+}
+
+[data-theme="clean-luxury"] .bg-slate-950 {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme="clean-luxury"] .bg-slate-900,
+[data-theme="clean-luxury"] .bg-slate-900\/60,
+[data-theme="clean-luxury"] .bg-slate-900\/70,
+[data-theme="clean-luxury"] .bg-slate-900\/80,
+[data-theme="clean-luxury"] .bg-slate-900\/90 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05) !important;
+  color: #1e293b !important;
+}
+
+[data-theme="clean-luxury"] .bg-slate-950\/60,
+[data-theme="clean-luxury"] .bg-slate-950\/70,
+[data-theme="clean-luxury"] .bg-slate-950\/80,
+[data-theme="clean-luxury"] .bg-slate-950\/40,
+[data-theme="clean-luxury"] .bg-slate-950\/50 {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="clean-luxury"] .border-slate-800,
+[data-theme="clean-luxury"] .border-slate-850,
+[data-theme="clean-luxury"] .border-slate-700 {
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme="clean-luxury"] .text-white {
+  color: #0f172a !important;
+}
+
+[data-theme="clean-luxury"] .text-slate-100 {
+  color: #0f172a !important;
+}
+
+[data-theme="clean-luxury"] .text-slate-200 {
+  color: #1e293b !important;
+}
+
+[data-theme="clean-luxury"] .text-slate-300 {
+  color: #334155 !important;
+}
+
+[data-theme="clean-luxury"] .text-slate-400 {
+  color: #64748b !important;
+}
+
+[data-theme="clean-luxury"] .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+[data-theme="clean-luxury"] input,
+[data-theme="clean-luxury"] select,
+[data-theme="clean-luxury"] textarea {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="clean-luxury"] input:focus,
+[data-theme="clean-luxury"] select:focus,
+[data-theme="clean-luxury"] textarea:focus {
+  border-color: #059669 !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15) !important;
+}
+
+/* دکمه‌های اصلی به رنگ زمردی سلطنتی (Emerald 600) تغییر می‌کنند */
+[data-theme="clean-luxury"] .bg-indigo-600 {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.25) !important;
+}
+
+[data-theme="clean-luxury"] .hover\:bg-indigo-500:hover {
+  background-color: #047857 !important;
+}
+
+[data-theme="clean-luxury"] .bg-indigo-500\/10,
+[data-theme="clean-luxury"] .bg-indigo-500\/20,
+[data-theme="clean-luxury"] .bg-indigo-600\/15,
+[data-theme="clean-luxury"] .bg-indigo-600\/20 {
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+  color: #065f46 !important;
+}
+
+[data-theme="clean-luxury"] .text-indigo-400,
+[data-theme="clean-luxury"] .text-indigo-300 {
+  color: #047857 !important;
+}
+
+[data-theme="clean-luxury"] .border-indigo-500,
+[data-theme="clean-luxury"] .border-indigo-500\/30,
+[data-theme="clean-luxury"] .border-indigo-500\/50 {
+  border-color: #10b981 !important;
+}
+
+/* گرادیان بنر در قالب لوکس روشن */
+[data-theme="clean-luxury"] .from-indigo-950\/60,
+[data-theme="clean-luxury"] .from-indigo-950\/80 {
+  background: linear-gradient(to left, #ffffff, #f0fdf4, #ecfdf5) !important;
+  border-color: #a7f3d0 !important;
+  box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.08) !important;
+}
+
+/* ==============================================================
+   قالب ۳: Midnight Aurora Glass (کهکشان شیشه‌ای و آئورا نئون)
+   ============================================================== */
+[data-theme="midnight-aurora"] {
+  --background: #080214;
+  --foreground: #f3e8ff;
+  background: radial-gradient(circle at 10% 15%, rgba(147, 51, 234, 0.22) 0%, transparent 45%),
+              radial-gradient(circle at 90% 85%, rgba(59, 130, 246, 0.22) 0%, transparent 45%),
+              radial-gradient(circle at 50% 50%, rgba(217, 70, 239, 0.12) 0%, transparent 60%),
+              #070114 !important;
+  color: #f3e8ff !important;
+}
+
+[data-theme="midnight-aurora"] .min-h-screen {
+  background: transparent !important;
+}
+
+[data-theme="midnight-aurora"] .bg-slate-950 {
+  background-color: rgba(14, 4, 28, 0.7) !important;
+  border-color: rgba(168, 85, 247, 0.25) !important;
+}
+
+[data-theme="midnight-aurora"] .bg-slate-900,
+[data-theme="midnight-aurora"] .bg-slate-900\/60,
+[data-theme="midnight-aurora"] .bg-slate-900\/70,
+[data-theme="midnight-aurora"] .bg-slate-900\/80,
+[data-theme="midnight-aurora"] .bg-slate-900\/90 {
+  background-color: rgba(26, 11, 46, 0.5) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-color: rgba(192, 132, 252, 0.3) !important;
+  box-shadow: 0 8px 32px 0 rgba(112, 26, 179, 0.25) !important;
+}
+
+[data-theme="midnight-aurora"] .bg-slate-950\/60,
+[data-theme="midnight-aurora"] .bg-slate-950\/70,
+[data-theme="midnight-aurora"] .bg-slate-950\/80 {
+  background-color: rgba(16, 5, 34, 0.75) !important;
+  border-color: rgba(168, 85, 247, 0.25) !important;
+}
+
+[data-theme="midnight-aurora"] .border-slate-800,
+[data-theme="midnight-aurora"] .border-slate-850,
+[data-theme="midnight-aurora"] .border-slate-700 {
+  border-color: rgba(168, 85, 247, 0.3) !important;
+}
+
+[data-theme="midnight-aurora"] input,
+[data-theme="midnight-aurora"] select,
+[data-theme="midnight-aurora"] textarea {
+  background-color: rgba(18, 4, 38, 0.8) !important;
+  border-color: rgba(168, 85, 247, 0.4) !important;
+  color: #f3e8ff !important;
+}
+
+[data-theme="midnight-aurora"] input:focus,
+[data-theme="midnight-aurora"] select:focus,
+[data-theme="midnight-aurora"] textarea:focus {
+  border-color: #d946ef !important;
+  box-shadow: 0 0 15px rgba(217, 70, 239, 0.3) !important;
+}
+
+/* دکمه‌های اصلی در کهکشان شیشه‌ای به گرادیان بنفش-ارغوانی نئون تبدیل می‌شوند */
+[data-theme="midnight-aurora"] .bg-indigo-600 {
+  background: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 20px 0 rgba(192, 38, 211, 0.4) !important;
+}
+
+[data-theme="midnight-aurora"] .hover\:bg-indigo-500:hover {
+  background: linear-gradient(135deg, #9333ea 0%, #d946ef 100%) !important;
+}
+
+[data-theme="midnight-aurora"] .text-indigo-400,
+[data-theme="midnight-aurora"] .text-indigo-300 {
+  color: #e879f9 !important;
+}
+
+[data-theme="midnight-aurora"] .border-indigo-500,
+[data-theme="midnight-aurora"] .border-indigo-500\/30,
+[data-theme="midnight-aurora"] .border-indigo-500\/50 {
+  border-color: rgba(217, 70, 239, 0.4) !important;
+}
+
+[data-theme="midnight-aurora"] .from-indigo-950\/60,
+[data-theme="midnight-aurora"] .from-indigo-950\/80 {
+  background: linear-gradient(135deg, rgba(88, 28, 135, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%) !important;
+  border-color: rgba(192, 132, 252, 0.4) !important;
+  box-shadow: 0 10px 30px rgba(147, 51, 234, 0.25) !important;
+}
+
+/* ==============================================================
+   اسکرول‌بارهای سفارشی
+   ============================================================== */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: rgba(15, 23, 42, 0.6);
 }
 
 ::-webkit-scrollbar-thumb {
