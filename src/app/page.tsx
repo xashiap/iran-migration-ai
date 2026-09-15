@@ -15,8 +15,8 @@ import { DossierDashboard } from '@/components/Result/DossierDashboard';
 import { CurrencyBar } from '@/components/CurrencyBar';
 import { ImmigrationRadar } from '@/components/Radar/ImmigrationRadar';
 import { CurrencyData, DEFAULT_CURRENCY } from '@/lib/currency';
-import { AppTheme, THEME_OPTIONS } from '@/types/theme';
-import { Sparkles, ChevronRight, Zap, Radio, Palette } from 'lucide-react';
+import { ThreeDimensionalDecorations } from '@/components/ThreeDimensionalDecorations';
+import { Sparkles, ChevronRight, Zap, Radio } from 'lucide-react';
 
 export default function Home() {
   const [profile, setProfile] = useState<UserProfile>(INITIAL_EMPTY_PROFILE);
@@ -28,7 +28,6 @@ export default function Home() {
   const [currency, setCurrency] = useState<CurrencyData>(DEFAULT_CURRENCY);
   const [isCurrencyLoading, setIsCurrencyLoading] = useState<boolean>(false);
   const [isRadarOpen, setIsRadarOpen] = useState<boolean>(false);
-  const [theme, setTheme] = useState<AppTheme>('cyber-dark');
 
   const fetchCurrency = async () => {
     setIsCurrencyLoading(true);
@@ -54,19 +53,6 @@ export default function Home() {
     const savedKey = localStorage.getItem('gemini_api_key');
     if (savedKey) setApiKey(savedKey);
   }, []);
-
-  // بارگذاری قالب ذخیره‌شده
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('app_theme') as AppTheme;
-    if (savedTheme && ['cyber-dark', 'clean-luxury', 'midnight-aurora'].includes(savedTheme)) {
-      setTheme(savedTheme);
-    }
-  }, []);
-
-  const handleSelectTheme = (newTheme: AppTheme) => {
-    setTheme(newTheme);
-    localStorage.setItem('app_theme', newTheme);
-  };
 
   const handleSaveApiKey = (key: string) => {
     setApiKey(key);
@@ -142,7 +128,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 transition-colors duration-300" data-theme={theme}>
+    <div className="min-h-screen flex flex-col relative overflow-x-hidden">
+      {/* المان‌های سه‌بعدی بلورین ۴ گوشه صفحه با گلس‌مورفیسم نرم */}
+      <ThreeDimensionalDecorations />
+
       <CurrencyBar
         currency={currency}
         isLoading={isCurrencyLoading}
@@ -156,8 +145,6 @@ export default function Home() {
         onSaveApiKey={handleSaveApiKey}
         onToggleRadar={() => setIsRadarOpen(!isRadarOpen)}
         isRadarOpen={isRadarOpen}
-        currentTheme={theme}
-        onSelectTheme={handleSelectTheme}
       />
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -249,92 +236,6 @@ export default function Home() {
                     </button>
                   ))}
                 </div>
-              </div>
-            </div>
-
-            {/* ویترین انتخاب ۳ قالب طراحی حرفه‌ای */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-3.5 backdrop-blur-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
-                    <Palette className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                      <span>انتخاب سبک طراحی و تم ظاهری (UI Design System)</span>
-                      <span className="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-mono">
-                        فونت ایران یکان (IRANYekan)
-                      </span>
-                    </h3>
-                    <p className="text-[11px] text-slate-400">
-                      روی هر کدام از ۳ قالب زیر کلیک کنید تا تمام اجزا و رنگ‌بندی سایت بی‌درنگ تغییر کند:
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-[11px] text-slate-400 self-start sm:self-auto">
-                  <span>قالب در حال استفاده: </span>
-                  <strong className="text-white font-bold">
-                    {THEME_OPTIONS.find((t) => t.id === theme)?.titleFa}
-                  </strong>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {THEME_OPTIONS.map((item) => {
-                  const isSelected = theme === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => handleSelectTheme(item.id)}
-                      className={`p-4 rounded-2xl border text-right transition flex flex-col justify-between space-y-2.5 cursor-pointer relative overflow-hidden ${
-                        isSelected
-                          ? 'bg-indigo-600/15 border-indigo-500 shadow-lg shadow-indigo-600/15 ring-2 ring-indigo-500/60'
-                          : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-white flex items-center gap-1.5">
-                          <span className="text-lg">{item.icon}</span>
-                          <span>{item.titleFa}</span>
-                        </span>
-                        <span className="text-[10px] bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-full text-slate-300">
-                          {item.badgeFa}
-                        </span>
-                      </div>
-
-                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                        {item.descriptionFa}
-                      </p>
-
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
-                        <div className="flex items-center gap-1.5" title="پالت رنگی">
-                          <span
-                            className="w-3.5 h-3.5 rounded-full border border-white/20 shadow-sm"
-                            style={{ backgroundColor: item.previewColors.bg }}
-                          />
-                          <span
-                            className="w-3.5 h-3.5 rounded-full border border-white/20 shadow-sm"
-                            style={{ backgroundColor: item.previewColors.card }}
-                          />
-                          <span
-                            className="w-3.5 h-3.5 rounded-full shadow-sm"
-                            style={{ backgroundColor: item.previewColors.accent }}
-                          />
-                        </div>
-
-                        <span
-                          className={`text-[11px] font-bold ${
-                            isSelected ? 'text-indigo-400' : 'text-slate-500'
-                          }`}
-                        >
-                          {isSelected ? '✓ در حال نمایش' : 'پیش‌نمایش این قالب'}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
               </div>
             </div>
 

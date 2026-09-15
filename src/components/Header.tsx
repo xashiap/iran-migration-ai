@@ -3,9 +3,6 @@
 import React, { useState } from 'react';
 import { Compass, Key, Sparkles, RefreshCw, CheckCircle2, Radio } from 'lucide-react';
 import { SAMPLE_PROFILES, SampleProfileItem } from '@/data/sampleProfiles';
-import { AppTheme } from '@/types/theme';
-import { ThemeSwitcher } from './ThemeSwitcher';
-
 interface HeaderProps {
   onSelectSample: (sample: SampleProfileItem) => void;
   onReset: () => void;
@@ -13,8 +10,6 @@ interface HeaderProps {
   onSaveApiKey: (key: string) => void;
   onToggleRadar?: () => void;
   isRadarOpen?: boolean;
-  currentTheme: AppTheme;
-  onSelectTheme: (theme: AppTheme) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -24,8 +19,6 @@ export const Header: React.FC<HeaderProps> = ({
   onSaveApiKey,
   onToggleRadar,
   isRadarOpen,
-  currentTheme,
-  onSelectTheme,
 }) => {
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState(apiKey);
@@ -61,9 +54,6 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Theme Switcher */}
-          <ThemeSwitcher currentTheme={currentTheme} onSelectTheme={onSelectTheme} />
-
           {/* Live Immigration Radar Button */}
           {onToggleRadar && (
             <button
