@@ -12,6 +12,8 @@ import { StepLanguage } from '@/components/Wizard/StepLanguage';
 import { StepFinance } from '@/components/Wizard/StepFinance';
 import { StepPreferences } from '@/components/Wizard/StepPreferences';
 import { DossierDashboard } from '@/components/Result/DossierDashboard';
+import { CurrencyBar } from '@/components/CurrencyBar';
+import { CurrencyData, DEFAULT_CURRENCY } from '@/lib/currency';
 import { Sparkles, ChevronRight, Zap } from 'lucide-react';
 
 export default function Home() {
@@ -21,6 +23,27 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState<string>('');
+  const [currency, setCurrency] = useState<CurrencyData>(DEFAULT_CURRENCY);
+  const [isCurrencyLoading, setIsCurrencyLoading] = useState<boolean>(false);
+
+  const fetchCurrency = async () => {
+    setIsCurrencyLoading(true);
+    try {
+      const res = await fetch('/api/currency');
+      const json = await res.json();
+      if (json.success && json.data) {
+        setCurrency(json.data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch currency', e);
+    } finally {
+      setIsCurrencyLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCurrency();
+  }, []);
 
   // بارگذاری کلید از لوکال‌استوریج
   useEffect(() => {
@@ -103,6 +126,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+      <CurrencyBar
+        currency={currency}
+        isLoading={isCurrencyLoading}
+        onRefresh={fetchCurrency}
+      />
+
       <Header
         onSelectSample={handleSelectSample}
         onReset={handleReset}
@@ -130,6 +159,8 @@ export default function Home() {
             result={analysisResult}
             onEditProfile={() => setAnalysisResult(null)}
             onReset={handleReset}
+            usdTomanRate={currency.usdToman}
+            eurTomanRate={currency.eurToman}
           />
         ) : (
           /* فرم چندمرحله‌ای ارزیابی */
@@ -231,6 +262,7 @@ export default function Home() {
                   onChange={setProfile}
                   onPrev={() => setCurrentStep(4)}
                   onNext={() => setCurrentStep(6)}
+                  usdTomanRate={currency.usdToman}
                 />
               )}
 

@@ -14,17 +14,22 @@ import {
   Brain, 
   ShieldCheck 
 } from 'lucide-react';
+import { formatCostStringWithToman } from '@/lib/currency';
 
 interface DossierDashboardProps {
   result: AnalysisResult;
   onEditProfile: () => void;
   onReset: () => void;
+  usdTomanRate?: number;
+  eurTomanRate?: number;
 }
 
 export const DossierDashboard: React.FC<DossierDashboardProps> = ({
   result,
   onEditProfile,
   onReset,
+  usdTomanRate = 231300,
+  eurTomanRate = 268130,
 }) => {
   const [activeTab, setActiveTab] = useState<'roadmap' | 'finance' | 'ai_insights'>('roadmap');
   const [selectedCountry, setSelectedCountry] = useState<CountryRecommendation>(result.topCountries[0]);
@@ -219,10 +224,13 @@ export const DossierDashboard: React.FC<DossierDashboardProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="text-left bg-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-800">
+            <div className="text-left bg-slate-950 px-3.5 py-2 rounded-xl border border-slate-800">
               <div className="text-[10px] text-slate-400">حداقل سرمایه تخمینی:</div>
               <div className="text-xs sm:text-sm font-bold text-emerald-400 font-mono">
                 {selectedCountry.estimatedCostUSD}
+              </div>
+              <div className="text-[10px] text-emerald-300/90 font-medium mt-0.5">
+                {formatCostStringWithToman(selectedCountry.estimatedCostUSD, usdTomanRate, eurTomanRate).replace(selectedCountry.estimatedCostUSD, '').trim()}
               </div>
             </div>
           </div>
@@ -315,6 +323,8 @@ export const DossierDashboard: React.FC<DossierDashboardProps> = ({
           <CostEstimator
             financials={result.financialEstimate}
             targetCountry={selectedCountry.countryName}
+            usdTomanRate={usdTomanRate}
+            eurTomanRate={eurTomanRate}
           />
         )}
 

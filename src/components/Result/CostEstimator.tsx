@@ -2,32 +2,56 @@
 
 import React from 'react';
 import { AnalysisResult } from '@/types/migration';
-import { Coins, ShieldAlert } from 'lucide-react';
+import { Coins, ShieldAlert, TrendingUp, Calculator } from 'lucide-react';
+import { formatCostStringWithToman, convertUsdToTomanText } from '@/lib/currency';
 
 interface CostEstimatorProps {
   financials: AnalysisResult['financialEstimate'];
   targetCountry: string;
+  usdTomanRate?: number;
+  eurTomanRate?: number;
 }
 
-export const CostEstimator: React.FC<CostEstimatorProps> = ({ financials, targetCountry }) => {
+export const CostEstimator: React.FC<CostEstimatorProps> = ({ 
+  financials, 
+  targetCountry,
+  usdTomanRate = 231300,
+  eurTomanRate = 268130
+}) => {
   return (
     <div className="space-y-6">
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div>
             <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
               <Coins className="w-6 h-6 text-amber-400" />
               <span>برآورد واقع‌بینانه هزینه‌های مهاجرت به {targetCountry}</span>
             </h3>
             <p className="text-xs text-slate-400 mt-1">
-              تفکیک مخارج ریالی داخل ایران و هزینه‌های ارزی لازم در حساب مسدود و مقصد
+              تفکیک مخارج ریالی داخل ایران و هزینه‌های ارزی روز محاسبه‌شده با نرخ زنده TGJU
             </p>
           </div>
 
-          <div className="text-left bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-2 rounded-xl">
-            <div className="text-[10px] text-emerald-300">کل سرمایه پیشنهادی:</div>
-            <div className="text-base font-black text-emerald-400 font-mono">
-              {financials.totalStartingBudgetUSD}
+          {/* نرخ زنده و کل سرمایه */}
+          <div className="flex items-center gap-3">
+            <div className="text-left bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl hidden sm:block">
+              <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                <TrendingUp className="w-3 h-3 text-emerald-400" />
+                <span>دلار روز TGJU:</span>
+              </div>
+              <div className="text-xs font-bold text-emerald-400 font-mono">
+                {usdTomanRate.toLocaleString('fa-IR')} تومان
+              </div>
+            </div>
+
+            <div className="text-left bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-2 rounded-xl">
+              <div className="text-[10px] text-emerald-300">کل سرمایه پیشنهادی:</div>
+              <div className="text-sm sm:text-base font-black text-emerald-400 font-mono">
+                {financials.totalStartingBudgetUSD}
+              </div>
+              <div className="text-[10px] text-emerald-300/80 font-medium mt-0.5">
+                {formatCostStringWithToman(financials.totalStartingBudgetUSD, usdTomanRate, eurTomanRate).replace(financials.totalStartingBudgetUSD, '').trim()}
+              </div>
             </div>
           </div>
         </div>
@@ -61,21 +85,27 @@ export const CostEstimator: React.FC<CostEstimatorProps> = ({ financials, target
             <div className="text-xs font-bold text-cyan-400 flex items-center justify-between border-b border-slate-800 pb-2">
               <span>۲. آزمون‌های زبان و ارزیابی مدرک (ارزی)</span>
               <span className="font-mono text-white text-xs">
-                {financials.languageExamsUSD} + {financials.credentialEvaluationUSD}
+                {financials.languageExamsUSD}
               </span>
             </div>
             <ul className="space-y-2 text-xs text-slate-300">
-              <li className="flex items-start gap-2">
-                <span className="text-cyan-400">•</span>
-                <span>ثبت‌نام آزمون رسمی آیلتس، تافل، گوته یا دولینگو: <strong className="text-slate-200">{financials.languageExamsUSD}</strong></span>
+              <li className="flex items-start justify-between gap-2">
+                <span>ثبت‌نام آزمون رسمی آیلتس، تافل یا گوته:</span>
+                <strong className="text-cyan-300 font-mono text-[11px]">
+                  {formatCostStringWithToman(financials.languageExamsUSD, usdTomanRate, eurTomanRate)}
+                </strong>
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-cyan-400">•</span>
-                <span>هزینه ارزشیابی مدارک (WES کانادا یا ZAB آلمان): <strong className="text-slate-200">{financials.credentialEvaluationUSD}</strong></span>
+              <li className="flex items-start justify-between gap-2">
+                <span>هزینه ارزشیابی مدارک (WES یا ZAB):</span>
+                <strong className="text-cyan-300 font-mono text-[11px]">
+                  {formatCostStringWithToman(financials.credentialEvaluationUSD, usdTomanRate, eurTomanRate)}
+                </strong>
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-cyan-400">•</span>
-                <span>هزینه اپلیکیشن فی موسسات و کارگزاری‌های ویزا: <strong className="text-slate-200">{financials.applicationAndFeesUSD}</strong></span>
+              <li className="flex items-start justify-between gap-2">
+                <span>اپلیکیشن فی و کارگزاری‌ها:</span>
+                <strong className="text-cyan-300 font-mono text-[11px]">
+                  {formatCostStringWithToman(financials.applicationAndFeesUSD, usdTomanRate, eurTomanRate)}
+                </strong>
               </li>
             </ul>
           </div>
@@ -84,11 +114,21 @@ export const CostEstimator: React.FC<CostEstimatorProps> = ({ financials, target
           <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-4 space-y-3">
             <div className="text-xs font-bold text-amber-400 flex items-center justify-between border-b border-slate-800 pb-2">
               <span>۳. موجودی تمکن مالی (حساب مسدود یا پرینت بانک)</span>
-              <span className="font-mono text-white text-xs">{financials.blockedAccountOrProofUSD}</span>
+              <span className="font-mono text-white text-xs">
+                {financials.blockedAccountOrProofUSD}
+              </span>
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              این مبلغ به عنوان هزینه زندگی سال اول در کشور مقصد محسوب می‌شود و در آلمان در حساب مسدود (ماهیانه آزاد می‌شود) و برای کشورهایی نظیر کانادا یا ایتالیا به صورت نامه پرینت حساب بانکی ارائه می‌گردد.
-            </p>
+            <div className="text-xs text-slate-300 leading-relaxed space-y-1.5">
+              <p>
+                این مبلغ به عنوان هزینه زندگی سال اول محسوب می‌شود و در سفارتخانه مورد بررسی قرار می‌گیرد.
+              </p>
+              <div className="bg-slate-900 p-2.5 rounded-lg border border-slate-800 text-[11px] text-amber-300 flex items-center justify-between">
+                <span>معادل به نرخ زنده TGJU:</span>
+                <span className="font-bold font-mono">
+                  {formatCostStringWithToman(financials.blockedAccountOrProofUSD, usdTomanRate, eurTomanRate)}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* ستون ۴: مخارج اولیه استقرار و ماه‌های اول */}
@@ -98,13 +138,15 @@ export const CostEstimator: React.FC<CostEstimatorProps> = ({ financials, target
               <span className="font-mono text-white text-xs">{financials.emergencyBufferUSD}</span>
             </div>
             <ul className="space-y-2 text-xs text-slate-300">
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-400">•</span>
-                <span>بلیت هواپیما به مقصد و بیمه مسافرتی شنگن/بین‌المللی</span>
+              <li className="flex items-start justify-between gap-2">
+                <span>بلیت هواپیما و بیمه مسافرتی:</span>
+                <span className="text-slate-400 text-[11px]">شامل پرواز و بیمه اولیه</span>
               </li>
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-400">•</span>
-                <span>ودیعه و کرایه ماه اول مسکن یا خوابگاه (Kaution / Deposit)</span>
+              <li className="flex items-start justify-between gap-2">
+                <span>ودیعه و کرایه ماه اول مسکن:</span>
+                <strong className="text-emerald-300 font-mono text-[11px]">
+                  {formatCostStringWithToman(financials.emergencyBufferUSD, usdTomanRate, eurTomanRate)}
+                </strong>
               </li>
             </ul>
           </div>

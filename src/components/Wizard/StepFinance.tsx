@@ -2,16 +2,24 @@
 
 import React from 'react';
 import { UserProfile } from '@/types/migration';
-import { Landmark, Sparkles } from 'lucide-react';
+import { Landmark, Sparkles, TrendingUp } from 'lucide-react';
+import { convertUsdToTomanText } from '@/lib/currency';
 
 interface StepFinanceProps {
   profile: UserProfile;
   onChange: (updated: UserProfile) => void;
   onPrev: () => void;
   onNext: () => void;
+  usdTomanRate?: number;
 }
 
-export const StepFinance: React.FC<StepFinanceProps> = ({ profile, onChange, onPrev, onNext }) => {
+export const StepFinance: React.FC<StepFinanceProps> = ({ 
+  profile, 
+  onChange, 
+  onPrev, 
+  onNext,
+  usdTomanRate = 231300
+}) => {
   const fin = profile.finances;
 
   const update = (fields: Partial<UserProfile['finances']>) => {
@@ -39,15 +47,21 @@ export const StepFinance: React.FC<StepFinanceProps> = ({ profile, onChange, onP
           <span>مرحله ۵: سرمایه، بودجه ارزی و تمکن مالی در ایران</span>
         </h2>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          تمکن مالی یکی از مهم‌ترین ستون‌های دریافت ویزاست. ارزیابی دقیق منابع مالی به شما کمک می‌کند مقصدی متناسب با جیب خود انتخاب کنید.
+          تمکن مالی یکی از مهم‌ترین ستون‌های دریافت ویزاست. مبالغ دلاری با نرخ لحظه‌ای TGJU به تومان محاسبه می‌شوند.
         </p>
       </div>
 
       {/* بودجه نقدی ارزی در دسترس */}
       <div className="bg-slate-900/60 border border-slate-800 p-4 sm:p-5 rounded-2xl space-y-3">
-        <label className="block text-xs font-semibold text-slate-300 mb-1">
-          کل سرمایه نقدی که می‌توانید برای مهاجرت هزینه کنید (معادل دلاری/یورویی):
-        </label>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <label className="block text-xs font-semibold text-slate-300">
+            کل سرمایه نقدی که می‌توانید برای مهاجرت هزینه کنید (معادل دلاری):
+          </label>
+          <span className="text-[11px] text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20 flex items-center gap-1">
+            <TrendingUp className="w-3 h-3" />
+            محاسبه با دلار روز: {usdTomanRate.toLocaleString('fa-IR')} تومان
+          </span>
+        </div>
         
         <div className="flex items-center gap-3">
           <input
@@ -59,18 +73,26 @@ export const StepFinance: React.FC<StepFinanceProps> = ({ profile, onChange, onP
             onChange={(e) => update({ liquidBudgetUSD: parseInt(e.target.value) })}
             className="w-full accent-indigo-500 bg-slate-800 rounded-lg cursor-pointer h-2.5"
           />
-          <div className="w-28 bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-center text-sm font-bold text-emerald-400 font-mono">
+          <div className="w-28 bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-center text-sm font-bold text-emerald-400 font-mono flex-shrink-0">
             ${fin.liquidBudgetUSD.toLocaleString()}
           </div>
+        </div>
+
+        {/* معادل تومانی زنده بر اساس نرخ TGJU */}
+        <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3 flex items-center justify-between">
+          <span className="text-xs text-slate-400">معادل تومانی به نرخ زنده TGJU:</span>
+          <span className="text-xs sm:text-sm font-bold text-emerald-400 font-mono">
+            {convertUsdToTomanText(fin.liquidBudgetUSD, usdTomanRate)}
+          </span>
         </div>
 
         {/* بازه‌های بودجه پیشنهادی */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
           {[
-            { amount: 4000, label: 'زیر ۵ هزار دلار', desc: 'مناسب بورسیه ایتالیا / عمان' },
-            { amount: 10000, label: '۱۰ هزار دلار', desc: 'مناسب اتریش / کاری آلمان' },
-            { amount: 15000, label: '۱۵ هزار دلار', desc: 'پوشش حساب مسدود آلمان' },
-            { amount: 30000, label: 'بالای ۲۵ هزار دلار', desc: 'کانادا / استرالیا / دانشگاه‌های پولی' },
+            { amount: 4000, label: 'زیر ۵ هزار دلار', desc: convertUsdToTomanText(4000, usdTomanRate) },
+            { amount: 10000, label: '۱۰ هزار دلار', desc: convertUsdToTomanText(10000, usdTomanRate) },
+            { amount: 15000, label: '۱۵ هزار دلار', desc: convertUsdToTomanText(15000, usdTomanRate) },
+            { amount: 30000, label: 'بالای ۲۵ هزار دلار', desc: convertUsdToTomanText(30000, usdTomanRate) },
           ].map((b) => (
             <button
               key={b.amount}
@@ -83,7 +105,7 @@ export const StepFinance: React.FC<StepFinanceProps> = ({ profile, onChange, onP
               }`}
             >
               <div className="text-xs font-bold text-slate-200">{b.label}</div>
-              <div className="text-[10px] text-slate-400 mt-0.5 truncate">{b.desc}</div>
+              <div className="text-[10px] text-emerald-400 font-mono mt-0.5 truncate">{b.desc}</div>
             </button>
           ))}
         </div>
