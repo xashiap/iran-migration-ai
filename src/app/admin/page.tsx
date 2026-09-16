@@ -8,7 +8,6 @@ import {
 } from '@/types/migration';
 import { 
   Users, 
-  Download, 
   Sparkles, 
   RefreshCw, 
   Search, 
@@ -22,7 +21,10 @@ import {
   X, 
   BarChart3, 
   FileSpreadsheet, 
-  AlertCircle
+  AlertCircle,
+  Phone,
+  CheckCircle2,
+  Clock
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -32,7 +34,8 @@ export default function AdminDashboardPage() {
   const [inputKey, setInputKey] = useState<string>('');
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const [timeRange, setTimeRange] = useState<TimeRangeFilter>('1m');
+  const [timeRange, setTimeRange] = useState<TimeRangeFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'lead'>('all');
   const [search, setSearch] = useState<string>('');
   const [applicants, setApplicants] = useState<ApplicantRecord[]>([]);
   const [stats, setStats] = useState<ApplicantStatistics | null>(null);
@@ -55,14 +58,22 @@ export default function AdminDashboardPage() {
     }
   }, []);
 
-  const fetchData = async (keyToUse: string = adminKey, range: TimeRangeFilter = timeRange, q: string = search) => {
+  const fetchData = async (
+    keyToUse: string = adminKey, 
+    range: TimeRangeFilter = timeRange, 
+    q: string = search,
+    sFilter: 'all' | 'completed' | 'lead' = statusFilter
+  ) => {
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/admin/applicants?timeRange=${range}&search=${encodeURIComponent(q)}`, {
-        headers: {
-          'x-admin-key': keyToUse,
-        },
-      });
+      const res = await fetch(
+        `/api/admin/applicants?timeRange=${range}&search=${encodeURIComponent(q)}&status=${sFilter}`, 
+        {
+          headers: {
+            'x-admin-key': keyToUse,
+          },
+        }
+      );
 
       if (res.status === 401) {
         setIsAuthenticated(false);
@@ -88,24 +99,24 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     if (isAuthenticated && adminKey) {
-      fetchData(adminKey, timeRange, search);
+      fetchData(adminKey, timeRange, search, statusFilter);
     }
-  }, [isAuthenticated, timeRange]);
+  }, [isAuthenticated, timeRange, statusFilter]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputKey.trim()) return;
     setAdminKey(inputKey);
-    fetchData(inputKey, timeRange, search);
+    fetchData(inputKey, timeRange, search, statusFilter);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchData(adminKey, timeRange, search);
+    fetchData(adminKey, timeRange, search, statusFilter);
   };
 
   const handleExportCSV = () => {
-    const url = `/api/admin/applicants?timeRange=${timeRange}&search=${encodeURIComponent(search)}&format=csv&key=${encodeURIComponent(adminKey)}`;
+    const url = `/api/admin/applicants?timeRange=${timeRange}&search=${encodeURIComponent(search)}&status=${statusFilter}&format=csv&key=${encodeURIComponent(adminKey)}`;
     window.open(url, '_blank');
   };
 
@@ -179,14 +190,17 @@ export default function AdminDashboardPage() {
               disabled={isLoading}
               className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold transition shadow-lg shadow-indigo-600/25 cursor-pointer disabled:opacity-50"
             >
-              {isLoading ? 'در حال بررسی...' : 'ورود به پنل آمار و اطلاعات'}
+              {isLoading ? 'در حال تایید اعتبار...' : 'ورود به داشبورد مدیریت ←'}
             </button>
           </form>
 
-          <div className="pt-2 text-center">
-            <Link href="/" className="text-xs text-zinc-400 hover:text-indigo-300 inline-flex items-center gap-1">
+          <div className="pt-4 border-t border-white/[0.06] text-center">
+            <Link
+              href="/"
+              className="text-xs text-zinc-400 hover:text-white transition inline-flex items-center gap-1"
+            >
+              <span>بازگشت به صفحه اصلی سامانه</span>
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>بازگشت به صفحه اصلی سایت</span>
             </Link>
           </div>
         </div>
@@ -195,100 +209,118 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0c10] text-[#ededed] p-4 sm:p-6 lg:p-8" dir="rtl">
+    <div className="min-h-screen bg-[#0a0c10] text-zinc-100 p-4 sm:p-8 font-sans">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* نوار بالای داشبورد */}
-        <div className="bg-[#11141d]/90 border border-white/[0.08] rounded-3xl p-5 sm:p-6 shadow-xl flex flex-wrap items-center justify-between gap-4 backdrop-blur-md">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-600 border border-white/10 flex items-center justify-center shadow-md shadow-indigo-600/20">
-              <BarChart3 className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black text-white">داشبورد جامعه آماری و بیگ دیتا</h1>
-                <span className="text-xs bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-mono">
-                  IraMigrate DB
-                </span>
+        
+        {/* هدر بالای پنل */}
+        <div className="bg-[#11141d]/90 border border-white/[0.08] rounded-3xl p-6 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-indigo-400" />
               </div>
-              <p className="text-xs text-zinc-400">
-                رصد هوشمند متقاضیان، پرونده‌ها، شماره‌های تماس و تحلیل الگوهای مهاجرت
-              </p>
+              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                داشبورد جامعه آماری و بیگ دیتای متقاضیان
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                کلود متصل
+              </span>
             </div>
+            <p className="text-xs text-zinc-400">
+              تحلیل زنده پرونده‌های مهاجرتی، بانک اطلاعاتی نام و شماره متقاضیان، و استخراج خودکار الگوها
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/"
-              className="px-3 py-2 text-xs rounded-xl bg-zinc-900 border border-white/[0.06] text-zinc-300 hover:bg-zinc-800 transition flex items-center gap-1.5"
+            <button
+              onClick={() => fetchData(adminKey, timeRange, search, statusFilter)}
+              disabled={isLoading}
+              className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 border border-white/[0.06] cursor-pointer disabled:opacity-50"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>نمای کاربر (سایت)</span>
-            </Link>
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+              <span>بروزرسانی زنده</span>
+            </button>
 
             <button
               onClick={handleExportCSV}
-              disabled={applicants.length === 0}
-              className="px-3.5 py-2 text-xs rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1.5 font-bold cursor-pointer disabled:opacity-50"
-              title="خروجی فایل اکسل با فرمت استاندارد فارسی"
+              className="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer"
             >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-              <span>دانلود اکسل (CSV)</span>
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <span>خروجی اکسل (Excel CSV)</span>
             </button>
 
             <button
               onClick={handleGenerateAiReport}
-              disabled={isAiLoading || applicants.length === 0}
-              className="px-3.5 py-2 text-xs rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 font-bold shadow-md shadow-indigo-600/20 cursor-pointer disabled:opacity-50"
-              title="تولید تحلیل هوش مصنوعی از این جامعه آماری"
+              className="px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-indigo-600/25 cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-indigo-200" />
-              <span>تحلیل بیگ دیتا با AI</span>
+              <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+              <span>تحلیل بیگ دیتا با هوش مصنوعی</span>
             </button>
 
-            <button
-              onClick={() => fetchData()}
-              disabled={isLoading}
-              className="p-2 text-zinc-400 hover:text-white bg-zinc-900 border border-white/[0.06] rounded-xl transition cursor-pointer"
-              title="به‌روزرسانی داده‌ها"
+            <Link
+              href="/"
+              className="px-3 py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl text-xs font-semibold transition border border-white/[0.06]"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-indigo-400' : ''}`} />
-            </button>
+              مشاهده سایت
+            </Link>
           </div>
         </div>
 
-        {/* فیلترهای زمانی و جستجو */}
-        <div className="bg-[#11141d]/80 border border-white/[0.07] rounded-2xl p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 shadow-md">
-          {/* تب‌های بازه زمانی */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-zinc-400 ml-1 font-medium flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5 text-indigo-400" />
-              <span>بازه زمانی:</span>
-            </span>
+        {/* فیلترها و سرچ */}
+        <div className="bg-[#11141d]/70 border border-white/[0.06] rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-3">
+          
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            {/* بازه زمانی */}
+            <div className="flex items-center gap-1.5 bg-[#0c0f16] p-1 rounded-xl border border-white/[0.06]">
+              <Calendar className="w-3.5 h-3.5 text-zinc-500 ml-1 mr-2" />
+              {(
+                [
+                  { key: '1m', label: '۱ ماه اخیر' },
+                  { key: '2m', label: '۲ ماه اخیر' },
+                  { key: '3m', label: '۳ ماه اخیر' },
+                  { key: 'all', label: 'کل اطلاعات' },
+                ] as const
+              ).map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setTimeRange(tab.key)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                    timeRange === tab.key
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
-            {(
-              [
-                { key: '1m', label: '۱ ماه اخیر' },
-                { key: '2m', label: '۲ ماه اخیر' },
-                { key: '3m', label: '۳ ماه اخیر' },
-                { key: 'all', label: 'کل اطلاعات (همه)' },
-              ] as const
-            ).map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setTimeRange(tab.key)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                  timeRange === tab.key
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'bg-[#0c0f16] text-zinc-400 hover:text-zinc-200 hover:bg-zinc-850'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {/* تفکیک وضعیت (لید / تکمیل‌شده) */}
+            <div className="flex items-center gap-1 bg-[#0c0f16] p-1 rounded-xl border border-white/[0.06]">
+              {(
+                [
+                  { key: 'all', label: 'همه' },
+                  { key: 'completed', label: 'فقط تکمیل‌شده' },
+                  { key: 'lead', label: 'فقط لید مرحله ۱' },
+                ] as const
+              ).map((s) => (
+                <button
+                  key={s.key}
+                  onClick={() => setStatusFilter(s.key)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                    statusFilter === s.key
+                      ? 'bg-purple-600 text-white shadow-sm'
+                      : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* سرچ بار */}
-          <form onSubmit={handleSearchSubmit} className="flex items-center gap-1.5 w-full sm:w-auto">
+          <form onSubmit={handleSearchSubmit} className="flex items-center gap-1.5 w-full md:w-auto">
             <div className="relative flex-1 sm:w-64">
               <input
                 type="text"
@@ -319,8 +351,10 @@ export default function AdminDashboardPage() {
               <div className="text-2xl font-black text-white font-mono">
                 {stats.totalCount.toLocaleString('fa-IR')} <span className="text-xs font-normal text-zinc-500">نفر</span>
               </div>
-              <div className="text-[11px] text-zinc-500">
-                در بازه انتخابی: <span className="text-indigo-300 font-bold font-mono">{stats.filteredCount.toLocaleString('fa-IR')}</span> پرونده
+              <div className="text-[11px] text-zinc-400 flex items-center gap-2 pt-0.5">
+                <span className="text-emerald-400 font-mono font-bold">{stats.completedCount} تکمیل‌شده</span>
+                <span>•</span>
+                <span className="text-amber-400 font-mono font-bold">{stats.leadsCount} لید مرحله ۱</span>
               </div>
             </div>
 
@@ -376,7 +410,7 @@ export default function AdminDashboardPage() {
             </h2>
 
             <span className="text-xs text-zinc-500">
-              کلیک روی هر سطر برای مشاهده جزئیات کامل پرونده
+              کلیک روی هر سطر برای مشاهده جزئیات پرونده و تماس
             </span>
           </div>
 
@@ -385,6 +419,7 @@ export default function AdminDashboardPage() {
               <thead>
                 <tr className="border-b border-white/[0.06] text-zinc-400">
                   <th className="py-3 px-3">ردیف</th>
+                  <th className="py-3 px-3">وضعیت</th>
                   <th className="py-3 px-3">نام متقاضی</th>
                   <th className="py-3 px-3">شماره تماس</th>
                   <th className="py-3 px-3">سن</th>
@@ -399,7 +434,7 @@ export default function AdminDashboardPage() {
               <tbody className="divide-y divide-white/[0.04]">
                 {applicants.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="py-12 text-center text-zinc-500">
+                    <td colSpan={11} className="py-12 text-center text-zinc-500">
                       هیچ پرونده‌ای با این مشخصات در این بازه زمانی یافت نشد.
                     </td>
                   </tr>
@@ -411,24 +446,37 @@ export default function AdminDashboardPage() {
                       className="hover:bg-zinc-800/40 transition cursor-pointer group"
                     >
                       <td className="py-3 px-3 text-zinc-500 font-mono">{idx + 1}</td>
+                      <td className="py-3 px-3">
+                        {app.status === 'lead' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 whitespace-nowrap">
+                            <Clock className="w-3 h-3 text-amber-400" />
+                            <span>لید مرحله ۱</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 whitespace-nowrap">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                            <span>تکمیل‌شده</span>
+                          </span>
+                        )}
+                      </td>
                       <td className="py-3 px-3 font-bold text-white group-hover:text-indigo-300">
                         {app.fullName}
                       </td>
-                      <td className="py-3 px-3 font-mono text-zinc-300 dir-ltr text-right">
+                      <td className="py-3 px-3 font-mono text-zinc-200 dir-ltr text-right font-semibold">
                         {app.phone}
                       </td>
                       <td className="py-3 px-3 text-zinc-400 font-mono">{app.age} سال</td>
                       <td className="py-3 px-3 text-zinc-300 truncate max-w-[140px]">
-                        {app.field} ({app.degree})
+                        {app.field || '—'} {app.degree ? `(${app.degree})` : ''}
                       </td>
                       <td className="py-3 px-3 font-mono text-emerald-400 font-bold">
-                        ${app.liquidBudgetUSD?.toLocaleString()}
+                        {app.liquidBudgetUSD ? `$${app.liquidBudgetUSD.toLocaleString()}` : '—'}
                       </td>
                       <td className="py-3 px-3 text-indigo-300 font-medium">
-                        {app.topCountry}
+                        {app.topCountry || '—'}
                       </td>
                       <td className="py-3 px-3 font-mono font-bold text-white">
-                        %{app.matchScore}
+                        {app.status === 'lead' ? '—' : `%${app.matchScore}`}
                       </td>
                       <td className="py-3 px-3 text-zinc-400 font-mono text-[11px]">
                         {app.shamsiDate}
@@ -452,142 +500,193 @@ export default function AdminDashboardPage() {
             </table>
           </div>
         </div>
+
       </div>
 
-      {/* مودال مشاهده پرونده کامل کاربر */}
+      {/* مودال مشاهده کامل پرونده متقاضی */}
       {selectedApplicant && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#11141d] border border-white/[0.08] rounded-3xl max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto text-right">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#11141d] border border-white/[0.1] rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6 text-right shadow-2xl">
+            
+            {/* هدر مودال */}
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center">
-                  <User className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
+                  <User className="w-5 h-5 text-indigo-400" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">{selectedApplicant.fullName}</h3>
-                  <p className="text-xs text-zinc-400 font-mono dir-ltr text-right">{selectedApplicant.phone}</p>
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <span>پرونده متقاضی: {selectedApplicant.fullName}</span>
+                    {selectedApplicant.status === 'lead' ? (
+                      <span className="px-2 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                        لید اولیه مرحله ۱
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                        تکمیل‌شده
+                      </span>
+                    )}
+                  </h3>
+                  <p className="text-xs text-zinc-400">ثبت‌شده در: {selectedApplicant.shamsiDate}</p>
                 </div>
               </div>
 
               <button
                 onClick={() => setSelectedApplicant(null)}
-                className="p-1.5 text-zinc-400 hover:text-white rounded-lg transition cursor-pointer"
+                className="w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
+            {/* بنر تماس و وضعیت برای لید */}
+            {selectedApplicant.status === 'lead' && (
+              <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <div className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-amber-400" />
+                    <span>متقاضی در گام ۱ فرم متوقف شده و نیاز به پیگیری دارد</span>
+                  </div>
+                  <div className="text-[11px] text-zinc-400">
+                    شماره تماس و اطلاعات اولیه ثبت شده است. می‌توانید مستقیماً برای مشاوره با وی تماس بگیرید.
+                  </div>
+                </div>
+                <a
+                  href={`tel:${selectedApplicant.phone}`}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md flex-shrink-0"
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                  <span>تماس تلفنی</span>
+                </a>
+              </div>
+            )}
+
+            {/* کارت‌های خلاصه اطلاعات فردی و تماس */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.04]">
+              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.06]">
+                <span className="text-zinc-500 block mb-1">شماره تماس مستقیم:</span>
+                <a 
+                  href={`tel:${selectedApplicant.phone}`}
+                  className="font-mono text-indigo-400 font-bold hover:underline flex items-center gap-1"
+                >
+                  <Phone className="w-3 h-3" />
+                  <span>{selectedApplicant.phone}</span>
+                </a>
+              </div>
+              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.06]">
                 <span className="text-zinc-500 block mb-1">سن و جنسیت:</span>
-                <span className="font-bold text-white">{selectedApplicant.age} سال ({selectedApplicant.gender === 'male' ? 'آقا' : 'خانم'})</span>
+                <span className="font-bold text-zinc-200">
+                  {selectedApplicant.age} سال ({selectedApplicant.gender === 'male' ? 'آقا' : 'خانم'})
+                </span>
               </div>
-
-              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.04]">
+              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.06]">
                 <span className="text-zinc-500 block mb-1">وضعیت سربازی:</span>
-                <span className="font-bold text-white">{selectedApplicant.militaryStatus}</span>
+                <span className="font-bold text-zinc-200">
+                  {selectedApplicant.militaryStatus === 'completed' ? 'پایان خدمت' :
+                   selectedApplicant.militaryStatus === 'educational_exempt' ? 'معافیت تحصیلی' :
+                   selectedApplicant.militaryStatus === 'medical_exempt' ? 'معافیت پزشکی' :
+                   selectedApplicant.militaryStatus === 'not_applicable' ? 'غیرمشمول' : 'مشمول'}
+                </span>
               </div>
 
-              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.04]">
-                <span className="text-zinc-500 block mb-1">مدرک تحصیلی:</span>
-                <span className="font-bold text-white">{selectedApplicant.degree}</span>
+              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.06]">
+                <span className="text-zinc-500 block mb-1">رشته و مدرک:</span>
+                <span className="font-bold text-zinc-200">
+                  {selectedApplicant.field || 'نامشخص'} ({selectedApplicant.degree || '—'})
+                </span>
               </div>
-
-              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.04]">
-                <span className="text-zinc-500 block mb-1">رشته تحصیلی:</span>
-                <span className="font-bold text-white truncate block">{selectedApplicant.field}</span>
+              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.06]">
+                <span className="text-zinc-500 block mb-1">سابقه کار و شغل:</span>
+                <span className="font-bold text-zinc-200">
+                  {selectedApplicant.yearsExperience || 0} سال ({selectedApplicant.jobTitle || 'نامشخص'})
+                </span>
               </div>
-
-              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.04]">
-                <span className="text-zinc-500 block mb-1">شغل و سابقه:</span>
-                <span className="font-bold text-white">{selectedApplicant.jobTitle} ({selectedApplicant.yearsExperience} سال)</span>
-              </div>
-
-              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.04]">
-                <span className="text-zinc-500 block mb-1">سطح زبان:</span>
-                <span className="font-bold text-white">{selectedApplicant.englishLevel}</span>
-              </div>
-
-              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.04]">
+              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.06]">
                 <span className="text-zinc-500 block mb-1">بودجه نقدی دلاری:</span>
-                <span className="font-bold text-emerald-400 font-mono">${selectedApplicant.liquidBudgetUSD?.toLocaleString()}</span>
-              </div>
-
-              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.04]">
-                <span className="text-zinc-500 block mb-1">کشور هدف:</span>
-                <span className="font-bold text-indigo-300">{selectedApplicant.topCountry}</span>
-              </div>
-
-              <div className="bg-[#0c0f16] p-3 rounded-xl border border-white/[0.04]">
-                <span className="text-zinc-500 block mb-1">تاریخ ثبت:</span>
-                <span className="font-bold text-zinc-300 font-mono">{selectedApplicant.shamsiDate}</span>
+                <span className="font-bold text-emerald-400 font-mono">
+                  ${selectedApplicant.liquidBudgetUSD?.toLocaleString() || 0}
+                </span>
               </div>
             </div>
 
-            <div className="bg-[#0c0f16] p-4 rounded-xl border border-white/[0.04] space-y-1 text-xs">
-              <span className="text-zinc-400 block font-semibold">روش پیشنهادی سیستم هوشمند:</span>
-              <p className="text-white font-medium">{selectedApplicant.recommendedPathway}</p>
-            </div>
+            {/* نتیجه ارزیابی اختصاصی */}
+            {selectedApplicant.status !== 'lead' && (
+              <div className="bg-indigo-950/30 border border-indigo-500/20 rounded-2xl p-4 space-y-2">
+                <div className="text-xs font-bold text-indigo-300">نتیجه ارزیابی هوش مصنوعی:</div>
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div>
+                    کشور پیشنهادی برتر: <span className="font-bold text-white">{selectedApplicant.topCountry}</span>
+                  </div>
+                  <div>
+                    روش پیشنهادی: <span className="font-bold text-indigo-200">{selectedApplicant.recommendedPathway}</span>
+                  </div>
+                  <div>
+                    شانس ویزا: <span className="font-bold text-emerald-400 font-mono">%{selectedApplicant.matchScore}</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-end gap-2 pt-2 border-t border-white/[0.06]">
+              <a
+                href={`tel:${selectedApplicant.phone}`}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>تماس با متقاضی ({selectedApplicant.phone})</span>
+              </a>
               <button
                 onClick={() => setSelectedApplicant(null)}
-                className="px-5 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-xl text-xs font-bold transition cursor-pointer"
+                className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl text-xs font-bold transition"
               >
                 بستن پنجره
               </button>
             </div>
+
           </div>
         </div>
       )}
 
-      {/* مودال تحلیل بیگ دیتا با هوش مصنوعی */}
+      {/* مودال گزارش بیگ دیتای هوش مصنوعی */}
       {showAiModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#11141d] border border-white/[0.08] rounded-3xl max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 max-h-[85vh] overflow-y-auto text-right">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-white">گزارش هوش مصنوعی از جامعه آماری</h3>
-                  <p className="text-xs text-zinc-400">
-                    تحلیل بیگ دیتای متقاضیان در بازه {timeRange === '1m' ? 'یک ماه اخیر' : timeRange === '2m' ? 'دو ماه اخیر' : timeRange === '3m' ? 'سه ماه اخیر' : 'کل تاریخ'}
-                  </p>
-                </div>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#11141d] border border-white/[0.1] rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-5 text-right shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="w-5 h-5 text-amber-300" />
+                <h3 className="text-lg font-bold text-white">گزارش استراتژیک هوش مصنوعی (Executive AI Report)</h3>
               </div>
-
               <button
                 onClick={() => setShowAiModal(false)}
-                className="p-1.5 text-zinc-400 hover:text-white rounded-lg transition cursor-pointer"
+                className="w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {isAiLoading ? (
               <div className="py-16 text-center space-y-3">
-                <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin mx-auto" />
-                <p className="text-xs text-zinc-400">در حال آنالیز الگوها و تولید گزارش بازار با هوش مصنوعی...</p>
+                <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto" />
+                <p className="text-xs text-zinc-400">هوش مصنوعی در حال تحلیل متقاطع تمام داده‌های آماری متقاضیان است...</p>
               </div>
             ) : (
-              <div className="bg-[#0c0f16] p-5 rounded-2xl border border-white/[0.04] text-xs sm:text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap font-sans">
+              <div className="text-xs sm:text-sm text-zinc-300 leading-relaxed space-y-3 whitespace-pre-wrap bg-[#0c0f16] p-5 rounded-2xl border border-white/[0.06]">
                 {aiReport}
               </div>
             )}
 
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-end pt-3 border-t border-white/[0.06]">
               <button
                 onClick={() => setShowAiModal(false)}
-                className="px-5 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-xl text-xs font-bold transition cursor-pointer"
+                className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-xl text-xs font-bold transition"
               >
-                بستن گزارش
+                متوجه شدم و بستن
               </button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 }

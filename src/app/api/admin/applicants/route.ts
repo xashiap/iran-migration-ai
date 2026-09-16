@@ -27,10 +27,17 @@ export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   const timeRange = (searchParams.get('timeRange') as TimeRangeFilter) || 'all';
   const search = searchParams.get('search') || '';
+  const statusFilter = searchParams.get('status') || 'all';
   const format = searchParams.get('format') || 'json';
 
-  const all = readAllApplicants();
+  const all = await readAllApplicants();
   let filtered = filterApplicantsByRange(all, timeRange);
+
+  if (statusFilter === 'lead') {
+    filtered = filtered.filter((a) => a.status === 'lead');
+  } else if (statusFilter === 'completed') {
+    filtered = filtered.filter((a) => a.status !== 'lead');
+  }
 
   if (search.trim()) {
     const q = search.trim().toLowerCase();
@@ -53,7 +60,7 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const statistics = calculateStatistics(filtered);
+  const statistics = calculateStatistics(filtered, all.length);
 
   return NextResponse.json({
     success: true,
@@ -71,9 +78,9 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const timeRange: TimeRangeFilter = body.timeRange || 'all';
-    const all = readAllApplicants();
+    const all = await readAllApplicants();
     const filtered = filterApplicantsByRange(all, timeRange);
-    const stats = calculateStatistics(filtered);
+    const stats = calculateStatistics(filtered, all.length);
 
     const apiKey = process.env.GEMINI_API_KEY;
     const prompt = `

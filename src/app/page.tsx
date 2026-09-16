@@ -122,6 +122,14 @@ export default function Home() {
         setError(err);
         return;
       }
+      // ثبت خودکار نام و شماره تماس در کلود بلافاصله پس از اتمام مرحله اول
+      if (currentStep === 1 && profile.personal?.fullName && profile.personal?.phone) {
+        fetch('/api/lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ profile }),
+        }).catch(() => {});
+      }
     }
     setError(null);
     setCurrentStep(targetStep);

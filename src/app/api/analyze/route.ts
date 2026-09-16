@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     // ۳. ثبت پرونده در بانک داده جامعه آماری
     try {
-      saveApplicant(profile, analysisResult);
+      await saveApplicant(profile, analysisResult);
     } catch (dbErr) {
       console.warn('Failed to persist applicant record:', dbErr);
     }
