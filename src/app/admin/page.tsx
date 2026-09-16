@@ -166,11 +166,11 @@ export default function AdminDashboardPage() {
                 type="password"
                 value={inputKey}
                 onChange={(e) => setInputKey(e.target.value)}
-                placeholder="رمز عبور..."
+                placeholder="رمز عبور مدیریت را وارد کنید..."
                 className="w-full bg-[#0c0f16] border border-white/[0.09] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition font-mono"
               />
               <p className="text-[11px] text-zinc-500 mt-1">
-                رمز عبور پیش‌فرض: <code className="text-indigo-300">iramigrate2026</code> یا <code className="text-indigo-300">admin123</code>
+                دسترسی محافظت‌شده ویژه مدیران سامانه کوچ‌یار هوشمند
               </p>
             </div>
 

@@ -7,13 +7,13 @@ import {
 } from '@/lib/db';
 import { TimeRangeFilter } from '@/types/migration';
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'iramigrate2026';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Ko9351289395@';
 
 function verifyAuth(req: NextRequest): boolean {
   const authHeader = req.headers.get('x-admin-key');
   const urlKey = req.nextUrl.searchParams.get('key');
   const provided = authHeader || urlKey;
-  return Boolean(provided && (provided === ADMIN_PASSWORD || provided === 'admin123'));
+  return Boolean(provided && (provided === ADMIN_PASSWORD || provided === 'Ko9351289395@'));
 }
 
 export async function GET(req: NextRequest) {
