@@ -36,7 +36,9 @@ export async function GET(req: NextRequest) {
   if (statusFilter === 'lead') {
     filtered = filtered.filter((a) => a.status === 'lead');
   } else if (statusFilter === 'completed') {
-    filtered = filtered.filter((a) => a.status !== 'lead');
+    filtered = filtered.filter((a) => a.status === 'completed');
+  } else if (statusFilter === 'consultation_requested') {
+    filtered = filtered.filter((a) => a.status === 'consultation_requested');
   }
 
   if (search.trim()) {

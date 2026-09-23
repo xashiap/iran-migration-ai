@@ -381,6 +381,62 @@ export async function saveApplicant(profile: UserProfile, result: AnalysisResult
   return record;
 }
 
+// ثبت درخواست رزرو مشاوره تخصصی VIP
+export async function saveConsultationBooking(data: {
+  fullName: string;
+  phone: string;
+  service: string;
+  preferredTime?: string;
+  notes?: string;
+  telegramId?: string;
+  profile?: UserProfile;
+}): Promise<ApplicantRecord> {
+  const now = new Date();
+  const cleanPhone = (data.phone || '').trim();
+  const all = await readAllApplicants();
+  const existingIndex = all.findIndex(a => a.phone === cleanPhone);
+
+  const existing = existingIndex > -1 ? all[existingIndex] : null;
+
+  const record: ApplicantRecord = {
+    id: existing ? existing.id : 'vip_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+    createdAt: existing ? existing.createdAt : now.toISOString(),
+    shamsiDate: existing ? existing.shamsiDate : formatShamsiDate(now),
+    fullName: data.fullName || existing?.fullName || 'متقاضی VIP',
+    phone: cleanPhone,
+    status: 'consultation_requested',
+    age: data.profile?.personal?.age || existing?.age || 26,
+    gender: data.profile?.personal?.gender || existing?.gender || 'male',
+    militaryStatus: data.profile?.personal?.militaryStatus || existing?.militaryStatus || 'completed',
+    degree: data.profile?.education?.degree || existing?.degree || 'bachelor',
+    field: data.profile?.education?.field || existing?.field || 'مشاوره اختصاصی',
+    jobTitle: data.profile?.work?.jobTitle || existing?.jobTitle || 'مشاوره اختصاصی',
+    yearsExperience: data.profile?.work?.yearsExperience || existing?.yearsExperience || 0,
+    englishLevel: data.profile?.languages?.englishLevel || existing?.englishLevel || 'intermediate',
+    liquidBudgetUSD: data.profile?.finances?.liquidBudgetUSD || existing?.liquidBudgetUSD || 0,
+    topCountry: existing?.topCountry || 'درخواست مشاوره VIP',
+    matchScore: existing?.matchScore || 95,
+    recommendedPathway: `خدمت انتخابی: ${data.service}`,
+    consultationService: data.service,
+    consultationNotes: data.notes,
+    telegramId: data.telegramId,
+    profile: data.profile || existing?.profile,
+  };
+
+  if (existingIndex > -1) {
+    all[existingIndex] = record;
+  } else {
+    all.unshift(record);
+  }
+
+  memoryCache = all;
+  lastCacheSync = Date.now();
+  writeLocalFile(all);
+  persistToCloud(record).catch(() => {});
+
+  return record;
+}
+
 // فیلتر زمانی رکوردها
 export function filterApplicantsByRange(
   applicants: ApplicantRecord[],
@@ -530,7 +586,7 @@ export function exportToCSV(applicants: ApplicantRecord[]): string {
 
   const rows = applicants.map((app, idx) => [
     idx + 1,
-    app.status === 'lead' ? 'لید اولیه (گام ۱)' : 'تکمیل‌شده',
+    app.status === 'lead' ? 'لید اولیه (گام ۱)' : app.status === 'consultation_requested' ? 'درخواست مشاوره VIP' : 'تکمیل‌شده',
     '"' + (app.fullName || '').replace(/"/g, '""') + '"',
     '"' + (app.phone || '').replace(/"/g, '""') + '"',
     app.age,

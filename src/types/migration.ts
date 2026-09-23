@@ -185,7 +185,7 @@ export interface AnalysisResult {
 }
 
 export type TimeRangeFilter = '1m' | '2m' | '3m' | 'all';
-export type ApplicantStatus = 'lead' | 'completed';
+export type ApplicantStatus = 'lead' | 'completed' | 'consultation_requested';
 
 export interface ApplicantRecord {
   id: string;
@@ -193,7 +193,7 @@ export interface ApplicantRecord {
   shamsiDate: string; // تاریخ شمسی مانند ۱۴۰۵/۰۶/۲۴
   fullName: string;
   phone: string;
-  status?: ApplicantStatus; // 'lead' | 'completed'
+  status?: ApplicantStatus; // 'lead' | 'completed' | 'consultation_requested'
   age: number;
   gender: Gender;
   militaryStatus: MilitaryStatus;
@@ -206,6 +206,9 @@ export interface ApplicantRecord {
   topCountry?: string;
   matchScore?: number;
   recommendedPathway?: string;
+  consultationService?: string;
+  consultationNotes?: string;
+  telegramId?: string;
   profile?: UserProfile;
 }
 

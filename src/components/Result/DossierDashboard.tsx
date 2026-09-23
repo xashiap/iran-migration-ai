@@ -1,9 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AnalysisResult, CountryRecommendation } from '@/types/migration';
+import { AnalysisResult, CountryRecommendation, UserProfile } from '@/types/migration';
 import { RoadmapTimeline } from './RoadmapTimeline';
 import { CostEstimator } from './CostEstimator';
+import { AICounselorChat } from './AICounselorChat';
+import { EmbassyInterviewSimulator } from '../Interview/EmbassyInterviewSimulator';
+import { ResumeBuilderModal } from '../Resume/ResumeBuilderModal';
+import { ConsultationBookingModal } from './ConsultationBookingModal';
+import { TelegramAlertBanner } from '../Radar/TelegramAlertBanner';
 import { 
   AlertTriangle, 
   CheckCircle2, 
@@ -20,28 +25,36 @@ import {
   Building2,
   Clock,
   Sparkles,
-  Award
+  Award,
+  FileText,
+  PhoneCall
 } from 'lucide-react';
 import { formatCostStringWithToman } from '@/lib/currency';
 
 interface DossierDashboardProps {
   result: AnalysisResult;
+  profile?: UserProfile;
   onEditProfile: () => void;
   onReset: () => void;
   usdTomanRate?: number;
   eurTomanRate?: number;
+  apiKey?: string;
 }
 
 export const DossierDashboard: React.FC<DossierDashboardProps> = ({
   result,
+  profile,
   onEditProfile,
   onReset,
   usdTomanRate = 231300,
   eurTomanRate = 268130,
+  apiKey,
 }) => {
-  const [activeTab, setActiveTab] = useState<'roadmap' | 'finance' | 'ai_insights'>('roadmap');
+  const [activeTab, setActiveTab] = useState<'roadmap' | 'counselor' | 'interview' | 'finance' | 'ai_insights'>('roadmap');
   const [selectedCountry, setSelectedCountry] = useState<CountryRecommendation>(result.topCountries[0]);
   const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
+  const [showResumeModal, setShowResumeModal] = useState<boolean>(false);
+  const [showConsultationModal, setShowConsultationModal] = useState<boolean>(false);
 
   const handlePrint = () => {
     window.print();
@@ -89,7 +102,7 @@ export const DossierDashboard: React.FC<DossierDashboardProps> = ({
 
         {/* دکمه‌های پرینت و عملیات */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-6 mt-6 border-t border-slate-800/80 no-print">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={onEditProfile}
               className="px-4 py-2 bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
@@ -105,13 +118,31 @@ export const DossierDashboard: React.FC<DossierDashboardProps> = ({
             </button>
           </div>
 
-          <button
-            onClick={handlePrint}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-indigo-600/20"
-          >
-            <Printer className="w-4 h-4" />
-            <span>چاپ و ذخیره گزارش (PDF)</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setShowResumeModal(true)}
+              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-indigo-600/20"
+            >
+              <FileText className="w-4 h-4 text-indigo-200" />
+              <span>ساخت رزومه بین‌المللی (CV)</span>
+            </button>
+
+            <button
+              onClick={() => setShowConsultationModal(true)}
+              className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-amber-600/20"
+            >
+              <PhoneCall className="w-4 h-4 text-amber-200" />
+              <span>رزرو مشاوره VIP و وکیل</span>
+            </button>
+
+            <button
+              onClick={handlePrint}
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
+            >
+              <Printer className="w-4 h-4 text-slate-300" />
+              <span>چاپ (PDF)</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -325,6 +356,12 @@ export const DossierDashboard: React.FC<DossierDashboardProps> = ({
         </div>
       )}
 
+      {/* بنر اطلاع‌رسانی فرصت‌ها در تلگرام */}
+      <TelegramAlertBanner
+        userField={profile?.education?.field || profile?.work?.jobTitle || 'رشته و تخصص شما'}
+        userPhone={profile?.personal?.phone}
+      />
+
       {/* بخش رتبه‌بندی کشورهای پیشنهادی */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
@@ -448,12 +485,12 @@ export const DossierDashboard: React.FC<DossierDashboardProps> = ({
         </div>
       </div>
 
-      {/* تب‌های اصلی محتوا (نقشه راه، برآورد هزینه‌ها، تحلیل هوش مصنوعی) */}
+      {/* تب‌های اصلی محتوا (نقشه راه، مستشار AI، مصاحبه سفارت، برآورد هزینه‌ها، تحلیل هوش مصنوعی) */}
       <div className="space-y-6">
-        <div className="flex border-b border-slate-800 no-print">
+        <div className="flex flex-wrap border-b border-slate-800 no-print gap-1">
           <button
             onClick={() => setActiveTab('roadmap')}
-            className={`px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 ${
+            className={`px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 ${
               activeTab === 'roadmap'
                 ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -463,27 +500,54 @@ export const DossierDashboard: React.FC<DossierDashboardProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('counselor')}
+            className={`px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 ${
+              activeTab === 'counselor'
+                ? 'border-cyan-500 text-cyan-400 bg-cyan-500/5'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Brain className="w-4 h-4 text-cyan-400" />
+            <span>مستشار هوش مصنوعی (۵ سوال)</span>
+            <span className="bg-cyan-500/20 text-cyan-300 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+              آنلاین
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('interview')}
+            className={`px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 ${
+              activeTab === 'interview'
+                ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4 text-indigo-400" />
+            <span>شبیه‌ساز مصاحبه سفارت</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('finance')}
-            className={`px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 ${
+            className={`px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 ${
               activeTab === 'finance'
                 ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
             <DollarSign className="w-4 h-4" />
-            <span>برآورد هزینه‌ها و تمکن بانکی</span>
+            <span>برآورد هزینه‌ها و تمکن</span>
           </button>
 
           <button
             onClick={() => setActiveTab('ai_insights')}
-            className={`px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 ${
+            className={`px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 ${
               activeTab === 'ai_insights'
                 ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Brain className="w-4 h-4 text-cyan-400" />
-            <span>تحلیل هوش مصنوعی و شاه‌کلیدها</span>
+            <Sparkles className="w-4 h-4 text-indigo-400" />
+            <span>تحلیل و شاه‌کلیدها</span>
           </button>
         </div>
 
@@ -496,7 +560,26 @@ export const DossierDashboard: React.FC<DossierDashboardProps> = ({
           />
         )}
 
-        {/* تب ۲: هزینه‌ها */}
+        {/* تب ۲: مستشار هوش مصنوعی (۵ سوال رایگان) */}
+        {activeTab === 'counselor' && (
+          <AICounselorChat
+            profile={profile || ({} as UserProfile)}
+            targetCountry={selectedCountry.countryName}
+            onOpenConsultation={() => setShowConsultationModal(true)}
+            apiKey={apiKey}
+          />
+        )}
+
+        {/* تب ۳: شبیه‌ساز مصاحبه سفارت */}
+        {activeTab === 'interview' && (
+          <EmbassyInterviewSimulator
+            profile={profile || ({} as UserProfile)}
+            targetCountry={selectedCountry.countryName}
+            apiKey={apiKey}
+          />
+        )}
+
+        {/* تب ۴: هزینه‌ها */}
         {activeTab === 'finance' && (
           <CostEstimator
             financials={result.financialEstimate}
@@ -506,7 +589,7 @@ export const DossierDashboard: React.FC<DossierDashboardProps> = ({
           />
         )}
 
-        {/* تب ۳: تحلیل هوش مصنوعی */}
+        {/* تب ۵: تحلیل هوش مصنوعی */}
         {activeTab === 'ai_insights' && (
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
             <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
@@ -562,6 +645,50 @@ export const DossierDashboard: React.FC<DossierDashboardProps> = ({
           </div>
         )}
       </div>
+
+      {/* بنر رزرو مشاوره VIP و وکیل رسمی در انتهای پرونده */}
+      <div className="bg-gradient-to-r from-amber-500/10 via-slate-900 to-indigo-950/40 border border-amber-500/30 rounded-3xl p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-5 shadow-2xl relative overflow-hidden">
+        <div className="space-y-2 max-w-2xl relative z-10">
+          <div className="flex items-center gap-2">
+            <span className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              <ShieldCheck className="w-5 h-5 text-amber-400" />
+            </span>
+            <h3 className="text-base sm:text-lg font-black text-white">
+              نیاز به بررسی دقیق‌تر پرونده توسط وکلای رسمی و کارشناسان مهاجرت دارید؟
+            </h3>
+          </div>
+          <p className="text-xs text-slate-300 leading-relaxed">
+            اگر قرارداد کاری، نامه جاب‌آفر، پرونده سجاد، ریزنمرات خاص یا ابهاماتی در خصوص مصاحبه سفارت دارید، می‌توانید یک جلسه مشاوره تخصصی اختصاصی جهت بررسی حقوقی رزرو نمایید.
+          </p>
+        </div>
+
+        <button
+          onClick={() => setShowConsultationModal(true)}
+          className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white rounded-2xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 shadow-xl shadow-amber-600/20 flex-shrink-0"
+        >
+          <PhoneCall className="w-4 h-4" />
+          <span>درخواست نوبت مشاوره اختصاصی VIP</span>
+        </button>
+      </div>
+
+      {/* مودال رزومه‌ساز بین‌المللی */}
+      {showResumeModal && (
+        <ResumeBuilderModal
+          profile={profile || ({} as UserProfile)}
+          targetCountry={selectedCountry.countryName}
+          onClose={() => setShowResumeModal(false)}
+          apiKey={apiKey}
+        />
+      )}
+
+      {/* مودال رزرو مشاوره VIP */}
+      {showConsultationModal && (
+        <ConsultationBookingModal
+          profile={profile || ({} as UserProfile)}
+          targetCountry={selectedCountry.countryName}
+          onClose={() => setShowConsultationModal(false)}
+        />
+      )}
     </div>
   );
 };

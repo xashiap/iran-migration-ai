@@ -179,10 +179,12 @@ export default function Home() {
           /* صفحه نمایش نتایج جامع */
           <DossierDashboard
             result={analysisResult}
+            profile={profile}
             onEditProfile={() => setAnalysisResult(null)}
             onReset={handleReset}
             usdTomanRate={currency.usdToman}
             eurTomanRate={currency.eurToman}
+            apiKey={apiKey}
           />
         ) : (
           /* فرم چندمرحله‌ای ارزیابی */
