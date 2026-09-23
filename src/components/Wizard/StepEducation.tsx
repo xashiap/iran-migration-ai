@@ -11,6 +11,33 @@ interface StepEducationProps {
   onNext: () => void;
 }
 
+const POPULAR_FIELDS: { name: string; category: MajorCategory }[] = [
+  { name: 'مهندسی کامپیوتر / نرم‌افزار', category: 'computer_it' },
+  { name: 'هوش مصنوعی و علم داده', category: 'computer_it' },
+  { name: 'فناوری اطلاعات و شبکه', category: 'computer_it' },
+  { name: 'مهندسی عمران و سازه', category: 'engineering' },
+  { name: 'مهندسی مکانیک و طراحی جامدات', category: 'engineering' },
+  { name: 'مهندسی صنایع و مدیریت پروژه', category: 'engineering' },
+  { name: 'مهندسی برق و الکترونیک', category: 'engineering' },
+  { name: 'مهندسی شیمی، نفت و گاز', category: 'engineering' },
+  { name: 'معماری و طراحی داخلی', category: 'humanities_art' },
+  { name: 'پزشکی عمومی و تخصص', category: 'medical_health' },
+  { name: 'دندانپزشکی', category: 'medical_health' },
+  { name: 'داروسازی', category: 'medical_health' },
+  { name: 'پرستاری و هوشبری', category: 'medical_health' },
+  { name: 'فیزیوتراپی و رادیولوژی', category: 'medical_health' },
+  { name: 'مدیریت بازرگانی و MBA', category: 'business_finance' },
+  { name: 'حسابداری و مدیریت مالی', category: 'business_finance' },
+  { name: 'اقتصاد و بازاریابی بین‌الملل', category: 'business_finance' },
+  { name: 'شیمی کاربردی و بیوتکنولوژی', category: 'basic_sciences' },
+  { name: 'ژنتیک و زیست‌شناسی سلولی', category: 'basic_sciences' },
+  { name: 'حقوق و تجارت بین‌الملل', category: 'humanities_art' },
+  { name: 'روانشناسی و علوم شناختی', category: 'humanities_art' },
+  { name: 'گرافیک و طراحی دیجیتال', category: 'humanities_art' },
+  { name: 'زبان و ادبیات انگلیسی / ترجمه', category: 'humanities_art' },
+  { name: 'تکنسین فنی و تأسیسات', category: 'vocational' },
+];
+
 export const StepEducation: React.FC<StepEducationProps> = ({ profile, onChange, onPrev, onNext }) => {
   const edu = profile.education;
 
@@ -74,15 +101,37 @@ export const StepEducation: React.FC<StepEducationProps> = ({ profile, onChange,
         </div>
 
         {/* رشته دقیق */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5">عنوان دقیق رشته تحصیلی:</label>
+        <div className="sm:col-span-2 space-y-2">
+          <label className="block text-xs font-semibold text-slate-300">عنوان دقیق رشته تحصیلی:</label>
           <input
             type="text"
             value={edu.field}
             onChange={(e) => update({ field: e.target.value })}
-            placeholder="مثال: مهندسی کامپیوتر گرایش نرم‌افزار"
+            placeholder="تایپ کنید یا از لیست زیر با یک کلیک انتخاب فرمایید..."
             className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
           />
+
+          <div className="pt-1">
+            <span className="text-[11px] text-zinc-400 block mb-1.5 font-medium">
+              💡 انتخاب سریع از بین رشته‌های پرتقاضای بین‌المللی (یک کلیک):
+            </span>
+            <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1.5 bg-slate-950/60 rounded-xl border border-white/[0.05]">
+              {POPULAR_FIELDS.map((f, fIdx) => (
+                <button
+                  key={fIdx}
+                  type="button"
+                  onClick={() => update({ field: f.name, majorCategory: f.category })}
+                  className={`text-[11px] px-2.5 py-1 rounded-lg border transition cursor-pointer ${
+                    edu.field === f.name
+                      ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm font-bold'
+                      : 'bg-slate-900/80 text-zinc-400 border-white/[0.06] hover:text-white hover:border-indigo-500/40'
+                  }`}
+                >
+                  {f.name}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* نوع دانشگاه */}

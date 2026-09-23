@@ -11,6 +11,30 @@ interface StepWorkProps {
   onNext: () => void;
 }
 
+const POPULAR_JOBS: string[] = [
+  'برنامه‌نویس و توسعه‌دهنده وب / نرم‌افزار',
+  'کارشناس DevOps و زیرساخت کلاود',
+  'متخصص هوش مصنوعی و علم داده',
+  'مهندس عمران، سازه و سرپرست کارگاه',
+  'مهندس مکانیک و طراحی صنعتی',
+  'مهندس برق، کنترل و اتوماسیون صنعتی',
+  'مهندس صنایع و مدیر زنجیره تامین',
+  'معمار، طراح داخلی و مدل‌ساز سه‌بعدی',
+  'پرستار بالینی و کادر درمان',
+  'پزشک عمومی / دندانپزشک',
+  'داروساز',
+  'فیزیوتراپیست و کارشناس توانبخشی',
+  'مدیر مالی، حسابدار ارشد و حسابرس',
+  'کارشناس مارکتینگ، سئو و فروش بین‌الملل',
+  'طراح UI/UX و طراح محصول دیجیتال',
+  'گرافیست و موشن‌دیزاینر',
+  'تکنسین شبکه و امنیت سایبری',
+  'تکنسین فنی تأسیسات و تراشکاری/جوشکاری',
+  'مدرس زبان انگلیسی و آزمون‌های آیلتس',
+  'کارشناس امور حقوقی و قراردادها',
+  'سرآشپز، باریستا و مدیریت هتل/رستوران',
+];
+
 export const StepWork: React.FC<StepWorkProps> = ({ profile, onChange, onPrev, onNext }) => {
   const w = profile.work;
 
@@ -35,17 +59,39 @@ export const StepWork: React.FC<StepWorkProps> = ({ profile, onChange, onPrev, o
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        {/* عنوان شغلی */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5">عنوان شغل یا تخصص اصلی شما:</label>
+      <div className="space-y-4">
+        {/* عنوان شغلی با انتخاب سریع */}
+        <div className="space-y-2">
+          <label className="block text-xs font-semibold text-slate-300">عنوان شغل یا تخصص اصلی شما:</label>
           <input
             type="text"
             value={w.jobTitle}
             onChange={(e) => update({ jobTitle: e.target.value })}
-            placeholder="مثال: کارشناس شبکه، فرانت‌اند دولوپر، مهندس طراح مکانیک"
+            placeholder="تایپ کنید یا از لیست عناوین پرتقاضای زیر با یک کلیک انتخاب فرمایید..."
             className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
           />
+
+          <div className="pt-1">
+            <span className="text-[11px] text-zinc-400 block mb-1.5 font-medium">
+              💡 انتخاب سریع از بین مشاغل پرتقاضای بین‌المللی (یک کلیک):
+            </span>
+            <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1.5 bg-slate-950/60 rounded-xl border border-white/[0.05]">
+              {POPULAR_JOBS.map((j, jIdx) => (
+                <button
+                  key={jIdx}
+                  type="button"
+                  onClick={() => update({ jobTitle: j })}
+                  className={`text-[11px] px-2.5 py-1 rounded-lg border transition cursor-pointer ${
+                    w.jobTitle === j
+                      ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm font-bold'
+                      : 'bg-slate-900/80 text-zinc-400 border-white/[0.06] hover:text-white hover:border-indigo-500/40'
+                  }`}
+                >
+                  {j}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* سال‌های سابقه کار */}

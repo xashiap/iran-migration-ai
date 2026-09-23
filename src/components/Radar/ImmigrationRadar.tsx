@@ -44,7 +44,7 @@ export const ImmigrationRadar: React.FC<ImmigrationRadarProps> = ({ onClose, def
 
   // استیت‌های بخش بخشنامه‌ها
   const [selectedNewsCountry, setSelectedNewsCountry] = useState<string>('all');
-  const [selectedNewsCategory, setSelectedNewsCategory] = useState<string>('all');
+  const [selectedNewsCategory] = useState<string>('all');
   const [expandedNewsItems, setExpandedNewsItems] = useState<Record<string, boolean>>({});
 
   const toggleExpandNews = (id: string) => {

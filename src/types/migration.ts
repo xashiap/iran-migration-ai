@@ -181,6 +181,7 @@ export interface AnalysisResult {
     totalStartingBudgetUSD: string;
   };
   aiGeneratedAdvice?: string;
+  dailyMatches?: MatchedOpportunity[];
 }
 
 export type TimeRangeFilter = '1m' | '2m' | '3m' | 'all';
@@ -253,5 +254,11 @@ export interface GlobalOpportunity {
   publishedDate: string;
   isHot?: boolean;
 }
+
+export interface MatchedOpportunity extends GlobalOpportunity {
+  matchPercentage: number; // e.g. 96%
+  matchReason: string; // e.g. "تطبیق کامل با رشته مهندسی کامپیوتر و بودجه نقدی شما"
+}
+
 
 

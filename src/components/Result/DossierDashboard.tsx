@@ -12,7 +12,15 @@ import {
   DollarSign, 
   MapPin, 
   Brain, 
-  ShieldCheck 
+  ShieldCheck,
+  Zap,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  Building2,
+  Clock,
+  Sparkles,
+  Award
 } from 'lucide-react';
 import { formatCostStringWithToman } from '@/lib/currency';
 
@@ -33,6 +41,7 @@ export const DossierDashboard: React.FC<DossierDashboardProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'roadmap' | 'finance' | 'ai_insights'>('roadmap');
   const [selectedCountry, setSelectedCountry] = useState<CountryRecommendation>(result.topCountries[0]);
+  const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
 
   const handlePrint = () => {
     window.print();
@@ -143,6 +152,175 @@ export const DossierDashboard: React.FC<DossierDashboardProps> = ({
                 <p className="text-[11px] leading-relaxed opacity-90">{alert.content}</p>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* فرصت‌های فعال امروز منطبق با تخصص کاربر */}
+      {result.dailyMatches && result.dailyMatches.length > 0 && (
+        <div className="bg-gradient-to-br from-indigo-950/40 via-slate-900 to-slate-900 border border-indigo-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          {/* سربرگ بخش موقعیت‌ها */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4 relative z-10">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  <Zap className="w-5 h-5 fill-amber-400/20 animate-pulse" />
+                </span>
+                <h3 className="text-lg sm:text-xl font-black text-white">
+                  فرصت‌های طلایی و جاب‌آفرهای فعال امروز منطبق با پرونده شما
+                </h3>
+                <span className="bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2.5 py-0.5 rounded-full text-[10px] font-bold">
+                  آپدیت زنده
+                </span>
+              </div>
+              <p className="text-xs text-slate-300">
+                سیستم رادار بین‌المللی بر پایه رشته تحصیلی، شغل، سوابق و بودجه شما این موقعیت‌های واقعی را استخراج کرده است:
+              </p>
+            </div>
+
+            <div className="text-xs text-slate-400 font-mono bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 flex items-center gap-2 self-start sm:self-auto">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <span>{result.dailyMatches.length} موقعیت با تطابق بالای ۸۰٪</span>
+            </div>
+          </div>
+
+          {/* لیست کارت‌های موقعیت */}
+          <div className="grid grid-cols-1 gap-4 relative z-10">
+            {result.dailyMatches.map((opp) => {
+              const isExpanded = expandedMatchId === opp.id;
+
+              return (
+                <div 
+                  key={opp.id}
+                  className="bg-slate-950/70 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-5 sm:p-6 transition shadow-lg space-y-4"
+                >
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xl">{opp.countryFlag}</span>
+                        <span className="font-bold text-sm text-white">{opp.country}</span>
+                        {opp.city && <span className="text-xs text-slate-400">({opp.city})</span>}
+                        <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] px-2.5 py-0.5 rounded-full font-semibold">
+                          {opp.typeLabel}
+                        </span>
+                        {opp.isHot && (
+                          <span className="bg-rose-500/20 text-rose-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-rose-500/30">
+                            🔥 با تقاضای بالا
+                          </span>
+                        )}
+                      </div>
+
+                      <h4 className="text-base sm:text-lg font-bold text-white leading-snug">
+                        {opp.title}
+                      </h4>
+
+                      <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300">
+                        <div className="flex items-center gap-1.5 text-slate-300">
+                          <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+                          <span>{opp.institutionOrCompany}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                          <DollarSign className="w-3.5 h-3.5" />
+                          <span>{opp.salaryOrFund}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-slate-400">
+                          <Clock className="w-3.5 h-3.5 text-slate-500" />
+                          <span>مهلت: {opp.deadline}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* بج درصد تطابق و دکمه اقدام */}
+                    <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between gap-3 flex-shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-800">
+                      <div className="bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 px-3.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5">
+                        <Award className="w-4 h-4" />
+                        <span>٪{opp.matchPercentage} تطابق با پرونده</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <button
+                          onClick={() => setExpandedMatchId(isExpanded ? null : opp.id)}
+                          className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs rounded-xl border border-slate-700 transition flex items-center gap-1"
+                        >
+                          <span>{isExpanded ? 'بستن جزئیات' : 'مراحل اقدام'}</span>
+                          {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                        </button>
+                        <a
+                          href={opp.applyUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center gap-1.5"
+                        >
+                          <span>سامانه رسمی اقدام</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* جعبه دلیل تطابق پرونده */}
+                  <div className="bg-indigo-950/30 border border-indigo-500/20 rounded-xl p-3 text-xs text-indigo-200 flex items-start gap-2">
+                    <Sparkles className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-white font-bold">چرا این موقعیت برای شما انتخاب شد: </strong>
+                      <span>{opp.matchReason}</span>
+                    </div>
+                  </div>
+
+                  {/* بخش کشویی مراحل اقدام و نکات سفارت */}
+                  {isExpanded && (
+                    <div className="pt-3 border-t border-slate-800/80 space-y-4 animate-in fade-in duration-300 text-xs">
+                      <p className="text-slate-300 leading-relaxed bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        {opp.summary}
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-xl space-y-2">
+                          <div className="font-bold text-slate-200 flex items-center gap-1.5">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>پیش‌نیازهای کلیدی برای متقاضی ایرانی:</span>
+                          </div>
+                          <ul className="space-y-1.5 text-slate-300 pr-3 list-disc">
+                            {opp.iranianCompatibility.keyRequirements.map((req, rIdx) => (
+                              <li key={rIdx}>{req}</li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-xl space-y-2">
+                          <div className="font-bold text-slate-200 flex items-center gap-1.5">
+                            <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                            <span>وضعیت ویزا و سفارت برای ایرانیان:</span>
+                          </div>
+                          <div className="space-y-1 text-slate-300">
+                            <div>شانس دریافت ویزا: <strong className="text-emerald-400">٪{opp.iranianCompatibility.successRate}</strong></div>
+                            <div>نوع ویزا: <strong className="text-white">{opp.visaType}</strong></div>
+                            <div className="text-[11px] text-slate-400 mt-1">{opp.iranianCompatibility.embassyNotes}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* مراحل گام به گام */}
+                      <div className="bg-indigo-950/20 border border-indigo-900/30 p-4 rounded-xl space-y-2">
+                        <div className="font-bold text-indigo-300">گام‌های عملی ثبت درخواست:</div>
+                        <div className="space-y-2">
+                          {opp.stepsToApply.map((step, sIdx) => (
+                            <div key={sIdx} className="flex items-start gap-2 text-slate-200">
+                              <span className="w-5 h-5 rounded-full bg-indigo-600/30 text-indigo-300 font-mono text-[11px] flex items-center justify-center flex-shrink-0">
+                                {sIdx + 1}
+                              </span>
+                              <span className="leading-relaxed">{step}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

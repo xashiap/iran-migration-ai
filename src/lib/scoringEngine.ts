@@ -3,9 +3,11 @@ import {
   AnalysisResult, 
   CountryRecommendation, 
   RoadmapPhase,
-  RoadmapStep 
+  RoadmapStep,
+  MatchedOpportunity
 } from '../types/migration';
 import { COUNTRIES_DATABASE } from '../data/immigrationRules';
+import { GLOBAL_OPPORTUNITIES_DATABASE } from '../data/globalOpportunities';
 
 export function evaluateImmigrationProfile(profile: UserProfile): AnalysisResult {
   // ۱. محاسبه امتیاز آمادگی کلی (Readiness Score: 0 - 100)
@@ -252,7 +254,8 @@ export function evaluateImmigrationProfile(profile: UserProfile): AnalysisResult
     iranSpecificAlerts,
     topCountries,
     primaryRoadmap,
-    financialEstimate
+    financialEstimate,
+    dailyMatches: matchDailyOpportunities(profile, topCountries)
   };
 }
 
@@ -626,4 +629,140 @@ function getEnglishTitle(level: string): string {
     case 'basic': return 'مقدماتی (Basic)';
     default: return 'پایین';
   }
+}
+
+/**
+ * ماتریس تطبیق هوشمند فرصت‌های روزانه با پروفایل کاربر
+ */
+export function matchDailyOpportunities(
+  profile: UserProfile,
+  topCountries: CountryRecommendation[]
+): MatchedOpportunity[] {
+  const fieldLower = (profile.education.field || '').toLowerCase();
+  const jobLower = (profile.work.jobTitle || '').toLowerCase();
+  const majorCat = profile.education.majorCategory;
+  const userCombinedText = `${fieldLower} ${jobLower}`;
+
+  const scored = GLOBAL_OPPORTUNITIES_DATABASE.map((opp) => {
+    let score = 70; // نمره پایه
+    const reasons: string[] = [];
+
+    const oppContent = (
+      opp.title + ' ' + 
+      opp.tags.join(' ') + ' ' + 
+      opp.summary + ' ' + 
+      opp.typeLabel + ' ' + 
+      opp.institutionOrCompany + ' ' +
+      opp.iranianCompatibility.keyRequirements.join(' ')
+    ).toLowerCase();
+
+    // ۱. تطبیق حوزه کاری و تحصیلی
+    const isTechProfile = majorCat === 'computer_it' || 
+      /برنامه|کامپیوتر|نرم|وب|طراح|front|back|full|react|node|python|devops|data|ai|it|ui|ux|سئو|دیجیتال|کد|شبکه/i.test(userCombinedText);
+    
+    const isEngineeringProfile = majorCat === 'engineering' || 
+      /عمران|مکانیک|برق|صنایع|معمار|مهندس|civil|engineer|architect|mechanic|electric|industrial|سازه/i.test(userCombinedText);
+
+    const isMedicalProfile = majorCat === 'medical_health' || 
+      /پزشک|پرستار|دندان|دارو|درمان|مامایی|nurse|doctor|medical|dentist|pharma|health|بیمار/i.test(userCombinedText);
+
+    const isBusinessFinanceProfile = majorCat === 'business_finance' || 
+      /مالی|حسابدار|مدیریت|mba|مارکتینگ|فروش|بازاریابی|finance|accountant|marketing|business|اقتصاد/i.test(userCombinedText);
+
+    const isVocationalProfile = majorCat === 'vocational' || 
+      /فنی|حرفه|جوشکار|برقکار|مکانیک|تعمیر|تکنسین|نجار|آشپز|technician|craft|آوسبیلدونگ|trade/i.test(userCombinedText);
+
+    const isAcademicResearch = (profile.education.degree === 'master' || profile.education.degree === 'phd') ||
+      majorCat === 'basic_sciences' || majorCat === 'humanities_art';
+
+    if (isTechProfile && /نرم‌افزار|برنامه‌نویسی|swe|devops|computer|ui|ux|fullstack|فناوری|data|داده|react/i.test(oppContent)) {
+      score += 18;
+      reasons.push('تطابق تخصصی مستقیم با مهارت‌های نرم‌افزاری و فناوری اطلاعات شما');
+    } else if (isEngineeringProfile && /مهندسی|عمران|مکانیک|برق|مهندس|engineer|civil|طراحی/i.test(oppContent)) {
+      score += 18;
+      reasons.push('تقاضای بالا برای رشته‌های مهندسی و فنی در این موقعیت کاری');
+    } else if (isMedicalProfile && /nurse|پرستار|پزشک|درمان|healthcare|بهداشت|moh/i.test(oppContent)) {
+      score += 20;
+      reasons.push('تطبیق فوری با کمبود مبرم کادر درمان و سلامت در کشور مقصد');
+    } else if (isBusinessFinanceProfile && /حسابدار|مالی|مارکتینگ|accountant|finance|marketing|مدیریت/i.test(oppContent)) {
+      score += 18;
+      reasons.push('همخوانی با سوابق مدیریت مالی، حسابداری و مارکتینگ بین‌المللی');
+    } else if (isVocationalProfile && /آوسبیلدونگ|تکنسین|technician|ssw|مهارتی|ausbildung|مشاغل/i.test(oppContent)) {
+      score += 20;
+      reasons.push('پذیرش بر اساس مهارت‌های فنی-عملی بدون الزام به مدارک تئوریک سنگین');
+    } else if (isAcademicResearch && (opp.type === 'scholarship' || opp.id === 'us-postdoc-j1-cap-exempt' || opp.id === 'it-polimi-dsu-masters')) {
+      score += 16;
+      reasons.push('مناسب برای مقاطع تحصیلات تکمیلی و پژوهش‌های آکادمیک');
+    }
+
+    // بررسی انطباق مستقیم کلیدواژه‌های کاربر با تگ‌ها و متن فرصت
+    const words = userCombinedText.split(/[\s,،-]+/).filter(w => w.length > 2);
+    for (const w of words) {
+      if (oppContent.includes(w)) {
+        score += 6;
+        break;
+      }
+    }
+
+    // ۲. تطابق کشور با پیشنهادات برتر و انتخاب‌های کاربر
+    const topCountryNames = topCountries.slice(0, 3).map(c => c.countryName);
+    const userPreferred = profile.preferences.preferredCountries || [];
+
+    if (topCountryNames.some(cName => opp.country.includes(cName) || cName.includes(opp.country))) {
+      score += 12;
+      reasons.push(`قرارگیری کشور ${opp.country} در اولویت‌های پیشنهادی پرونده شما`);
+    } else if (userPreferred.some(cName => opp.country.includes(cName) || cName.includes(opp.country))) {
+      score += 8;
+      reasons.push(`همخوانی با کشور انتخابی مورد علاقه شما (${opp.country})`);
+    }
+
+    // ۳. تطابق هدف اصلی (کار سریع، تحصیل کم‌هزینه و...)
+    if (profile.preferences.primaryGoal === 'job_immediate' && opp.type === 'job_offer') {
+      score += 8;
+      reasons.push('دریافت حقوق و درآمد ارزی از ماه نخست ورود بدون معطلی');
+    } else if (profile.preferences.primaryGoal === 'study_low_cost' && (opp.type === 'scholarship' || opp.type === 'university_admission')) {
+      score += 8;
+      reasons.push('تامین شهریه و کمک‌هزینه زندگی دانشجویی جهت حفظ آرامش مالی');
+    }
+
+    // ۴. تطابق بودجه
+    if (profile.finances.liquidBudgetUSD < 6000) {
+      if (opp.type === 'scholarship' || opp.salaryOrFund.includes('بورسیه') || opp.salaryOrFund.includes('رایگان') || opp.region === 'gulf') {
+        score += 8;
+        reasons.push('امکان اقدام با بودجه اولیه محدود بدون نیاز به تمکن سنگین');
+      }
+    } else if (profile.finances.liquidBudgetUSD >= 12000) {
+      if (opp.type === 'job_seeker_visa' || opp.region === 'americas' || opp.region === 'europe') {
+        score += 5;
+        reasons.push('کفایت کامل سرمایه برای پروسه ویزا و استقرار اولیه');
+      }
+    }
+
+    // ۵. وضعیت نظام وظیفه
+    if (profile.personal.gender === 'male') {
+      if (profile.personal.militaryStatus === 'completed' || profile.personal.militaryStatus === 'medical_exempt' || profile.personal.militaryStatus === 'other_exempt') {
+        score += 3;
+      } else if (opp.iranianCompatibility.militarySensitive && (profile.personal.militaryStatus === 'conscript' || profile.personal.militaryStatus === 'educational_exempt')) {
+        score -= 5;
+      }
+    }
+
+    // محاسبه نهایی درصد تطابق
+    const matchPercentage = Math.min(98, Math.max(82, score));
+    const matchReason = reasons.length > 0 
+      ? reasons.slice(0, 2).join(' و ') + '.'
+      : `تطبیق بالا با پروفایل مهارتی و شانس بالای صدور ویزا در کشور ${opp.country}.`;
+
+    return {
+      ...opp,
+      matchPercentage,
+      matchReason,
+    } as MatchedOpportunity;
+  });
+
+  // مرتب‌سازی بر اساس درصد تطابق
+  scored.sort((a, b) => b.matchPercentage - a.matchPercentage);
+
+  // انتخاب ۳ فرصت طلایی برتر
+  return scored.slice(0, 3);
 }
