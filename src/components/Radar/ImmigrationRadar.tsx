@@ -23,8 +23,10 @@ import {
   DollarSign,
   Languages,
   Building2,
-  Layers
+  Layers,
+  RefreshCw
 } from 'lucide-react';
+import { GlobalOpportunity } from '@/types/migration';
 
 interface ImmigrationRadarProps {
   onClose?: () => void;
@@ -35,12 +37,42 @@ export const ImmigrationRadar: React.FC<ImmigrationRadarProps> = ({ onClose, def
   // تب اصلی: 'opportunities' (فرصت‌های شغلی و دانشگاهی) یا 'news' (بخشنامه‌ها و سفارت‌ها)
   const [activeMainTab, setActiveMainTab] = useState<'opportunities' | 'news'>('opportunities');
 
+  // لیست فرصت‌ها به همراه واکشی آنلاین از سرور
+  const [opportunitiesList, setOpportunitiesList] = useState<GlobalOpportunity[]>(GLOBAL_OPPORTUNITIES_DATABASE);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [lastSyncDate, setLastSyncDate] = useState<string>('');
+
   // استیت‌های بخش فرصت‌های جهانی
   const [selectedRegion, setSelectedRegion] = useState<WorldRegion>(defaultRegion);
   const [selectedType, setSelectedType] = useState<OpportunityType>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [hotOnly, setHotOnly] = useState<boolean>(false);
   const [expandedOppId, setExpandedOppId] = useState<string | null>(null);
+
+  // واکشی داده‌های زنده از ای‌پی‌آی رادار
+  const fetchLiveOpportunities = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await fetch('/api/opportunities');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.opportunities) && data.opportunities.length > 0) {
+          setOpportunitiesList(data.opportunities);
+        }
+        if (data.lastUpdated) {
+          setLastSyncDate(data.lastUpdated);
+        }
+      }
+    } catch (err) {
+      console.warn('Radar live fetch error, using local database:', err);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchLiveOpportunities();
+  }, []);
 
   // استیت‌های بخش بخشنامه‌ها
   const [selectedNewsCountry, setSelectedNewsCountry] = useState<string>('all');
@@ -57,7 +89,7 @@ export const ImmigrationRadar: React.FC<ImmigrationRadarProps> = ({ onClose, def
 
   // فیلتر کردن فرصت‌های جهانی
   const filteredOpportunities = useMemo(() => {
-    return GLOBAL_OPPORTUNITIES_DATABASE.filter(item => {
+    return opportunitiesList.filter(item => {
       if (selectedRegion !== 'all' && item.region !== selectedRegion) return false;
       if (selectedType !== 'all' && item.type !== selectedType) return false;
       if (hotOnly && !item.isHot) return false;
@@ -75,7 +107,7 @@ export const ImmigrationRadar: React.FC<ImmigrationRadarProps> = ({ onClose, def
       }
       return true;
     });
-  }, [selectedRegion, selectedType, hotOnly, searchQuery]);
+  }, [opportunitiesList, selectedRegion, selectedType, hotOnly, searchQuery]);
 
   // فیلتر کردن اخبار و بخشنامه‌ها
   const filteredNews = useMemo(() => {
@@ -88,12 +120,12 @@ export const ImmigrationRadar: React.FC<ImmigrationRadarProps> = ({ onClose, def
 
   // شمارش فرصت‌ها بر اساس منطقه
   const regionalCounts = useMemo(() => ({
-    all: GLOBAL_OPPORTUNITIES_DATABASE.length,
-    americas: GLOBAL_OPPORTUNITIES_DATABASE.filter(i => i.region === 'americas').length,
-    gulf: GLOBAL_OPPORTUNITIES_DATABASE.filter(i => i.region === 'gulf').length,
-    asia_turkey: GLOBAL_OPPORTUNITIES_DATABASE.filter(i => i.region === 'asia_turkey').length,
-    europe: GLOBAL_OPPORTUNITIES_DATABASE.filter(i => i.region === 'europe').length,
-  }), []);
+    all: opportunitiesList.length,
+    americas: opportunitiesList.filter(i => i.region === 'americas').length,
+    gulf: opportunitiesList.filter(i => i.region === 'gulf').length,
+    asia_turkey: opportunitiesList.filter(i => i.region === 'asia_turkey').length,
+    europe: opportunitiesList.filter(i => i.region === 'europe').length,
+  }), [opportunitiesList]);
 
   return (
     <div className="bg-[#11141d] border border-white/[0.09] rounded-3xl p-4 sm:p-7 shadow-2xl space-y-6 text-right">
@@ -112,16 +144,27 @@ export const ImmigrationRadar: React.FC<ImmigrationRadarProps> = ({ onClose, def
               </h3>
               <span className="text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>به‌روزرسانی اختصاصی امروز</span>
+                <span>{lastSyncDate ? `به‌روزرسانی خودکار: ${lastSyncDate}` : 'رادار فعال و متصل به سرور'}</span>
               </span>
             </div>
             <p className="text-xs text-zinc-400 mt-1">
-              رصد روزانه جاب‌آفرهای دارای اسپانسر ویزا، بورسیه‌های فول‌فاند و بخشنامه‌های سفارت‌ها در سراسر جهان
+              رصد روزانه و خودکار جاب‌آفرهای دارای اسپانسر ویزا، بورسیه‌های فول‌فاند و بخشنامه‌های سفارت‌ها در سراسر جهان
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
+          <button
+            type="button"
+            onClick={fetchLiveOpportunities}
+            disabled={isSyncing}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-xs text-zinc-300 hover:text-white transition cursor-pointer border border-white/[0.06] disabled:opacity-50"
+            title="همگام‌سازی لحظه‌ای با سرور"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-indigo-400 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span>{isSyncing ? 'در حال همگام‌سازی...' : 'بروزرسانی زنده'}</span>
+          </button>
+
           {onClose && (
             <button
               type="button"
@@ -147,7 +190,7 @@ export const ImmigrationRadar: React.FC<ImmigrationRadarProps> = ({ onClose, def
           }`}
         >
           <Globe className="w-4 h-4" />
-          <span>فرصت‌های شغلی و دانشگاهی ({GLOBAL_OPPORTUNITIES_DATABASE.length})</span>
+          <span>فرصت‌های شغلی و دانشگاهی ({opportunitiesList.length})</span>
         </button>
 
         <button

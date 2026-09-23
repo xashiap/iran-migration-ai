@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GLOBAL_OPPORTUNITIES_DATABASE } from '@/data/globalOpportunities';
+import { getAllOpportunities } from '@/lib/opportunitiesStore';
 import { WorldRegion, OpportunityType } from '@/types/migration';
 
 export const dynamic = 'force-dynamic';
@@ -12,7 +12,9 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get('search') || '';
     const hotOnly = searchParams.get('hot') === 'true';
 
-    let list = [...GLOBAL_OPPORTUNITIES_DATABASE];
+    // واکشی داده‌های یکپارچه (پایه + داینامیک ابری)
+    const allOpportunities = await getAllOpportunities();
+    let list = [...allOpportunities];
 
     if (region !== 'all') {
       list = list.filter((item) => item.region === region);
@@ -39,13 +41,13 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // آمار منطقه‌ای برای نمایش تب‌ها
+    // آمار منطقه‌ای پویا برای تب‌ها
     const regionalCounts = {
-      all: GLOBAL_OPPORTUNITIES_DATABASE.length,
-      americas: GLOBAL_OPPORTUNITIES_DATABASE.filter((i) => i.region === 'americas').length,
-      gulf: GLOBAL_OPPORTUNITIES_DATABASE.filter((i) => i.region === 'gulf').length,
-      asia_turkey: GLOBAL_OPPORTUNITIES_DATABASE.filter((i) => i.region === 'asia_turkey').length,
-      europe: GLOBAL_OPPORTUNITIES_DATABASE.filter((i) => i.region === 'europe').length,
+      all: allOpportunities.length,
+      americas: allOpportunities.filter((i) => i.region === 'americas').length,
+      gulf: allOpportunities.filter((i) => i.region === 'gulf').length,
+      asia_turkey: allOpportunities.filter((i) => i.region === 'asia_turkey').length,
+      europe: allOpportunities.filter((i) => i.region === 'europe').length,
     };
 
     return NextResponse.json({
