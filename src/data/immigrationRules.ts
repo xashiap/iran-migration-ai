@@ -502,6 +502,306 @@ export const COUNTRIES_DATABASE: CountryData[] = [
         }
       }
     ]
+  },
+  {
+    id: 'sweden',
+    name: 'سوئد',
+    nameEn: 'Sweden',
+    flag: '🇸🇪',
+    languages: ['سوئدی', 'انگلیسی'],
+    minimumBudgetUSD: 12000,
+    averageTimelineMonths: 8,
+    currency: 'کرون سوئد (SEK)',
+    visaCenterInIran: 'سفارت سوئد در تهران و اداره مهاجرت سوئد (Migrationsverket)',
+    summary: 'پایتخت نوآوری اروپا، مهد شرکت‌های بزرگ فناوری (Spotify, Klarna, Ericsson) و بالاترین استانداردهای رفاه اجتماعی.',
+    pros: [
+      'بیش از ۹۰٪ جامعه و محیط‌های شرکتی به زبان انگلیسی مسلط هستند',
+      'بورسیه فول‌فاند انستیتو سوئد (SI Scholarship) با پوشش کامل شهریه و حقوق ماهانه',
+      'امکان اخذ اقامت دائم پس از ۴ سال کار قانونی و بیمه',
+      'تعادل بی‌نظیر کار و زندگی (Work-Life Balance) و حمایت‌های سخاوتمندانه از خانواده'
+    ],
+    cons: [
+      'زمستان‌های سرد و طولانی در نیمه شمالی',
+      'مالیات بر درآمد نسبتاً بالا در مقایسه با کشورهای حوزه خلیج فارس',
+      'کمبود مسکن اجاره‌ای رسمی در شهرهای استکهلم و گوتنبرگ'
+    ],
+    pathways: [
+      {
+        id: 'sweden_work',
+        title: 'ویزای کار تخصصی و IT سوئد (Work Permit)',
+        type: 'work',
+        description: 'مهاجرت مستقیم با قرارداد کاری رسمی از کارفرمای سوئدی دارای تاییدیه اتحادیه‌های کارگری (Facket).',
+        costUSD: '3,000 - 5,000 $',
+        durationMonths: '4 تا 8 ماه',
+        requirements: [
+          'پیشنهاد کاری تمام‌وقت با حداقل حقوق مصوب اداره مهاجرت سوئد',
+          'بیمه‌های سلامت، عمر و بازنشستگی از سوی کارفرما',
+          'پاسپورت معتبر و سابقه کاری مرتبط'
+        ],
+        isSuitableFor: (p) => {
+          let score = 35;
+          const reasons: string[] = [];
+          if (p.education.majorCategory === 'computer_it') {
+            score += 35;
+            reasons.push('تقاضای شدید اکوسیستم استارتاپی سوئد برای برنامه‌نویسان');
+          } else if (p.education.majorCategory === 'engineering') {
+            score += 25;
+            reasons.push('فرصت‌های صنعتی ولوو و اسکانیا');
+          }
+          if (p.languages.englishLevel === 'advanced' || p.languages.englishLevel === 'fluent') {
+            score += 20;
+            reasons.push('انگلیسی مسلط جهت استخدام در سوئد');
+          }
+          if (p.work.yearsExperience >= 3) {
+            score += 15;
+            reasons.push('سابقه کار کافی');
+          }
+          return { score: Math.min(score, 96), reason: reasons.join('، ') };
+        }
+      },
+      {
+        id: 'sweden_study_si',
+        title: 'تحصیل کارشناسی ارشد و بورسیه انستیتو سوئد (SI Scholarship)',
+        type: 'study',
+        description: 'اخذ پذیرش از دانشگاه‌های ممتاز سوئد (KTH, Lund, Uppsala) و رقابت برای بورسیه فول‌فاند دولتی SI.',
+        costUSD: '2,500 - 4,500 $ (با بورسیه SI شهریه صفر و ماهانه ۱۲ هزار کرون حقوق پرداخت می‌شود)',
+        durationMonths: '6 تا 9 ماه',
+        requirements: [
+          'مدرک کارشناسی معتبر با معدل مناسب',
+          'مدرک زبان آیلتس آکادمیک ۶.۵+ بدون مهارت زیر ۵.۵',
+          'حداقل ۳۰۰۰ ساعت سابقه کار یا فعالیت اجتماعی برای بورسیه SI'
+        ],
+        isSuitableFor: (p) => {
+          let score = 40;
+          const reasons: string[] = [];
+          if (p.education.degree === 'bachelor' || p.education.degree === 'master') {
+            score += 25;
+            reasons.push('واجد شرایط کارشناسی ارشد سوئد');
+          }
+          if (p.finances.needsScholarshipOrFreeTuition) {
+            score += 20;
+            reasons.push('هدف‌گذاری بورسیه انستیتو سوئد');
+          }
+          if (p.languages.englishLevel === 'advanced') {
+            score += 15;
+            reasons.push('نمره زبان ایده‌آل');
+          }
+          return { score: Math.min(score, 94), reason: reasons.join('، ') };
+        }
+      }
+    ]
+  },
+  {
+    id: 'denmark',
+    name: 'دانمارک',
+    nameEn: 'Denmark',
+    flag: '🇩🇰',
+    languages: ['دانمارکی', 'انگلیسی'],
+    minimumBudgetUSD: 14000,
+    averageTimelineMonths: 6,
+    currency: 'کرون دانمارک (DKK)',
+    visaCenterInIran: 'کارگزاری VFS Global تهران و آژانس استخدام بین‌المللی دانمارک (SIRI)',
+    summary: 'شادترین و باثبات‌ترین اقتصاد شمال اروپا با طرح‌های کاری سریع لیست مثبت (Positive List) و درآمدهای بالا.',
+    pros: [
+      'بالاترین میانگین دستمزد و درآمدهای خالص در اروپا',
+      'طرح لیست مثبت برای مهندسان، کادر درمان و متخصصان IT با کمترین تشریفات بوروکراتیک',
+      'زبان انگلیسی به عنوان زبان دوم غیررسمی در تمام سطوح اداری و اجتماعی رایج است',
+      'ساعات کاری استاندارد ۳۷ ساعت در هفته و مرخصی‌های باحقوق ۵ تا ۶ هفته در سال'
+    ],
+    cons: [
+      'هزینه‌های زندگی و اجاره مسکن در کپنهاگ بسیار بالاست',
+      'ارزیابی و تایید مدارک رشته‌های پزشکی و پیراپزشکی روندی دقیق و زمان‌بر دارد',
+      'قوانین اخذ تابعیت و شهروندی دانمارک جزو سخت‌گیرانه‌ترین‌ها در اروپاست'
+    ],
+    pathways: [
+      {
+        id: 'denmark_positive_list',
+        title: 'طرح لیست مشاغل مثبت دانمارک (Positive List Scheme)',
+        type: 'work',
+        description: 'اقامت کاری برای مشاغلی که در فهرست رسمی کمبود نیروی کار تخصصی دانمارک قرار دارند.',
+        costUSD: '3,500 - 5,500 $',
+        durationMonths: '3 تا 6 ماه',
+        requirements: [
+          'پیشنهاد کاری از کارفرمای دانمارکی در عناوین شغلی لیست مثبت',
+          'مدرک دانشگاهی مرتبط معادل کارشناسی یا کارشناسی ارشد دانمارک',
+          'حداقل حقوق قانونی سالانه مصوب دانمارک'
+        ],
+        isSuitableFor: (p) => {
+          let score = 35;
+          const reasons: string[] = [];
+          if (p.education.majorCategory === 'engineering' || p.education.majorCategory === 'computer_it') {
+            score += 35;
+            reasons.push('حضور رشته در لیست مشاغل با کمبود دانمارک');
+          } else if (p.education.majorCategory === 'medical_health') {
+            score += 25;
+            reasons.push('نیاز به کادر درمان');
+          }
+          if (p.work.yearsExperience >= 2) {
+            score += 20;
+            reasons.push('سوابق حرفه‌ای مستند');
+          }
+          return { score: Math.min(score, 95), reason: reasons.join('، ') };
+        }
+      },
+      {
+        id: 'denmark_fast_track',
+        title: 'ویزای طرح سریع فست‌ترک دانمارک (Fast-Track Scheme)',
+        type: 'work',
+        description: 'صدور ویزای ورود و مجوز کار ظرف حداکثر ۱ ماه از طریق شرکت‌های تایید شده دولتی دانمارک.',
+        costUSD: '3,000 - 4,500 $',
+        durationMonths: '1 تا 3 ماه',
+        requirements: [
+          'قرارداد کاری با شرکت معتبر دارای گواهینامه Fast-Track',
+          'حقوق بالاتر از سقف مصوب طرح حقوق سریع (Pay Limit Scheme)',
+          'پاسپورت معتبر'
+        ],
+        isSuitableFor: (p) => {
+          let score = 30;
+          const reasons: string[] = [];
+          if (p.preferences.timeline === 'immediate' || p.preferences.timeline === 'under_1_year') {
+            score += 30;
+            reasons.push('تمایل به سریع‌ترین پردازش ممکن');
+          }
+          if (p.education.majorCategory === 'computer_it' || p.education.majorCategory === 'business_finance') {
+            score += 25;
+            reasons.push('پتانسیل بالای استخدام در شرکت‌های بین‌المللی دانمارک');
+          }
+          return { score: Math.min(score, 93), reason: reasons.join('، ') };
+        }
+      }
+    ]
+  },
+  {
+    id: 'norway',
+    name: 'نروژ',
+    nameEn: 'Norway',
+    flag: '🇳🇴',
+    languages: ['نروژی', 'انگلیسی'],
+    minimumBudgetUSD: 16000,
+    averageTimelineMonths: 7,
+    currency: 'کرون نروژ (NOK)',
+    visaCenterInIran: 'کارگزاری VFS Global تهران و اداره مهاجرت نروژ (UDI)',
+    summary: 'ثروتمندترین کشور اسکاندیناوی، رتبه ۱ شاخص توسعه انسانی جهان و بالاترین سطح رفاه و دستمزد.',
+    pros: [
+      'بالاترین پایه حقوق و قدرت خرید در کل قاره اروپا',
+      'بازار کار فوق‌العاده برای مهندسان نفت، گاز، صنایع دریایی، انرژی‌های تجدیدپذیر و IT',
+      'طبیعت رویایی، آب و هوای پاک و ضریب امنیت اجتماعی کم‌نظیر',
+      'امکان همراهی همسر و فرزندان با اجازه کار فول‌تایم برای همسر'
+    ],
+    cons: [
+      'هزینه‌های زندگی، حمل و نقل و اقلام خوراکی بسیار گران است',
+      'از سال ۲۰۲۳ دانشگاه‌های نروژ برای دانشجویان خارج از اروپا شهریه وضع کرده‌اند',
+      'نیاز به یادگیری زبان نروژی برای ارتباطات عمیق و مشاغل غیر از IT'
+    ],
+    pathways: [
+      {
+        id: 'norway_skilled_worker',
+        title: 'ویزای نیروی کار ماهر نروژ (Skilled Worker Residence Permit)',
+        type: 'work',
+        description: 'اقامت کاری نروژ از طریق اداره مهاجرت UDI بر مبنای قرارداد رسمی تمام‌وقت از یک کارفرمای نروژی.',
+        costUSD: '4,000 - 6,500 $',
+        durationMonths: '3 تا 6 ماه',
+        requirements: [
+          'مدرک دانشگاهی مرتبط با رشته و پوزیشن شغلی',
+          'پیشنهاد کاری رسمی با حداقل حقوق مصوب صنفی نروژ',
+          'تطابق قرارداد با استانداردهای اداره کار نروژ (Arbeidstilsynet)'
+        ],
+        isSuitableFor: (p) => {
+          let score = 35;
+          const reasons: string[] = [];
+          if (p.education.majorCategory === 'engineering' || p.education.majorCategory === 'computer_it') {
+            score += 35;
+            reasons.push('تقاضای بالا در صنایع انرژی، دریانوردی و IT نروژ');
+          }
+          if (p.work.yearsExperience >= 3) {
+            score += 20;
+            reasons.push('تجربه کاری حرفه‌ای');
+          }
+          if (p.preferences.primaryGoal === 'lifestyle_freedom') {
+            score += 15;
+            reasons.push('بهترین کیفیت زندگی در جهان');
+          }
+          return { score: Math.min(score, 94), reason: reasons.join('، ') };
+        }
+      }
+    ]
+  },
+  {
+    id: 'finland',
+    name: 'فنلاند',
+    nameEn: 'Finland',
+    flag: '🇫🇮',
+    languages: ['فنلاندی', 'سوئدی', 'انگلیسی'],
+    minimumBudgetUSD: 11000,
+    averageTimelineMonths: 5,
+    currency: 'یورو (€)',
+    visaCenterInIran: 'کارگزاری VFS Global تهران و اداره مهاجرت فنلاند (Migri)',
+    summary: 'شادترین کشور دنیا، پیشروترین نظام آموزشی جهان و ارائه‌دهنده ویزای کاری فست‌ترک ۲ هفته‌ای.',
+    pros: [
+      'ویزای فست‌ترک ۲ هفته‌ای (Specialist Fast Track) برای متخصصان و مدیران فناوری',
+      'اعطای مجوز اقامت پیوسته نوع A به دانشجویان بین‌المللی و احتساب دوران تحصیل در سابقه اقامت دائم',
+      'اجازه کار ۳۰ ساعت در هفته در حین تحصیل و ویزای ۲ ساله جستجوی کار پس از فراغت',
+      'رتبه ۱ جهان در شفافیت اداری، سلامت روانی و برابری اجتماعی'
+    ],
+    cons: [
+      'زبان فنلاندی گرامر و ساختار بسیار دشواری دارد',
+      'زمستان‌های تاریک و کمبود نور خورشید در ماه‌های دسامبر و ژانویه',
+      'بازار کار داخلی نسبت به آلمان و بریتانیا فشرده‌تر است'
+    ],
+    pathways: [
+      {
+        id: 'finland_specialist_fasttrack',
+        title: 'ویزای فوق‌سریع متخصصان فنلاند (Specialist Fast Track 14 Days)',
+        type: 'work',
+        description: 'سریع‌ترین ویزای شنگن اروپا با صدور ویزای D ورود ظرف ۲ هفته برای متخصصان فناوری و مدیران.',
+        costUSD: '3,000 - 5,000 $',
+        durationMonths: '1 تا 2 ماه',
+        requirements: [
+          'پیشنهاد کاری با حداقل حقوق ماهانه حدود ۳,۶۰۰ یورو ناخالص',
+          'مدرک دانشگاهی مرتبط',
+          'سابقه کاری حرفه‌ای قابل استناد'
+        ],
+        isSuitableFor: (p) => {
+          let score = 35;
+          const reasons: string[] = [];
+          if (p.education.majorCategory === 'computer_it') {
+            score += 35;
+            reasons.push('اکوسیستم استارتاپی و گیمینگ فنلاند (Nokia, Rovio, Supercell)');
+          }
+          if (p.preferences.timeline === 'immediate' || p.preferences.timeline === 'under_1_year') {
+            score += 25;
+            reasons.push('نیاز به پردازش فوق‌سریع ۲ هفته‌ای');
+          }
+          return { score: Math.min(score, 97), reason: reasons.join('، ') };
+        }
+      },
+      {
+        id: 'finland_study_pr',
+        title: 'تحصیل در فنلاند با اقامت پیوسته (Type A Continuous Residence Permit)',
+        type: 'study',
+        description: 'تحصیل در دانشگاه‌های علمی‌کاربردی و جامع فنلاند با ویزای اقامت پیوسته و هموارترین مسیر اقامت دائم اروپا.',
+        costUSD: '10,000 - 13,000 $ (شامل تمکن و شهریه پس از بورسیه)',
+        durationMonths: '4 تا 7 ماه',
+        requirements: [
+          'مدرک دیپلم یا کارشناسی با ترجمه رسمی',
+          'آیلتس آکادمیک ۶.۰+ یا تافل',
+          'تمکن مالی سالانه ۶,۷۲۰ یورو در حساب بانکی'
+        ],
+        isSuitableFor: (p) => {
+          let score = 35;
+          const reasons: string[] = [];
+          if (p.preferences.primaryGoal === 'quick_pr') {
+            score += 30;
+            reasons.push('احتساب کل دوران تحصیل در سنوات اقامت دائم فنلاند');
+          }
+          if (p.education.degree === 'highschool' || p.education.degree === 'bachelor') {
+            score += 20;
+            reasons.push('واجد شرایط مقاطع لیسانس و ارشد');
+          }
+          return { score: Math.min(score, 95), reason: reasons.join('، ') };
+        }
+      }
+    ]
   }
 ];
 

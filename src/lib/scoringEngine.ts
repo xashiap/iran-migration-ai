@@ -201,11 +201,11 @@ export function evaluateImmigrationProfile(profile: UserProfile): AnalysisResult
     }
 
     // اولویت هدف اصلی
-    if (profile.preferences.primaryGoal === 'quick_pr' && (country.id === 'canada' || country.id === 'germany')) {
+    if (profile.preferences.primaryGoal === 'quick_pr' && (country.id === 'canada' || country.id === 'germany' || country.id === 'sweden' || country.id === 'finland')) {
       totalCountryScore += 8;
-    } else if (profile.preferences.primaryGoal === 'study_low_cost' && (country.id === 'italy' || country.id === 'germany' || country.id === 'austria')) {
+    } else if (profile.preferences.primaryGoal === 'study_low_cost' && (country.id === 'italy' || country.id === 'germany' || country.id === 'austria' || country.id === 'finland' || country.id === 'norway')) {
       totalCountryScore += 10;
-    } else if (profile.preferences.primaryGoal === 'job_immediate' && (country.id === 'uae_oman' || country.id === 'germany')) {
+    } else if (profile.preferences.primaryGoal === 'job_immediate' && (country.id === 'uae_oman' || country.id === 'germany' || country.id === 'denmark' || country.id === 'sweden')) {
       totalCountryScore += 10;
     }
 
@@ -277,6 +277,14 @@ function generateDetailedRoadmap(profile: UserProfile, topCountry: CountryRecomm
     phases = getAustriaRoadmapPhases(profile, topCountry);
   } else if (cid === 'uae_oman') {
     phases = getUaeOmanRoadmapPhases(profile, topCountry);
+  } else if (cid === 'sweden') {
+    phases = getSwedenRoadmapPhases(profile, topCountry);
+  } else if (cid === 'denmark') {
+    phases = getDenmarkRoadmapPhases(profile, topCountry);
+  } else if (cid === 'norway') {
+    phases = getNorwayRoadmapPhases(profile, topCountry);
+  } else if (cid === 'finland') {
+    phases = getFinlandRoadmapPhases(profile, topCountry);
   } else {
     phases = getGenericRoadmapPhases(profile, topCountry);
   }
@@ -1446,7 +1454,881 @@ function getUaeOmanRoadmapPhases(profile: UserProfile, country: CountryRecommend
   return phases;
 }
 
-// ۶. نقشه راه جنریک برای سایر کشورها
+// ۶. نقشه راه اختصاصی سوئد (ویزای کاری، جاب‌آفر و تحصیلی)
+function getSwedenRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: پیگیری‌های اداری و اسناد هویتی در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'بررسی اعتبار پاسپورت، آزادسازی اصل دانشنامه‌ها در سامانه سجاد و ترجمه رسمی انگلیسی.',
+    steps: [
+      ...(profile.personal.gender === 'male' ? [{
+        id: 'se-military',
+        title: 'تعیین تکلیف نظام وظیفه و سامانه سخا',
+        description: profile.personal.militaryStatus === 'completed'
+          ? 'بررسی کارت پایان خدمت هوشمند جهت تحویل به دارالترجمه رسمی.'
+          : 'ثبت درخواست معافیت تحصیلی یا وثیقه خروج از کشور در سامانه sakha.epolice.ir.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'کارت پایان خدمت برای اخذ مجوز خروج از کشور و ترجمه رسمی الزامی است.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }] : []),
+      {
+        id: 'se-passport',
+        title: 'بررسی یا تمدید گذرنامه با حداقل ۲ سال اعتبار',
+        description: 'مراجعه به دفاتر پلیس+۱۰ جهت صدور یا تمدید پاسپورت. هماهنگی املای لاتین نام و نام‌خانوادگی بسیار مهم است.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'اداره مهاجرت سوئد (Migrationsverket) مدت اجازه اقامت را حداکثر تا سقف اعتبار گذرنامه شما صادر می‌کند.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      ...(!profile.education.isDegreeReleased && profile.education.degree !== 'highschool' ? [{
+        id: 'se-sajjad',
+        title: 'لغو تعهد آموزش رایگان و اخذ کد صحت در سامانه سجاد (portal.saorg.ir)',
+        description: 'دریافت تاییدیه دانشنامه و ریزنمرات دانشگاهی از وزارت علوم یا بهداشت جهت ترجمه رسمی.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'بدون کد صحت سامانه سجاد، مهرهای دادگستری و امور خارجه برای مدارک تحصیلی صادر نمی‌شود.',
+        estimatedTime: '۲ تا ۵ هفته'
+      }] : []),
+      {
+        id: 'se-translation',
+        title: 'ترجمه رسمی کلیه مدارک به زبان انگلیسی با مهرهای کامل دادگستری و خارجه',
+        description: 'ترجمه شناسنامه، مدارک تحصیلی، ریزنمرات و گواهی‌های سابقه کار همراه با تاییدیه دادگستری و وزارت امور خارجه.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'در سوئد تمامی ادارات دولتی و دانشگاه‌ها ترجمه رسمی انگلیسی را با کمال میل می‌پذیرند.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: تسلط بر زبان انگلیسی و آماده‌سازی آزمون',
+    duration: '۳ تا ۵ ماه',
+    summary: 'کسب نمره آیلتس ۶.۵+ یا تافل ۹۰+ جهت کار در شرکت‌های بین‌المللی یا تحصیل در دانشگاه‌های سوئد.',
+    steps: [
+      {
+        id: 'se-lang-prep',
+        title: 'آمادگی فشرده برای آزمون آیلتس آکادمیک یا جنرال',
+        description: 'تقویت مهارت‌های Speaking و Writing برای نمره حداقل ۶.۵ در آیلتس یا معادل تافل.',
+        category: 'language',
+        isIranSpecific: false,
+        tips: 'زبان انگلیسی زبان کاری شرکت‌های بزرگ سوئدی (مانند اسپاتیفای، ولوو، اریکسون و ایکیا) است؛ سوئدی الزام ورود نیست اما پس از ورود رایگان آموزش داده می‌شود.',
+        estimatedTime: '۳ تا ۵ ماه'
+      },
+      {
+        id: 'se-lang-exam',
+        title: 'ثبت‌نام و شرکت در آزمون رسمی آیلتس یا تافل در سنترهای ایران',
+        description: 'اخذ کارنامه رسمی زبان معتبر جهت الصاق به پرونده دانشگاهی یا مصاحبه با کارفرمای سوئدی.',
+        category: 'language',
+        isIranSpecific: true,
+        tips: 'کارنامه آزمون آیلتس ۲ سال اعتبار دارد؛ زمان‌بندی آزمون را با ددلاین‌های دانشگاهی و کاری هماهنگ فرمایید.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: تدوین رزومه استاندارد اسکاندیناوی و ارزیابی مدرک در UHR',
+    duration: '۱ تا ۲ ماه',
+    summary: 'تهیه رزومه سوئدی متمرکز بر پروژه‌ها، بهینه‌سازی لینکدین و ارزیابی مدارک در شورای آموزش عالی سوئد.',
+    steps: [
+      {
+        id: 'se-resume-prep',
+        title: 'تنظیم رزومه بر اساس فرهنگ کاری سوئد (مختصر، شفاف و مبتنی بر همکاری تیمی)',
+        description: 'فرهنگ کاری سوئد بر کار تیمی، عدم سلسله‌مراتب عمودی و تعادل کار و زندگی (Lagom) استوار است. رزومه باید دستاوردهای تیمی و تخصصی شما را نشان دهد.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'لینک پروفایل لینکدین و نمونه کارهای فنی (گیت‌هاب/پورتفولیو) را در صدر رزومه قرار دهید.',
+        estimatedTime: '۲ هفته'
+      },
+      {
+        id: 'se-uhr-eval',
+        title: 'ارزیابی اختیاری مدارک تحصیلی در شورای آموزش عالی سوئد (UHR)',
+        description: 'ثبت رایگان مدارک در پورتال uhr.se جهت دریافت گواهی تطبیق مدرک دانشگاهی با استانداردهای سوئد.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'ارزیابی UHR برای رشته‌های مهندسی و مدیریت رایگان است و به کارفرمایان اطمینان خاطر می‌دهد.',
+        estimatedTime: '۱ تا ۲ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: فرآیند اپلای (جاب‌آفر تایید شده اتحادیه یا پذیرش از UniversityAdmissions)',
+    duration: '۲ تا ۴ ماه',
+    summary: 'عقد قرارداد با کارفرمای سوئدی طبق مصوبه اتحادیه صنفی یا اخذ پذیرش و بورسیه انستیتو سوئد (SI).',
+    steps: [
+      country.pathwayType === 'work' ? {
+        id: 'se-job-offer',
+        title: 'دریافت جاب‌آفر از کارفرمای سوئدی با حداقل دستمزد قانونی مصوب اداره مهاجرت',
+        description: 'کارفرما باید شغل را ابتدا به مدت ۱۰ روز در پورتال EURES آگهی کرده و شرایط کار، حقوق، بیمه درمانی و بازنشستگی را به تایید اتحادیه صنفی سوئد (Facket / Kollektivavtal) برساند.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'حداقل حقوق ماهانه برای ویزای کاری سوئد اکنون طبق قانون جدید حدود ۲۸,۴۸۰ کرون سوئد (حدود ۲,۶۰۰ دلار) است.',
+        estimatedTime: '۲ تا ۴ ماه'
+      } : {
+        id: 'se-university-admissions',
+        title: 'ثبت اپلیکیشن تحصیلی در پورتال ملی Universityadmissions.se و بورسیه SI',
+        description: 'انتخاب حداکثر ۴ اولویت رشته در دانشگاه‌های سوئد (مانند KTH، لوند، چالمز و اوپسالا) و اقدام همزمان برای بورسیه کامل دولتی انستیتو سوئد (Swedish Institute Scholarship).',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'ددلاین اپلای پاییز در سوئد معمولاً ۱۵ ژانویه است و بورسیه SI کلیه شهریه و هزینه‌های زندگی ۱۲,۰۰۰ کرونی را پوشش می‌دهد.',
+        estimatedTime: '۲ تا ۳ ماه'
+      },
+      {
+        id: 'se-admission-letter',
+        title: 'دریافت نامه رسمی پذیرش تحصیلی یا آغاز پرونده آنلاین توسط کارفرما',
+        description: 'دریافت نامه پذیرش Notification of Selection Results یا ایمیل دعوتنامه کارفرما برای شروع مراحل اداره مهاجرت.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'به محض دریافت نامه، سریعاً به فاز پرداخت فی و ثبت اقامت ورود کنید.',
+        estimatedTime: '۲ تا ۴ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: تمکن مالی، پرداخت اپلیکیشن فی و مقدمات مالی',
+    duration: '۳ تا ۴ هفته',
+    summary: 'صدور تمکن بانکی لاتین از ایران و پرداخت هزینه‌های دولتی با کارت اعتباری ارزی.',
+    steps: [
+      {
+        id: 'se-bank-statement',
+        title: 'صدور گواهی تمکن مالی لاتین از بانک ایرانی (معادل حدود ۱۰,۳۱۴ کرون در ماه)',
+        description: 'گواهی مانده موجودی به نام متقاضی به زبان انگلیسی از بانک‌های خصوصی یا دولتی معتبر ایران با نرخ برابری روز.',
+        category: 'financial',
+        isIranSpecific: true,
+        tips: 'برای ویزای تحصیلی، تمکن کل ۱ سال تحصیلی (حدود ۱۲۵ هزار کرون معادل ۱۱ هزار دلار) در حساب شخصی نیاز است.',
+        estimatedTime: '۳ تا ۵ روز'
+      },
+      {
+        id: 'se-app-fee',
+        title: 'پرداخت اپلیکیشن فی پرونده اقامت سوئد (Migrationsverket Fee)',
+        description: 'پرداخت هزینه بررسی پرونده اقامت کاری یا دانشجویی (حدود ۲,۲۰۰ کرون کاری یا ۱,۵۰۰ کرون تحصیلی) از طریق کارت‌های اعتباری ارزی بین‌المللی.',
+        category: 'financial',
+        isIranSpecific: false,
+        tips: 'می‌توانید پرداخت ارزی را از طریق صرافی‌های معتبر آنلاین داخلی انجام دهید.',
+        estimatedTime: '۱ تا ۲ روز'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: ثبت در اداره مهاجرت سوئد (Migrationsverket) و بیومتریک در تهران',
+    duration: '۲ تا ۴ ماه',
+    summary: 'ثبت پرونده در سامانه آنلاین اداره مهاجرت، حضور در سفارت سوئد تهران جهت بیومتریک و صدور کارت اقامت.',
+    steps: [
+      {
+        id: 'se-migrationsverket-portal',
+        title: 'تکمیل فرم آنلاین در پرتال رسمی migrationsverket.se',
+        description: 'بارگذاری پاسپورت، مدارک تحصیلی یا قرارداد تایید شده، فیش پرداخت و تمکن مالی در پورتال مهاجرت سوئد.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'تمامی فایل‌ها باید اسکن رنگی واضح با فرمت PDF باشند.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'se-embassy-tehran',
+        title: 'رزرو نوبت و حضور در سفارت پادشاهی سوئد در تهران (خیابان فرمانیه)',
+        description: 'ارائه اصل گذرنامه، ثبت اثر انگشت، گرفتن عکس بیومتریک و مصاحبه هویتی با آفیسر سفارت سوئد.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'در روز مصاحبه، آرامش خود را حفظ کرده و درباره اهداف شغلی و تحصیلی خود در سوئد شفاف صحبت کنید.',
+        estimatedTime: '۱ روز کاری'
+      },
+      {
+        id: 'se-ut-card',
+        title: 'دریافت تصمیم قبولی (Bifall) و صدور کارت فیزیکی اقامت (UT-kort)',
+        description: 'ابلاغ نتیجه مثبت پرونده و دریافت ویزای ورود یا کارت هوشمند اقامت (Uppehållstillståndskort).',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'پس از دریافت تاییدیه، کارت اقامت توسط پست دیپلماتیک به تهران ارسال شده و آماده تحویل می‌گردد.',
+        estimatedTime: '۴ تا ۸ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: پرواز به سوئد، ثبت در Skatteverket، دریافت Personnummer و BankID',
+    duration: '۳ تا ۴ هفته',
+    summary: 'ورود به خاک سوئد، دریافت شماره شناسایی ملی ۱۲ رقمی، هویت دیجیتال بانک‌آیدی و کلاس‌های زبان SFI.',
+    steps: [
+      {
+        id: 'se-flight',
+        title: 'خرید بلیت پرواز به استکهلم (فرودگاه آرلاندا) یا گوتنبرگ',
+        description: 'رزرو پرواز با هواپیمایی ترکیش، قطر، پگاسوس یا امارات و پرداخت عوارض خروج در ایران.',
+        category: 'arrival',
+        isIranSpecific: true,
+        tips: 'رسید پرداخت عوارض خروج را همراه پاسپورت در فرودگاه امام خمینی همراه داشته باشید.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'se-skatteverket',
+        title: 'مراجعه به اداره مالیات سوئد (Skatteverket) و ثبت آدرس جهت صدور کد ملی (Personnummer)',
+        description: 'کد ملی ۱۲ رقمی (Personnummer) شاهرگ حیاتی زندگی در سوئد است و برای کلیه امور بانکی، بیمه درمانی رایگان و اشتغال الزامی است.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'همراه داشتن قرارداد اجاره مسکن، کارت اقامت و پاسپورت در روز مراجعه به Skatteverket الزامی است.',
+        estimatedTime: '۲ تا ۴ هفته'
+      },
+      {
+        id: 'se-bankid-sfi',
+        title: 'افتتاح حساب بانکی، فعال‌سازی BankID و ثبت‌نام در دوره‌های رایگان سوئدی (SFI)',
+        description: 'افتتاح حساب در یکی از بانک‌های معتبر (Swedbank، SEB، Nordea یا Handelsbanken)، فعال‌سازی امضای دیجیتال BankID بر روی تلفن همراه و شروع کلاس‌های آموزش زبان سوئدی برای مهاجران (Swedish for Immigrants).',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'شناسه BankID امکان دسترسی به تمامی خدمات اداری، خریدهای اینترنتی، پرداخت مالیات و اپلیکیشن پرکاربرد Swish را فراهم می‌کند.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۷. نقشه راه اختصاصی دانمارک (ویزای کاری، لیست مثبت، فست‌ترک و تحصیلی)
+function getDenmarkRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: پیگیری‌های اداری و اسناد هویتی در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'بررسی پاسپورت، آزادسازی مدارک در سامانه سجاد و ترجمه رسمی انگلیسی با تاییدات دولتی.',
+    steps: [
+      {
+        id: 'dk-passport',
+        title: 'اطمینان از اعتبار گذرنامه (حداقل ۲ سال اعتبار)',
+        description: 'بررسی تاریخ انقضا و سلامت فیزیکی گذرنامه در پلیس+۱۰ جهت جلوگیری از هرگونه توقف اداری.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'دانمارک برای صدور پرمیت کاری و تحصیلی، حداقل اعتبار ۲ ساله گذرنامه را توصیه می‌کند.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      ...(!profile.education.isDegreeReleased && profile.education.degree !== 'highschool' ? [{
+        id: 'dk-sajjad',
+        title: 'لغو تعهد آموزش رایگان در سامانه سجاد و دریافت ریزنمرات رسمی',
+        description: 'ثبت درخواست لغو تعهد در portal.saorg.ir و اخذ بارکد صحت جهت تایید مدارک توسط مراجع قانونی.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'ریزنمرات کامل کلیه دوره‌ها با نمرات تفکیکی باید ترجمه رسمی شوند.',
+        estimatedTime: '۲ تا ۵ هفته'
+      }] : []),
+      {
+        id: 'dk-translation',
+        title: 'ترجمه رسمی مدارک تحصیلی و سوابق کاری به انگلیسی با مهرهای دادگستری و امور خارجه',
+        description: 'ترجمه دانشنامه، سوابق بیمه تامین اجتماعی، شناسنامه و گواهی‌های شغلی به زبان انگلیسی.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'کلیه موسسات دانمارکی اسناد رسمی تایید شده به زبان انگلیسی را قبول می‌کنند.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: کسب مدرک زبان انگلیسی معتبر بین‌المللی',
+    duration: '۳ تا ۵ ماه',
+    summary: 'اخذ نمره حداقل ۶.۵ در آیلتس آکادمیک یا ۸۸ در تافل اینترنتی.',
+    steps: [
+      {
+        id: 'dk-lang-prep',
+        title: 'آمادگی و شرکت در آزمون رسمی آیلتس یا تافل در ایران',
+        description: 'بیش از ۹۵ درصد مردم دانمارک به روانی انگلیسی صحبت می‌کنند و محیط‌های کاری در کپنهاگ و آرهوس تماماً به زبان انگلیسی فعال هستند.',
+        category: 'language',
+        isIranSpecific: true,
+        tips: 'کسب نمره آیلتس ۷ یا بالاتر، یک امتیاز رقابتی برجسته برای استخدام در شرکت‌های دانمارکی مانند Novo Nordisk، Mærsk و LEGO محسوب می‌شود.',
+        estimatedTime: '۳ تا ۵ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: انطباق رشته با لیست مثبت دانمارک (Positive List) و رزومه‌سازی',
+    duration: '۱ تا ۲ ماه',
+    summary: 'بررسی موقعیت شغلی در Positive List دانمارک و ارزیابی آنلاین در اداره آموزش عالی دانمارک.',
+    steps: [
+      {
+        id: 'dk-positive-list',
+        title: 'بررسی عنوان شغلی در فهرست مشاغل مورد نیاز دانمارک (The Positive List)',
+        description: 'اداره مهاجرت دانمارک سالانه دو بار فهرست مشاغل دارای کمبود نیرو را در دو دسته (Higher Education و Skilled Work) منتشر می‌کند. قرار داشتن شغل شما در این لیست اخذ اقامت را به شدت تسهیل می‌کند.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'رشته‌های مهندسی نرم‌افزار، الکترونیک، عمران، مدیریت پروژه و کادر درمان همواره در صدر Positive List دانمارک قرار دارند.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'dk-resume',
+        title: 'تدوین رزومه و پورتفولیو مطابق استانداردهای اسکاندیناوی و لینکدین بین‌المللی',
+        description: 'ارائه دستاوردهای فنی، بهینه‌سازی کلمات کلیدی تخصصی و نگارش توصیه‌نامه‌های شغلی از مدیران قبلی.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'پورتال استخدامی رسمی دانمارک یعنی workindenmark.dk را به طور مداوم رصد کنید.',
+        estimatedTime: '۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: فرآیند اپلای (طرح‌های کاری SIRI یا پذیرش تحصیلی)',
+    duration: '۲ تا ۳ ماه',
+    summary: 'عقد قرارداد با کارفرمای دانمارکی (Fast-track / Pay Limit) یا اخذ پذیرش از دانشگاه‌های DTU و KU.',
+    steps: [
+      country.pathwayType === 'work' ? {
+        id: 'dk-work-apply',
+        title: 'دریافت جاب‌آفر از کارفرمای دانمارکی تحت طرح Pay Limit Scheme یا Fast-track',
+        description: 'کارفرما قرارداد کاری با شرایط حقوقی مصوب قانون کار دانمارک تنظیم کرده و بخشی از درخواست اقامت را در پرتال SIRI آغاز می‌کند.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'طرح فست‌ترک دانمارک سریع‌ترین زمان پاسخگویی را در بین کشورهای اروپایی دارد.',
+        estimatedTime: '۲ تا ۳ ماه'
+      } : {
+        id: 'dk-study-apply',
+        title: 'ثبت درخواست پذیرش در دانشگاه‌های برتر دانمارک (DTU، کپنهاگ، آلبورگ و CBS)',
+        description: 'ارسال مدارک، انگیزه‌نامه و ریزنمرات به پورتال پذیرش دانشگاه و دریافت تاییدیه قبولی تحصیلی.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'دانشجویان بین‌المللی در دانمارک حق کار ۲۰ ساعت در هفته در طول ترم و تمام وقت در تعطیلات را دارند.',
+        estimatedTime: '۲ تا ۳ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: ساخت Case Order ID و پرداخت هزینه دولتی (Gebyr) به اداره SIRI',
+    duration: '۲ تا ۳ هفته',
+    summary: 'ایجاد شناسه پرونده در پرتال newtodenmark.dk و واریز هزینه دولتی بررسی اقامت.',
+    steps: [
+      {
+        id: 'dk-case-order',
+        title: 'ایجاد شناسه پرونده (Case Order ID) در سایت رسمی اداره مهاجرت دانمارک (SIRI)',
+        description: 'ورود به پرتال newtodenmark.dk، انتخاب نوع پرونده (کاری یا دانشجویی) و دریافت شماره اختصاصی پرونده اقامتی.',
+        category: 'financial',
+        isIranSpecific: false,
+        tips: 'شماره پرونده دانمارک به عنوان کد رهگیری اصلی شما تا زمان صدور کارت اقامت عمل خواهد کرد.',
+        estimatedTime: '۱ تا ۲ روز'
+      },
+      {
+        id: 'dk-fee-payment',
+        title: 'پرداخت آنلاین هزینه دولتی رسیدگی به پرونده (Gebyr) با کارت اعتباری بین‌المللی',
+        description: 'واریز هزینه دولتی اداره مهاجرت دانمارک (حدود ۳,۳۰۰ تا ۴,۶۰۰ کرون دانمارک بسته به نوع ویزا) از طریق کردیت‌کارت ارزی.',
+        category: 'financial',
+        isIranSpecific: false,
+        tips: 'رسید پرداخت الکترونیکی Gebyr را چاپ کرده و به پرونده بیومتریک الصاق کنید.',
+        estimatedTime: '۱ تا ۲ روز'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: ثبت بیومتریک در مرکز VFS Global تهران و صدور ویزای دانمارک',
+    duration: '۱ تا ۲ ماه',
+    summary: 'رزرو نوبت VFS تهران ظرف حداکثر ۱۴ روز پس از ساخت شناسه SIRI، انگشت‌نگاری و صدور ویزا.',
+    steps: [
+      {
+        id: 'dk-vfs-appointment',
+        title: 'رزرو وقت بیومتریک در کارگزاری VFS Global دانمارک در تهران (مرکز هروی سنتر)',
+        description: 'مراجعه به سایت vfsglobal.com/denmark/iran و رزرو نوبت جهت ثبت اثر انگشت و چهره بیومتریک.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'توجه بسیار مهم: طبق قوانین دانمارک، ثبت بیومتریک باید ظرف حداکثر ۱۴ روز تقویمی پس از ثبت پرونده اینترنتی SIRI انجام شود.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'dk-vfs-attend',
+        title: 'حضور در مرکز VFS، تحویل مدارک و مصاحبه هویتی با کارشناس کارگزاری',
+        description: 'ارائه پاسپورت، رسید Gebyr، نسخه پرینت فرم اینترنتی، عکس و ثبت ۱۰ اثر انگشت.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'کارشناسان مدارک را بررسی کرده و پوشه دیجیتال را به سفارت پادشاهی دانمارک ارسال می‌نمایند.',
+        estimatedTime: '۱ روز کاری'
+      },
+      {
+        id: 'dk-visa-decision',
+        title: 'دریافت تاییدیه رسمی اقامت و الصاق لیبل ویزای ورود نوع D در پاسپورت',
+        description: 'پیگیری آنلاین وضعیت پرونده، دریافت پیامک آماده بودن پاسپورت و چسبانده شدن ویزای ورود.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'ویزای ورود به شما اجازه سفر به دانمارک و ثبت نام برای کارت اقامت را اعطا می‌کند.',
+        estimatedTime: '۳ تا ۶ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: پرواز به دانمارک، اخذ کد CPR، کارت زرد درمانی و فعال‌سازی MitID',
+    duration: '۲ تا ۳ هفته',
+    summary: 'ورود به کپنهاگ/آرهوس، مراجعه به International Citizen Service، دریافت کارت سلامت و هویت MitID.',
+    steps: [
+      {
+        id: 'dk-flight-arrival',
+        title: 'پرواز به کپنهاگ (فرودگاه کاستروپ) و اسکان اولیه در دانمارک',
+        description: 'سفر به دانمارک و اجاره اقامتگاه دارای امکان ثبت آدرس رسمی (CPR Registration).',
+        category: 'arrival',
+        isIranSpecific: true,
+        tips: 'حتماً مطمئن شوید صاحبخانه به شما اجازه ثبت CPR بر روی آدرس منزل را می‌دهد.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'dk-ics-visit',
+        title: 'مراجعه به مرکز بین‌المللی شهروندان (ICS) جهت صدور CPR Number و کارت سلامت زرد',
+        description: 'مرکز ICS یک درگاه یکپارچه دولتی دانمارک برای مهاجران متخصص است که شماره شناسایی ملی (CPR) و کارت بیمه سلامت رایگان (Sundhedskort / Yellow Card) را در یک جلسه صادر می‌کند.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'با کارت زرد درمانی، تمامی خدمات پزشکی عمومی و بیمارستانی در دانمارک برای شما کاملاً رایگان خواهد بود.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'dk-mitid-bank',
+        title: 'فعال‌سازی هویت دیجیتال دانمارک (MitID) و افتتاح حساب بانکی (NemKonto)',
+        description: 'فعال‌سازی اپلیکیشن MitID در گوشی همراه، مراجعه به بانک دانمارکی (مانند Danske Bank، Nordea یا Jyske Bank)، افتتاح حساب جاری و تعیین آن به عنوان حساب رسمی واریز حقوق و تسهیلات دولتی (NemKonto).',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'سیستم هوشمند جامعه بدون پول نقد (Cashless Society) دانمارک با MitID و اپلیکیشن پرداختی MobilePay زندگی روزمره را فوق‌العاده ساده می‌سازد.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۸. نقشه راه اختصاصی نروژ (ویزای نیروی کار ماهر UDI، صنعت انرژی/تک و تحصیلی)
+function getNorwayRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: پیگیری‌های اداری و اسناد اولیه در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'پاسپورت معتبر، آزادسازی مدارک در سامانه سجاد و ترجمه رسمی مدارک به انگلیسی.',
+    steps: [
+      {
+        id: 'no-passport',
+        title: 'بررسی اعتبار ۲ تا ۳ ساله پاسپورت و صدور گذرنامه جدید',
+        description: 'مراجعه به پلیس+۱۰ و اطمینان از سلامت گذرنامه جهت ثبت اطلاعات در پرتال اداره مهاجرت نروژ (UDI).',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'پاسپورت با اعتبار بالا آسودگی خاطر برای پروسه‌های اقامتی نروژ ایجاد می‌کند.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      ...(!profile.education.isDegreeReleased && profile.education.degree !== 'highschool' ? [{
+        id: 'no-sajjad',
+        title: 'تسویه و آزادسازی دانشنامه در سامانه سجاد (portal.saorg.ir)',
+        description: 'لغو تعهد آموزش رایگان و اخذ بارکد صحت برای دانشنامه و ریزنمرات دوره‌های کارشناسی و ارشد.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'اداره مهاجرت نروژ (UDI) بر تطابق دقیق سرفصل‌ها و ریزنمرات دانشگاهی حساس است.',
+        estimatedTime: '۲ تا ۵ هفته'
+      }] : []),
+      {
+        id: 'no-translation',
+        title: 'ترجمه رسمی کلیه مدارک هویتی، شغلی و تحصیلی به زبان انگلیسی',
+        description: 'ترجمه رسمی با مهرهای وزارت دادگستری و وزارت امور خارجه ایران.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'نروژ ترجمه انگلیسی را برای کلیه مراجع دولتی، کارفرمایان و دانشگاه‌ها کاملاً معتبر می‌داند.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: کسب مدرک زبان انگلیسی بین‌المللی',
+    duration: '۳ تا ۵ ماه',
+    summary: 'اخذ نمره آیلتس ۶.۵ به بالا یا تافل ۹۰ جهت ورود به بازار کار و دانشگاه‌های نروژ.',
+    steps: [
+      {
+        id: 'no-lang-exam',
+        title: 'آمادگی و شرکت در آزمون آیلتس (IELTS) یا تافل در سنترهای ایران',
+        description: 'در صنایع پیشرفته نفت و گاز، انرژی‌های تجدیدپذیر، آی‌تی و علوم دریایی نروژ، زبان کاری رایج انگلیسی است.',
+        category: 'language',
+        isIranSpecific: true,
+        tips: 'یادگیری زبان نروژی (Bokmål) مزیت فوق‌العاده‌ای در جامعه نروژ است اما پیش‌شرط اخذ ویزای نیروی کار ماهر نیست.',
+        estimatedTime: '۳ تا ۵ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: ارزیابی مدارک در HK-dir (سابقاً NOKUT) و رزومه اسکاندیناوی',
+    duration: '۱ تا ۲ ماه',
+    summary: 'ارزیابی دانشگاه در اداره آموزش عالی نروژ و آماده‌سازی رزومه کاری شفاف و استاندارد.',
+    steps: [
+      {
+        id: 'no-nokut-eval',
+        title: 'ارسال مدارک به اداره آموزش عالی و مهارت‌های نروژ (HK-dir / سابقا NOKUT)',
+        description: 'ثبت نام در پرتال hkdir.no و درخواست گواهی تطبیق مدرک دانشگاهی ایران با مقاطع کارشناسی و کارشناسی ارشد نروژ.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'تاییدیه HK-dir پذیرش شغلی شما توسط کارفرمایان نروژی را بسیار سریع‌تر و روان‌تر می‌کند.',
+        estimatedTime: '۱ تا ۲ ماه'
+      },
+      {
+        id: 'no-resume',
+        title: 'تدوین رزومه استاندارد بر اساس سبک نروژی (شفاف، مبتنی بر دستاوردها و بدون مبالغه)',
+        description: 'نروژی‌ها به صداقت کاری، تخصص عملی و مهارت‌های تعاملی ارزش بالایی می‌دهند. رزومه باید دقیق و حاوی اطلاعات تماس معرف‌های قبلی باشد.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'پورتال رسمی کاریابی نروژ یعنی finn.no و nav.no را برای مشاهده موقعیت‌های استخدام روزانه چک کنید.',
+        estimatedTime: '۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: فرآیند اپلای (پیشنهاد کاری Skilled Worker یا پذیرش دانشگاهی)',
+    duration: '۲ تا ۴ ماه',
+    summary: 'دریافت جاب‌آفر با حداقل درآمد مصوب صنفی یا اخذ پذیرش از دانشگاه‌های NTNU، اسلو و برگن.',
+    steps: [
+      country.pathwayType === 'work' ? {
+        id: 'no-work-offer',
+        title: 'دریافت پیشنهاد کاری معتبر فول‌تایم از کارفرمای نروژی (Offer of Employment Form)',
+        description: 'کارفرما باید فرم رسمی UDI Offer of Employment را تکمیل کند. حقوق پیشنهادی باید حداقل برابر با توافقنامه‌های جمعی صنف یا حداقل مصوب نروژ برای مقطع کارشناسی ارشد (حدود ۵۰۰ هزار کرون نروژ در سال) باشد.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'شغل پیشنهادی باید مستقیماً با مدارک تحصیلی و سوابق کاری شما همخوانی داشته باشد.',
+        estimatedTime: '۲ تا ۴ ماه'
+      } : {
+        id: 'no-study-apply',
+        title: 'اخذ پذیرش در دوره‌های کارشناسی ارشد یا دکترا از دانشگاه‌های برتر نروژ',
+        description: 'ثبت اپلیکیشن در پورتال دانشگاه (مانند UiO, NTNU, UiB) و دریافت نامه قطعی پذیرش تحصیلی.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'دوره‌های دکترا در نروژ به عنوان موقعیت استخدامی با حقوق ماهانه بسیار بالا (حدود ۴۵ تا ۵۰ هزار یورو در سال) شناخته می‌شوند.',
+        estimatedTime: '۲ تا ۳ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: تمکن مالی، حساب امانی دانشگاه یا اثبات حقوق کاری',
+    duration: '۳ تا ۴ هفته',
+    summary: 'تامین مبلغ مصوب تمکن UDI در حساب سپرده نروژ یا قرارداد استخدامی معتبر.',
+    steps: [
+      {
+        id: 'no-financial-proof',
+        title: 'تامین هزینه زندگی مصوب اداره مهاجرت نروژ (UDI Subsistence Requirement)',
+        description: country.pathwayType === 'work'
+          ? 'قرارداد کاری رسمی با حقوق بالای ۵۰۰,۰۰۰ کرون در سال به طور خودکار شرط تمکن مالی ویزای کار را پوشش می‌دهد.'
+          : 'برای ویزای دانشجویی، مبلغ ۱۵۱,۶۹۰ کرون نروژ باید پیش از صدور ویزا به حساب امانی ویژه دانشجویان در دانشگاه نروژ واریز گردد.',
+        category: 'financial',
+        isIranSpecific: false,
+        tips: 'مبلغ تمکن دانشجویی پس از ورود به نروژ و افتتاح حساب بانکی، به صورت ماهانه به حساب شما واریز خواهد شد.',
+        estimatedTime: '۲ تا ۳ هفته'
+      },
+      {
+        id: 'no-udi-fee',
+        title: 'پرداخت هزینه دولتی اپلیکیشن پرمیت کار یا تحصیل در سایت UDI',
+        description: 'پرداخت اینترنتی مبلغ ۶,۳۰۰ کرون نروژ با کارت اعتباری بین‌المللی در پورتال اداره مهاجرت نروژ.',
+        category: 'financial',
+        isIranSpecific: false,
+        tips: 'رسید پرداخت الکترونیکی باید ضمیمه پرونده کاغذی شود.',
+        estimatedTime: '۱ تا ۲ روز'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: ثبت در پورتال UDI و تحویل مدارک به VFS Global نروژ در تهران',
+    duration: '۲ تا ۳ ماه',
+    summary: 'سابمیت فرم آنلاین، نوبت انگشت‌نگاری در VFS تهران و بررسی پرونده توسط سفارت سلطنتی نروژ.',
+    steps: [
+      {
+        id: 'no-udi-portal',
+        title: 'تکمیل فرم آنلاین در پرتال رسمی اداره مهاجرت نروژ (udi.no)',
+        description: 'ثبت اطلاعات هویتی، بارگذاری مدارک و انتخاب سفارت نروژ در تهران به عنوان محل تحویل مدارک.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'چک‌لیست رسمی مدارک (Checklist for Skilled Workers / Students) را دانلود و امضا نمایید.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'no-vfs-tehran',
+        title: 'مراجعه به کارگزاری VFS Global نروژ در تهران جهت تحویل پوشه و بیومتریک',
+        description: 'تحویل اصل پاسپورت، ترجمه‌ها با کپی برابر اصل، قرارداد کاری و ثبت ۱۰ اثر انگشت.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'پوشه مدارک را منظم و بر اساس ترتیب چک‌لیست رسمی UDI تحویل دهید.',
+        estimatedTime: '۱ روز کاری'
+      },
+      {
+        id: 'no-permit-decision',
+        title: 'دریافت برگه تاییدیه اقامت و ویزای ورود نوع D (Entry Visa)',
+        description: 'صدور مجوز رسمی اقامت توسط اداره مهاجرت نروژ (UDI) و الصاق لیبل ویزای ورود ۷ روزه در پاسپورت.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'این ویزا برای ورود به خاک نروژ و دریافت کارت هوشمند فیزیکی صادر می‌شود.',
+        estimatedTime: '۴ تا ۸ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: پرواز به نروژ، اداره مالیات (Skatteetaten)، کد Fødselsnummer و BankID',
+    duration: '۲ تا ۴ هفته',
+    summary: 'ورود به اسلو/برگن، دریافت کد ملی نروژ، کارت مالیاتی Skattekort و هویت دیجیتال BankID.',
+    steps: [
+      {
+        id: 'no-flight-arrival',
+        title: 'پرواز به اسلو (فرودگاه گاردرموئن) و ورود به خاک نروژ',
+        description: 'تهیه بلیت پرواز بین‌المللی و رزرو محل سکونت اولیه در نروژ.',
+        category: 'arrival',
+        isIranSpecific: true,
+        tips: 'در باجه فرودگاه اسلو برگه تاییدیه اقامت UDI را همراه پاسپورت نشان دهید.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'no-police-skatteetaten',
+        title: 'مراجعه به پلیس و اداره مالیات نروژ (Skatteetaten) جهت دریافت کد ملی (Fødselsnummer)',
+        description: 'ثبت هویت حضوری ظرف ۷ روز اول ورود، صدور شماره ۱۱ رقمی ملی نروژ (Fødselsnummer) و صدور کارت مالیاتی (Skattekort).',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'بدون کارت مالیاتی Skattekort، کارفرما مجبور خواهد بود ۵۰ درصد از اولین حقوق شما را به عنوان مالیات علی‌الحساب کسر کند.',
+        estimatedTime: '۲ تا ۳ هفته'
+      },
+      {
+        id: 'no-bank-bankid',
+        title: 'افتتاح حساب بانکی در نروژ (DNB / Nordea) و فعال‌سازی هویت دیجیتال BankID نروژ',
+        description: 'دریافت کارت بانکی بین‌المللی Visa/Mastercard و فعال‌سازی BankID که پلتفرم یکپارچه ورود به تمامی سامانه‌های بانکی، پزشکی و دولتی نروژ (Altinn) است.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'طبیعت خیره‌کننده، امنیت اجتماعی بالا و حقوق منصفانه نروژ استانداردی کم‌نظیر از زندگی برای شما فراهم می‌آورد.',
+        estimatedTime: '۲ هفته'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۹. نقشه راه اختصاصی فنلاند (ویزای سریع متخصصان Fast-Track، تک‌هاب اروپا و تحصیلی)
+function getFinlandRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: مدارک اولیه و تاییدات اداری در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'بررسی پاسپورت، آزادسازی اصل دانشنامه‌ها در سامانه سجاد و ترجمه رسمی انگلیسی.',
+    steps: [
+      {
+        id: 'fi-passport',
+        title: 'بررسی سلامت و اعتبار گذرنامه (حداقل ۲ سال اعتبار)',
+        description: 'اقدام جهت تعویض یا تمدید پاسپورت در دفاتر پلیس+۱۰ جهت درج اطلاعات در سامانه اقامتی فنلاند.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'اعتبار پاسپورت برای صدور کارت اقامت پیوسته نوع A فنلاند (معمولاً ۱ تا ۲ ساله) اهمیت دارد.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      ...(!profile.education.isDegreeReleased && profile.education.degree !== 'highschool' ? [{
+        id: 'fi-sajjad',
+        title: 'لغو تعهد آموزش رایگان در سامانه سجاد (portal.saorg.ir)',
+        description: 'تسویه با دانشگاه و اخذ بارکد صحت مدارک تحصیلی جهت دریافت تاییدیه وزارتخانه‌های مربوطه.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'مدارک مقاطع دانشگاهی قبلی همراه ریزنمرات کامل به تایید دادگستری و امور خارجه می‌رسد.',
+        estimatedTime: '۲ تا ۵ هفته'
+      }] : []),
+      {
+        id: 'fi-translation',
+        title: 'ترجمه رسمی مدارک تحصیلی، کاری و هویتی به زبان انگلیسی با مهرهای کامل',
+        description: 'تحویل مدارک به دارالترجمه رسمی و دریافت پلمپ‌های معتبر وزارت دادگستری و وزارت امور خارجه.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'فنلاند تمامی مدارک رسمی ترجمه شده به زبان انگلیسی را بدون نیاز به ترجمه به زبان فنلاندی قبول می‌کند.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: تسلط بر زبان انگلیسی و آزمون معتبر',
+    duration: '۳ تا ۵ ماه',
+    summary: 'کسب نمره آیلتس ۶.۵+ یا تافل ۹۰+؛ فنلاند یکی از برترین کشورهای انگلیسی‌زبان غیربومی جهان است.',
+    steps: [
+      {
+        id: 'fi-lang-prep',
+        title: 'آمادگی و شرکت در آزمون رسمی آیلتس یا تافل در ایران',
+        description: 'زبان انگلیسی زبان کاری رایج در اکوسیستم فناوری، استارتاپ‌ها و شرکت‌های چندملیتی فنلاند (مانند نوکیا، روویو و سوپرسل) است.',
+        category: 'language',
+        isIranSpecific: true,
+        tips: 'برای ویزای کاری و تخصصی فنلاند ارائه مدرک رسمی زبان فنلاندی الزامی نیست؛ تسلط بر زبان انگلیسی کافی است.',
+        estimatedTime: '۳ تا ۵ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: رزومه استاندارد سبک نوردیک و حضور در جامعه استارتاپی فنلاند',
+    duration: '۱ تا ۲ ماه',
+    summary: 'تدوین رزومه مدرن متمرکز بر نوآوری، لینکدین بین‌المللی و استفاده از پلتفرم Business Finland.',
+    steps: [
+      {
+        id: 'fi-resume-prep',
+        title: 'تنظیم رزومه و لینکدین بر اساس فرهنگ کاری منعطف و بدون سلسله‌مراتب فنلاند (Flat Hierarchy)',
+        description: 'مدیران فنلاندی به استقلال فردی، مسئولیت‌پذیری، کارایی و خلاقیت اهمیت زیادی می‌دهند. رزومه باید نتایج قابل اندازه‌گیری پروژه‌ها را نشان دهد.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'پلتفرم دولتی Work in Finland (workinfinland.com) را برای یافتن شرکت‌های فنلاندی دارای استخدام بین‌المللی بررسی کنید.',
+        estimatedTime: '۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: فرآیند اپلای (ویزای فوق‌سریع متخصصان Fast-Track یا پذیرش تحصیلی)',
+    duration: '۲ تا ۳ ماه',
+    summary: 'عقد قرارداد کاری متخصصان با فرآیند رسیدگی شگفت‌انگیز کمتر از ۱۴ روز کاری یا پذیرش دانشگاهی.',
+    steps: [
+      country.pathwayType === 'work' ? {
+        id: 'fi-fast-track',
+        title: 'دریافت جاب‌آفر تخصصی و استفاده از مسیر ویزای فوق‌سریع متخصصان فنلاند (Specialist Fast-Track)',
+        description: 'اگر حقوق ناخالص شما حداقل ۳,۶۳۸ یورو در ماه باشد، شما و خانواده‌تان واجد شرایط طرح Fast-Track فنلاند می‌شوید. در این طرح، اداره مهاجرت فنلاند (Migri) درخواست اقامت را ظرف کمتر از ۱۴ روز کاری بررسی و صادر می‌کند!',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'فنلاند سریع‌ترین فرآیند صدور ویزای کار متخصصان را در سراسر اتحادیه اروپا داراست.',
+        estimatedTime: '۲ تا ۳ ماه'
+      } : {
+        id: 'fi-studyinfo',
+        title: 'ثبت درخواست پذیرش در پورتال مرکزی Studyinfo.fi و اقدام برای بورسیه‌های تخفیف شهریه',
+        description: 'انتخاب رشته‌های کارشناسی ارشد در دانشگاه‌های تراز اول مانند دانشگاه آلتو (Aalto University) یا دانشگاه هلسینکی و دریافت معافیت ۵۰ تا ۱۰۰ درصدی شهریه بر اساس رزومه علمی.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'دانشجویان فارغ‌التحصیل از فنلاند مجوز اقامت ویژه ۲ ساله برای جستجوی کار یا راه‌اندازی استارتاپ دریافت می‌کنند.',
+        estimatedTime: '۲ تا ۳ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: تمکن مالی، بیمه درمانی بین‌المللی و پرداخت هزینه پرتال',
+    duration: '۳ تا ۴ هفته',
+    summary: 'صدور تمکن بانکی لاتین، تهیه بیمه سلامت معتبر و پرداخت اینترنتی هزینه اقامت.',
+    steps: [
+      {
+        id: 'fi-financial-insurance',
+        title: 'تهیه گواهی تمکن بانکی لاتین و بیمه درمانی معتبر بین‌المللی (Swisscare / SIP)',
+        description: 'برای دانشجویان تمکن سالانه ۶,۷۲۰ یورو (۵۶۰ یورو در هر ماه) در حساب شخصی و بیمه درمانی بین‌المللی با پوشش حداقل ۴۰,۰۰۰ یورو مورد نیاز است. برای شاغلان، قرارداد استخدامی کفایت می‌کند.',
+        category: 'financial',
+        isIranSpecific: true,
+        tips: 'گواهی تمکن باید حداکثر ۳۰ روز قبل از ارسال مدارک از یکی از بانک‌های ایران به زبان انگلیسی صادر شده باشد.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'fi-migri-fee',
+        title: 'پرداخت الکترونیکی هزینه رسیدگی اداره مهاجرت فنلاند (Migri Fee)',
+        description: 'پرداخت آنلاین هزینه بررسی درخواست اقامت نوع A (حدود ۳۸۰ تا ۴۹۰ یورو بسته به نوع درخواست) با کارت اعتباری بین‌المللی.',
+        category: 'financial',
+        isIranSpecific: false,
+        tips: 'ثبت اینترنتی در پرتال Enter Finland ارزان‌تر و سریع‌تر از درخواست کاغذی است.',
+        estimatedTime: '۱ روز'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: ثبت در سامانه Enter Finland و بیومتریک در کارگزاری VFS تهران',
+    duration: '۲ تا ۴ هفته (یا کمتر از ۱۴ روز در مسیر Fast-Track)',
+    summary: 'ثبت مدارک در پرتال enterfinland.fi، مراجعه به کارگزاری VFS تهران و صدور کارت اقامت نوع A.',
+    steps: [
+      {
+        id: 'fi-enter-finland',
+        title: 'تکمیل فرم آنلاین در پرتال رسمی Enter Finland (enterfinland.fi)',
+        description: 'بارگذاری پاسپورت، مدارک شغلی/تحصیلی، تمکن مالی و بیمه در سامانه یکپارچه خدمات اقامتی فنلاند.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'پس از سابمیت پرونده، کد رهگیری یکتا و برگه احراز هویت برای تحویل به کارگزاری صادر می‌شود.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'fi-vfs-tehran',
+        title: 'رزرو نوبت و حضور در مرکز VFS Global فنلاند در تهران (مرکز هروی سنتر)',
+        description: 'ارائه اصل پاسپورت، برگه پرینت فرم Enter Finland، ثبت اثر انگشت و اسکن چهره بیومتریک.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'در مسیر Specialist Fast-Track، سفارت فنلاند ظرف چند روز گذرنامه و برگه D-Visa ویژه پرواز سریع را صادر می‌نماید.',
+        estimatedTime: '۱ روز کاری'
+      },
+      {
+        id: 'fi-residence-card',
+        title: 'صدور کارت هوشمند اقامت شینگن نوع A (Continuous Residence Permit)',
+        description: 'دریافت کارت فیزیکی اقامت فنلاند که اجازه رفت‌وآمد نامحدود در حوزه شینگن و حق کار کامل را به شما می‌دهد.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'اقامت نوع A پس از ۴ سال زندگی در فنلاند مستقیماً به اقامت دائم (Permanent Residence) و سپس پاسپورت فنلاندی تبدیل می‌شود.',
+        estimatedTime: '۲ تا ۶ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: پرواز به هلسینکی، مراجعه به DVV، دریافت کد ملی و شناسه بانکی Suomi.fi',
+    duration: '۲ تا ۳ هفته',
+    summary: 'ورود به پایتخت فنلاند، دریافت Finnish Personal Identity Code، بیمه Kela و افتتاح حساب بانکی.',
+    steps: [
+      {
+        id: 'fi-flight-arrival',
+        title: 'پرواز به هلسینکی (فرودگاه هلسینکی-وانتا) و اسکان در فنلاند',
+        description: 'سفر به فنلاند و اقامت در محل سکونت اولیه در منطقه کلان‌شهری هلسینکی (Helsinki, Espoo, Vantaa).',
+        category: 'arrival',
+        isIranSpecific: true,
+        tips: 'سیستم حمل و نقل عمومی HSL هلسینکی از مدرن‌ترین و دقیق‌ترین شبکه‌های قطار و تراموای جهان است.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'fi-dvv-register',
+        title: 'مراجعه به آژانس خدمات دیجیتال و جمعیت فنلاند (DVV) جهت دریافت کد ملی (Henkilötunnus)',
+        description: 'ثبت آدرس سکونت دائمی و دریافت شماره شناسایی شخصی ۱۱ رقمی فنلاند (Finnish Personal Identity Code) که کلید اصلی کلیه خدمات اداری است.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'همزمان درخواست عضویت در سازمان بیمه تامین اجتماعی و سلامت فنلاند (Kela) را جهت دریافت خدمات درمانی و رفاهی رایگان ثبت نمایید.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'fi-bank-tupas',
+        title: 'افتتاح حساب بانکی در فنلاند (Nordea / OP / Danske Bank) و فعال‌سازی کدهای آنلاین Suomi.fi',
+        description: 'مراجعه به بانک با کارت اقامت و پاسپورت، دریافت کارت دبیت بین‌المللی و فعال‌سازی شناسه‌های الکترونیکی بانکی (Online Banking Credentials) که سیستم هویت دیجیتال فنلاند برای ورود به تمامی سایت‌های دولتی و مالیاتی است.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'فنلاند برای هفتمین سال پیاپی به عنوان شادترین کشور جهان شناخته شده و از بالاترین استانداردهای شفافیت، آموزش رایگان فرزندان و تعادل کار و زندگی برخوردار است.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۱۰. نقشه راه جنریک برای سایر کشورها
 function getGenericRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
   const phases: RoadmapPhase[] = [];
 
@@ -1620,6 +2502,7 @@ function calculateFinancialEstimate(profile: UserProfile, topCountry: CountryRec
   let credentialUSD = '150 - 300 $';
   if (topCountry.countryId === 'canada') credentialUSD = '280 $ (WES ECA)';
   else if (topCountry.countryId === 'germany') credentialUSD = '220 € (ZAB در صورت لزوم)';
+  else if (topCountry.countryId === 'sweden' || topCountry.countryId === 'norway' || topCountry.countryId === 'denmark' || topCountry.countryId === 'finland') credentialUSD = 'رایگان یا حدود ۱۵۰ $ (UHR / HK-dir)';
 
   let applicationFees = '150 - 500 $';
   if (topCountry.pathwayType === 'work') applicationFees = '100 - 250 $';
@@ -1628,12 +2511,17 @@ function calculateFinancialEstimate(profile: UserProfile, topCountry: CountryRec
   if (topCountry.countryId === 'germany') blockedOrProof = '11,904 € (حساب مسدود برای ۱ سال)';
   else if (topCountry.countryId === 'italy') blockedOrProof = '6,000 € (صرفاً در حساب ریالی ایران جهت تمکن)';
   else if (topCountry.countryId === 'canada') blockedOrProof = '20,635 $ CAD (تمکن قانونی)';
+  else if (topCountry.countryId === 'sweden') blockedOrProof = 'حدود ۱۰,۳۱۴ کرون سوئد در ماه (حدود ۱۲,۰۰۰ دلار برای ۱ سال تحصیلی)';
+  else if (topCountry.countryId === 'norway') blockedOrProof = '۱۵۱,۶۹۰ کرون نروژ (حدود ۱۴,۰۰۰ دلار در حساب امانی دانشگاه)';
+  else if (topCountry.countryId === 'denmark') blockedOrProof = 'تمکن بانکی لاتین یا جاب‌آفر بالای مصوب Pay Limit';
+  else if (topCountry.countryId === 'finland') blockedOrProof = '۶,۷۲۰ یورو در سال (۵۶۰ یورو در ماه تمکن دانشجویی)';
 
   const emergencyBuffer = '1,500 - 3,000 $';
   let totalStartingUSD = '12,000 - 16,000 $';
   if (topCountry.countryId === 'italy') totalStartingUSD = '4,500 - 6,500 $';
   else if (topCountry.countryId === 'uae_oman') totalStartingUSD = '3,000 - 5,000 $';
   else if (topCountry.countryId === 'canada') totalStartingUSD = '18,000 - 25,000 $';
+  else if (topCountry.countryId === 'finland' && topCountry.pathwayType === 'work') totalStartingUSD = '3,500 - 6,000 $';
 
   return {
     iranAdministrativeIRR: iranAdminIRR,

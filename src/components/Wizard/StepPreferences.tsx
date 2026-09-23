@@ -16,10 +16,14 @@ const COUNTRIES_LIST = [
   { name: 'آلمان', flag: '🇩🇪' },
   { name: 'ایتالیا', flag: '🇮🇹' },
   { name: 'کانادا', flag: '🇨🇦' },
-  { name: 'استرالیا', flag: '🇦🇺' },
+  { name: 'سوئد', flag: '🇸🇪' },
+  { name: 'دانمارک', flag: '🇩🇰' },
+  { name: 'نروژ', flag: '🇳🇴' },
+  { name: 'فنلاند', flag: '🇫🇮' },
   { name: 'اتریش', flag: '🇦🇹' },
-  { name: 'فرانسه', flag: '🇫🇷' },
+  { name: 'استرالیا', flag: '🇦🇺' },
   { name: 'هلند', flag: '🇳🇱' },
+  { name: 'فرانسه', flag: '🇫🇷' },
   { name: 'امارات و عمان', flag: '🇦🇪' },
 ];
 
