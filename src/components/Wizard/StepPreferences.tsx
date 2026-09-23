@@ -14,16 +14,20 @@ interface StepPreferencesProps {
 
 const COUNTRIES_LIST = [
   { name: 'آلمان', flag: '🇩🇪' },
-  { name: 'ایتالیا', flag: '🇮🇹' },
+  { name: 'انگلیس', flag: '🇬🇧' },
+  { name: 'آمریکا', flag: '🇺🇸' },
   { name: 'کانادا', flag: '🇨🇦' },
+  { name: 'استرالیا', flag: '🇦🇺' },
+  { name: 'هلند', flag: '🇳🇱' },
   { name: 'سوئد', flag: '🇸🇪' },
   { name: 'دانمارک', flag: '🇩🇰' },
   { name: 'نروژ', flag: '🇳🇴' },
   { name: 'فنلاند', flag: '🇫🇮' },
-  { name: 'اتریش', flag: '🇦🇹' },
-  { name: 'استرالیا', flag: '🇦🇺' },
-  { name: 'هلند', flag: '🇳🇱' },
   { name: 'فرانسه', flag: '🇫🇷' },
+  { name: 'ایتالیا', flag: '🇮🇹' },
+  { name: 'اتریش', flag: '🇦🇹' },
+  { name: 'ژاپن', flag: '🇯🇵' },
+  { name: 'ترکیه', flag: '🇹🇷' },
   { name: 'امارات و عمان', flag: '🇦🇪' },
 ];
 

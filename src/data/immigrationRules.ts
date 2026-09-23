@@ -802,6 +802,516 @@ export const COUNTRIES_DATABASE: CountryData[] = [
         }
       }
     ]
+  },
+  {
+    id: 'uk',
+    name: 'انگلیس',
+    nameEn: 'United Kingdom',
+    flag: '🇬🇧',
+    languages: ['انگلیسی'],
+    minimumBudgetUSD: 16000,
+    averageTimelineMonths: 6,
+    currency: 'پوند استرلینگ (£)',
+    visaCenterInIran: 'مرکز VFS Global تهران و پورتال رسمی gov.uk',
+    summary: 'پایتخت مالی و فناوری اروپا با مسیرهای شفاف ویزای کار ماهر (Skilled Worker) و ویزای فارغ‌التحصیلی ۲ ساله (Graduate Route).',
+    pros: [
+      'زبان رسمی انگلیسی بدون نیاز به یادگیری زبان دوم',
+      'بازار کار فوق‌العاده برای IT، امور مالی و مهندسی در لندن، منچستر و ادینبرو',
+      'امکان کار همسر به صورت فول‌تایم در اکثر ویزاهای کاری',
+      'اخذ اقامت دائم (ILR) پس از ۵ سال کار قانونی با بیمه'
+    ],
+    cons: [
+      'هزینه‌های بالای مسکن و زندگی به ویژه در لندن',
+      'شهریه سنگین دانشگاه‌ها برای دانشجویان بین‌المللی (۱۵ تا ۲۵ هزار پوند در سال)',
+      'افزایش حداقل حقوق مصوب ویزای کار به ۳۸,۷۰۰ پوند در سال ۲۰۲۴'
+    ],
+    pathways: [
+      {
+        id: 'uk_skilled_worker',
+        title: 'ویزای نیروی کار ماهر انگلیس (Skilled Worker Visa)',
+        type: 'work',
+        description: 'مهاجرت با جاب‌آفر رسمی از کارفرمای دارای لایسنس اسپانسرشیپ Home Office با حداقل حقوق سالانه ۳۸,۷۰۰ پوند.',
+        costUSD: '4,000 - 6,000 $ (شامل هزینه ویزا و بیمه سلامت NHS)',
+        durationMonths: '3 تا 6 ماه',
+        requirements: [
+          'پیشنهاد کاری از کارفرمای مورد تایید وزارت کشور بریتانیا با نامه CoS',
+          'مدرک زبان انگلیسی حداقل B1 (آیلتس جنرال/آکادمیک ۴.۰ یا SELT)',
+          'شغل در لیست مشاغل واجد شرایط SOC کد Home Office'
+        ],
+        isSuitableFor: (p) => {
+          let score = 35;
+          const reasons: string[] = [];
+          if (p.languages.englishLevel === 'advanced' || p.languages.englishLevel === 'fluent') {
+            score += 25;
+            reasons.push('تسلط بر زبان انگلیسی');
+          }
+          if (p.education.majorCategory === 'computer_it' || p.education.majorCategory === 'business_finance') {
+            score += 25;
+            reasons.push('رشته دارای تقاضای بالا در بازار کار بریتانیا');
+          }
+          if (p.work.yearsExperience >= 3) {
+            score += 15;
+            reasons.push('سابقه کار حرفه‌ای مستند');
+          }
+          return { score: Math.min(score, 95), reason: reasons.join('، ') };
+        }
+      },
+      {
+        id: 'uk_study_graduate',
+        title: 'ویزای تحصیلی و اقامت پس از فراغت (Student Visa + Graduate PSW)',
+        type: 'study',
+        description: 'تحصیل کارشناسی ارشد ۱ ساله در دانشگاه‌های ممتاز بریتانیا و دریافت اقامت کاری ۲ ساله آزاد بدون نیاز به اسپانسر.',
+        costUSD: '22,000 - 32,000 $ (شهریه دوره ارشد ۱ ساله + تمکن بانکی)',
+        durationMonths: '4 تا 8 ماه',
+        requirements: [
+          'پذیرش رسمی با شماره CAS از دانشگاه معتبر بریتانیا',
+          'آیلتس آکادمیک ۶.۵ یا تافل معادل',
+          'تمکن مالی ۲۸ روزه در حساب بانکی شخص متقاضی یا والدین'
+        ],
+        isSuitableFor: (p) => {
+          let score = 35;
+          const reasons: string[] = [];
+          if (p.education.degree === 'bachelor' || p.education.degree === 'master') {
+            score += 25;
+            reasons.push('مناسب برای مقطع کارشناسی ارشد ۱ ساله فشرده');
+          }
+          if (p.finances.liquidBudgetUSD >= 20000) {
+            score += 20;
+            reasons.push('توانایی تامین شهریه و هزینه‌های اولیه');
+          }
+          if (p.preferences.primaryGoal === 'quick_pr' || p.preferences.timeline === 'under_1_year') {
+            score += 15;
+            reasons.push('دوره‌های ۱ ساله بریتانیا سریع‌ترین زمان فارغ‌التحصیلی را دارند');
+          }
+          return { score: Math.min(score, 92), reason: reasons.join('، ') };
+        }
+      }
+    ]
+  },
+  {
+    id: 'usa',
+    name: 'آمریکا',
+    nameEn: 'United States',
+    flag: '🇺🇸',
+    languages: ['انگلیسی'],
+    minimumBudgetUSD: 18000,
+    averageTimelineMonths: 12,
+    currency: 'دلار آمریکا ($)',
+    visaCenterInIran: 'سفارت‌های آمریکا در آنکارا (ترکیه)، ایروان (ارمنستان) و ابوظبی (امارات)',
+    summary: 'بزرگترین اقتصاد جهان، مهد غول‌های سیلیکون‌ولی و بالاترین درآمدهای فناوری، با مسیرهای لاتاری، تحصیلی F-1 و گرین‌کارت نخبگان.',
+    pros: [
+      'بالاترین حقوق و دستمزدهای جهان در حوزه‌های IT، مهندسی و پزشکی',
+      'فرصت کار ۳ ساله پس از فارغ‌التحصیلی در رشته‌های STEM (STEM OPT)',
+      'لاتاری سالانه گرین‌کارت (DV Lottery) با شانس اخذ اقامت دائم مستقیم بدون مدرک زبان و هزینه',
+      'امکان خوداسپانسری اقامت دائم از طریق گرین‌کارت نخبگان (EB-2 NIW)'
+    ],
+    cons: [
+      'عدم وجود سفارت در ایران و الزام به سفر خارجی برای مصاحبه کنسولی',
+      'پروسه کلیرنس اداری و امنیتی (Administrative Processing) برای متقاضیان ایرانی',
+      'شهریه بالای دانشگاه‌ها برای دوره‌های بدون فاند',
+      'سیستم پیچیده قرعه‌کشی ویزای کار تجاری H-1B'
+    ],
+    pathways: [
+      {
+        id: 'usa_dv_lottery',
+        title: 'لاتاری گرین‌کارت آمریکا (Diversity Immigrant Visa - DV Lottery)',
+        type: 'job_seeker',
+        description: 'برنامه سالانه قرعه‌کشی ویزای تنوع نژادی وزارت امور خارجه آمریکا با اعطای اقامت دائم قطعی (Green Card) از بدو ورود به برندگان.',
+        costUSD: '1,500 - 3,000 $ (صرفاً هزینه‌های مدیکال، مصاحبه سفارت و صدور گرین‌کارت پس از قبولی)',
+        durationMonths: '12 تا 18 ماه',
+        requirements: [
+          'ثبت‌نام اینترنتی در سایت رسمی dvprogram.state.gov در مهر و آبان',
+          'حداقل مدرک دیپلم ۱۲ ساله یا ۲ سال سابقه کار مهارتی در ۵ سال اخیر',
+          'بدون نیاز به مدرک زبان انگلیسی یا تمکن مالی سنگین',
+          'پاسپورت معتبر در زمان مصاحبه سفارت'
+        ],
+        isSuitableFor: (p) => {
+          let score = 50;
+          const reasons: string[] = [];
+          if (p.education.degree !== 'associate') {
+            score += 20;
+            reasons.push('دارای حداقل مدرک دیپلم معتبر جهت احراز صلاحیت لاتاری');
+          }
+          if (p.preferences.primaryGoal === 'quick_pr' || p.preferences.riskTolerance === 'moderate') {
+            score += 20;
+            reasons.push('دریافت مستقیم گرین‌کارت دائمی آمریکا بدون وابستگی به کارفرما');
+          }
+          return { score: Math.min(score, 98), reason: reasons.join('، ') };
+        }
+      },
+      {
+        id: 'usa_f1_opt',
+        title: 'ویزای تحصیلی F-1 با ۳ سال کار قانونی (STEM OPT Extension)',
+        type: 'study',
+        description: 'تحصیل در دانشگاه‌های معتبر آمریکا با فاند کامل (TA/RA) یا سلف‌فاند و اشتغال ۳۶ ماهه با درآمد دلاری پس از فراغت در رشته‌های فنی-مهندسی.',
+        costUSD: '20,000 - 35,000 $ (در صورت عدم دریافت فاند کامل سال اول)',
+        durationMonths: '8 تا 14 ماه',
+        requirements: [
+          'اخذ فرم I-20 رسمی از دانشگاه معتبر آمریکا (SEVP Approved)',
+          'مدرک تافل (۸۰+) یا آیلتس (۶.۵+) یا دولینگو (۱۱۰+)',
+          'اثبات تمکن مالی و علایق قوی بازگشت به کشور (Non-immigrant Intent)',
+          'پرداخت کارمزد سویس (SEVIS I-901 Fee)'
+        ],
+        isSuitableFor: (p) => {
+          let score = 35;
+          const reasons: string[] = [];
+          if (p.education.majorCategory === 'computer_it' || p.education.majorCategory === 'engineering' || p.education.majorCategory === 'basic_sciences') {
+            score += 35;
+            reasons.push('رشته جزو دسته‌بندی STEM با ۳ سال مجوز کار تمام‌وقت (OPT)');
+          }
+          if (p.education.degree === 'bachelor' || p.education.degree === 'master') {
+            score += 20;
+            reasons.push('آمادگی آکادمیک برای کارشناسی ارشد و دکترا');
+          }
+          if (p.languages.englishLevel === 'advanced' || p.languages.englishLevel === 'fluent') {
+            score += 15;
+            reasons.push('نمره زبان ایده‌آل');
+          }
+          return { score: Math.min(score, 94), reason: reasons.join('، ') };
+        }
+      },
+      {
+        id: 'usa_eb2_niw',
+        title: 'گرین‌کارت منافع ملی نخبگان آمریکا (EB-2 NIW Green Card)',
+        type: 'work',
+        description: 'دریافت مستقیم اقامت دائم بدون نیاز به کارفرمای آمریکایی، جاب‌آفر یا فرآیند کارگری PERM بر مبنای سوابق علمی و دستاوردهای تخصصی.',
+        costUSD: '5,000 - 9,000 $ (هزینه‌های وکیل مهاجرتی و لاج فرم I-140 به USCIS)',
+        durationMonths: '12 تا 24 ماه',
+        requirements: [
+          'مدرک کارشناسی ارشد یا دکترا (یا کارشناسی با حداقل ۵ سال سابقه کار تخصصی)',
+          'اثبات اهمیت ملی تخصص و توانایی شما برای اقتصاد یا علم آمریکا',
+          'داشتن مقالات، استنادات علمی، پتنت، جوایز یا پروژه‌های شاخص بین‌المللی'
+        ],
+        isSuitableFor: (p) => {
+          let score = 30;
+          const reasons: string[] = [];
+          if (p.education.degree === 'phd' || p.education.degree === 'master') {
+            score += 35;
+            reasons.push('مدرک تحصیلات تکمیلی مورد نیاز برای رده EB-2');
+          }
+          if (p.work.yearsExperience >= 4) {
+            score += 20;
+            reasons.push('سوابق کاری حرفه‌ای قابل اتکا');
+          }
+          return { score: Math.min(score, 93), reason: reasons.join('، ') };
+        }
+      }
+    ]
+  },
+  {
+    id: 'netherlands',
+    name: 'هلند',
+    nameEn: 'Netherlands',
+    flag: '🇳🇱',
+    languages: ['هلندی', 'انگلیسی'],
+    minimumBudgetUSD: 13000,
+    averageTimelineMonths: 6,
+    currency: 'یورو (€)',
+    visaCenterInIran: 'کارگزاری VFS Global تهران و اداره مهاجرت هلند (IND)',
+    summary: 'هاب فناوری و تجارت اروپای غربی با بیشترین درصد تسلط به انگلیسی و طرح مهاجر ماهر (Kennismigrant) همراه با مزیت ۳۰٪ معافیت مالیاتی.',
+    pros: [
+      'بیش از ۹۵٪ جامعه به روانی انگلیسی صحبت می‌کنند',
+      'طرح ۳۰٪ معافیت مالیاتی (30% Tax Ruling) برای متخصصان خارجی جذب شده',
+      'ویزای ۱ ساله جستجوی کار (Zoekjaar) برای فارغ‌التحصیلان ۲۰۰ دانشگاه برتر جهان',
+      'مقر شرکت‌های غول فناوری مانند ASML, Booking.com, Philips و Adyen'
+    ],
+    cons: [
+      'بحران کمبود شدید مسکن اجاره‌ای در آمستردام، روتردام و اوترخت',
+      'هزینه‌های زندگی بالا نسبت به جنوب اروپا',
+      'آب‌وهوای ابری و بارانی در طول سال'
+    ],
+    pathways: [
+      {
+        id: 'nl_kennismigrant',
+        title: 'ویزای مهاجر بسیار ماهر هلند (Highly Skilled Migrant - Kennismigrant)',
+        type: 'work',
+        description: 'مهاجرت با جاب‌آفر از کارفرمای مورد تایید اداره مهاجرت هلند (IND Recognised Sponsor) با حداقل حقوق مصوب دولتی.',
+        costUSD: '3,000 - 5,000 $',
+        durationMonths: '2 تا 4 ماه',
+        requirements: [
+          'قرارداد کاری با کارفرمای معتبر ثبت‌شده در IND',
+          'حداقل حقوق ماهانه مصوب (حدود ۴,۰۷۱ یورو برای افراد بالای ۳۰ سال و ۲,۹۸۹ یورو برای زیر ۳۰ سال)',
+          'پاسپورت معتبر و مدارک دانشگاهی مرتبط'
+        ],
+        isSuitableFor: (p) => {
+          let score = 35;
+          const reasons: string[] = [];
+          if (p.education.majorCategory === 'computer_it' || p.education.majorCategory === 'engineering') {
+            score += 35;
+            reasons.push('تقاضای شدید اکوسیستم های‌تک هلند برای مهندسان نرم‌افزار و سخت‌افزار');
+          }
+          if (p.languages.englishLevel === 'advanced' || p.languages.englishLevel === 'fluent') {
+            score += 20;
+            reasons.push('زبان کاری شرکت‌های هلندی تماماً انگلیسی است');
+          }
+          if (p.work.yearsExperience >= 2) {
+            score += 15;
+            reasons.push('سوابق کاری مکفی');
+          }
+          return { score: Math.min(score, 96), reason: reasons.join('، ') };
+        }
+      },
+      {
+        id: 'nl_zoekjaar',
+        title: 'ویزای جستجوی کار هلند (Orientation Year / Zoekjaar)',
+        type: 'job_seeker',
+        description: 'ویزای اقامت ۱ ساله جهت جستجوی کار در هلند برای فارغ‌التحصیلان دانشگاه‌های هلند یا فارغ‌التحصیلان ۲۰۰ دانشگاه برتر جهان (QS/THE).',
+        costUSD: '2,500 - 4,000 $',
+        durationMonths: '2 تا 4 ماه',
+        requirements: [
+          'فارغ‌التحصیلی در ۳ سال اخیر از ۲۰۰ دانشگاه برتر جهان یا دانشگاه‌های هلند',
+          'مدرک زبان انگلیسی آیلتس ۶.۰ یا معادل',
+          'تمکن مالی برای دوره اقامت در هلند'
+        ],
+        isSuitableFor: (p) => {
+          let score = 30;
+          const reasons: string[] = [];
+          if (p.education.universityType === 'state_top' || p.education.degree === 'master' || p.education.degree === 'phd') {
+            score += 30;
+            reasons.push('فارغ‌التحصیل دانشگاه‌های رتبه برتر');
+          }
+          if (p.preferences.timeline === 'immediate' || p.preferences.timeline === 'under_1_year') {
+            score += 20;
+            reasons.push('تمایل به جستجوی کار مستقیم در خاک هلند');
+          }
+          return { score: Math.min(score, 91), reason: reasons.join('، ') };
+        }
+      }
+    ]
+  },
+  {
+    id: 'france',
+    name: 'فرانسه',
+    nameEn: 'France',
+    flag: '🇫🇷',
+    languages: ['فرانسوی', 'انگلیسی'],
+    minimumBudgetUSD: 8000,
+    averageTimelineMonths: 6,
+    currency: 'یورو (€)',
+    visaCenterInIran: 'مرکز VFS Global تهران و درگاه رسمی کمپیوس فرانس ایران (Campus France)',
+    summary: 'مرکز فرهنگ و هنر اروپا با سیستم حمایتی دانشجویی بی‌نظیر (CAF)، شهریه کم دانشگاه‌های دولتی و ویزای پاسپورت تلنت.',
+    pros: [
+      'شهریه بسیار ارزان دانشگاه‌های دولتی فرانسه برای دانشجویان بین‌المللی',
+      'کمک‌هزینه مسکن ماهانه دانشجویی از طرف دولت فرانسه (کمک‌هزینه CAF بین ۱۰۰ تا ۲۵۰ یورو در ماه)',
+      'ویزای ۴ ساله اقامت کاری پاسپورت تلنت (Passeport Talent) برای متخصصان و استارتاپ‌ها',
+      'امکان کار دانشجویی تا ۶۰٪ ساعات کاری رسمی (حدود ۲۰ ساعت در هفته)'
+    ],
+    cons: [
+      'یادگیری زبان فرانسوی برای زندگی روزمره و اکثر مشاغل خارج از حوزه IT حیاتی است',
+      'بوروکراسی اداری و زمان‌بر بودن تایید مدارک در پرتال کمپیوس فرانس',
+      'سفارت فرانسه در ارزیابی مدارک مالی و انگیزه‌نامه تحصیلی سخت‌گیر است'
+    ],
+    pathways: [
+      {
+        id: 'fr_passeport_talent',
+        title: 'ویزای اقامت مهارتی پاسپورت تلنت (Passeport Talent)',
+        type: 'work',
+        description: 'اقامت کاری ۴ ساله چندبار ورود بدون نیاز به مجوز اداره کار برای متخصصان فناوری، استارتاپ‌ها و فارغ‌التحصیلان ارشد.',
+        costUSD: '3,000 - 4,500 $',
+        durationMonths: '2 تا 4 ماه',
+        requirements: [
+          'قرارداد کاری با شرکت فرانسوی با حداقل حقوق ناخالص سالانه مصوب (حدود ۴۲,۰۰۰ یورو)',
+          'مدرک کارشناسی ارشد یا سابقه ۵ سال فعالیت حرفه‌ای معادل',
+          'پاسپورت معتبر'
+        ],
+        isSuitableFor: (p) => {
+          let score = 35;
+          const reasons: string[] = [];
+          if (p.education.majorCategory === 'computer_it' || p.education.majorCategory === 'engineering') {
+            score += 35;
+            reasons.push('تقاضای اکوسیستم فناوری Station F و شرکت‌های فناوری فرانسه');
+          }
+          if (p.languages.frenchLevel !== 'none') {
+            score += 25;
+            reasons.push('تسلط بر زبان فرانسوی');
+          } else if (p.languages.englishLevel === 'advanced') {
+            score += 15;
+            reasons.push('امکان کار به زبان انگلیسی در شرکت‌های بین‌المللی پاریس');
+          }
+          return { score: Math.min(score, 95), reason: reasons.join('، ') };
+        }
+      },
+      {
+        id: 'fr_campus_study',
+        title: 'تحصیل در فرانسه از طریق کمپیوس فرانس (Campus France)',
+        type: 'study',
+        description: 'اخذ پذیرش از دانشگاه‌های دولتی فرانسه با شهریه اندک، بیمه درمانی رایگان و کمک‌هزینه مسکن دانشجویی CAF.',
+        costUSD: '5,000 - 8,000 $ (شامل تمکن مالی حدود ۷,۵۰۰ یورو)',
+        durationMonths: '4 تا 8 ماه',
+        requirements: [
+          'ثبت پرونده و مصاحبه در سامانه کمپیوس فرانس تهران (Etudes en France)',
+          'مدرک زبان فرانسوی B2 (TCF/DELF) یا مدرک زبان انگلیسی آیلتس ۶.۵ برای دوره‌های انگلیسی‌زبان',
+          'تمکن مالی حداقل ۶۱۵ یورو در ماه برای مدت ۱ سال تحصیلی'
+        ],
+        isSuitableFor: (p) => {
+          let score = 40;
+          const reasons: string[] = [];
+          if (p.languages.frenchLevel !== 'none') {
+            score += 30;
+            reasons.push('امتیاز طلایی آشنایی با زبان فرانسه');
+          }
+          if (p.finances.needsScholarshipOrFreeTuition || p.finances.liquidBudgetUSD < 12000) {
+            score += 20;
+            reasons.push('تناسب با بودجه اقتصادی و شهریه پایین دانشگاه‌های فرانسه');
+          }
+          return { score: Math.min(score, 93), reason: reasons.join('، ') };
+        }
+      }
+    ]
+  },
+  {
+    id: 'japan',
+    name: 'ژاپن',
+    nameEn: 'Japan',
+    flag: '🇯🇵',
+    languages: ['ژاپنی', 'انگلیسی'],
+    minimumBudgetUSD: 9000,
+    averageTimelineMonths: 7,
+    currency: 'ین ژاپن (JPY)',
+    visaCenterInIran: 'سفارت ژاپن در تهران (خیابان وزرا)',
+    summary: 'امن‌ترین و منظم‌ترین کشور دنیا با کمبود شدید نیروی کار و سیستم پیشرفته ویزای متخصصان ماهر (HSP) و بورسیه دولتی MEXT.',
+    pros: [
+      'امنیت اجتماعی رتبه اول جهان و سیستم درمانی و بهداشتی فوق‌العاده',
+      'بورسیه دولتی فول‌فاند MEXT با حقوق ماهانه عالی و بدون نیاز به تمکن',
+      'امکان اخذ اقامت دائم ژاپن ظرف تنها ۱ تا ۲ سال با سیستم امتیازبندی HSP (۸۰ امتیاز)',
+      'تقاضای بالا برای استخدام مهندسان نرم‌افزار، الکترونیک و مکانیک'
+    ],
+    cons: [
+      'زبان ژاپنی با ۳ سیستم نگارشی ساختار متفاوتی دارد',
+      'فرهنگ کاری سخت‌کوشانه و سلسله‌مراتب سنتی در شرکت‌های ژاپنی',
+      'سفارت ژاپن در تهران برای ویزای کار حتماً نیاز به ارائه اصل گواهی COE دارد'
+    ],
+    pathways: [
+      {
+        id: 'jp_hsp_visa',
+        title: 'ویزای متخصصان بسیار ماهر ژاپن (Highly Skilled Professional - HSP)',
+        type: 'work',
+        description: 'اقامت ۵ ساله بر مبنای کسب حداقل ۷۰ امتیاز (سن، مدرک، زبان، درآمد) با سریع‌ترین مسیر اقامت دائم ژاپن (۱ تا ۳ سال).',
+        costUSD: '2,500 - 4,000 $',
+        durationMonths: '2 تا 4 ماه',
+        requirements: [
+          'پیشنهاد کاری از شرکتی در ژاپن با درآمد حداقل ۳ میلیون ین در سال',
+          'کسب حداقل ۷۰ امتیاز از جدول امتیازات مهاجرت ژاپن',
+          'اخذ گواهی صلاحیت اقامت (Certificate of Eligibility - COE)'
+        ],
+        isSuitableFor: (p) => {
+          let score = 35;
+          const reasons: string[] = [];
+          if (p.education.majorCategory === 'computer_it' || p.education.majorCategory === 'engineering') {
+            score += 35;
+            reasons.push('تقاضای استخدام شدید در غول‌های فناوری ژاپن (Sony, Rakuten, Line)');
+          }
+          if (p.education.degree === 'master' || p.education.degree === 'phd') {
+            score += 20;
+            reasons.push('امتیاز تحصیلی بالا در جدول HSP ژاپن');
+          }
+          return { score: Math.min(score, 95), reason: reasons.join('، ') };
+        }
+      },
+      {
+        id: 'jp_mext_study',
+        title: 'بورسیه دولتی ژاپن (MEXT Scholarship) و پذیرش دانشگاهی',
+        type: 'study',
+        description: 'تحصیل در دانشگاه‌های برتر ژاپن (توکیو، کیوتو، اوزاکا) با پوشش ۱۰۰٪ شهریه، بلیت رفت و برگشت و حقوق ماهیانه ۱۴۴ هزار ین.',
+        costUSD: '1,500 - 2,500 $ (با قبولی در MEXT شهریه کاملاً رایگان است)',
+        durationMonths: '6 تا 10 ماه',
+        requirements: [
+          'معدل بالای ۱۶ در مقطع تحصیلی قبلی',
+          'تسلط به زبان انگلیسی (آیلتس ۶.۵+) یا زبان ژاپنی',
+          'پروپوزال تحقیقاتی قوی و قبولی در آزمون و مصاحبه سفارت ژاپن در تهران'
+        ],
+        isSuitableFor: (p) => {
+          let score = 40;
+          const reasons: string[] = [];
+          if (p.education.degree === 'bachelor' || p.education.degree === 'master') {
+            score += 25;
+            reasons.push('مناسب برای مقاطع کارشناسی ارشد و دکترا با بورسیه MEXT');
+          }
+          if (p.finances.needsScholarshipOrFreeTuition) {
+            score += 25;
+            reasons.push('هدف‌گذاری بورسیه دولتی فول‌فاند');
+          }
+          return { score: Math.min(score, 94), reason: reasons.join('، ') };
+        }
+      }
+    ]
+  },
+  {
+    id: 'turkey',
+    name: 'ترکیه',
+    nameEn: 'Turkey',
+    flag: '🇹🇷',
+    languages: ['ترکی استانبولی'],
+    minimumBudgetUSD: 4000,
+    averageTimelineMonths: 2,
+    currency: 'لیر ترکیه (TRY)',
+    visaCenterInIran: 'سفارت ترکیه در تهران و کنسولگری‌های تبریز، مشهد و ارومیه (ورود بدون ویزا)',
+    summary: 'نزدیک‌ترین و سریع‌ترین مقصد برای مهاجرت بدون نیاز به ویزای ورود اولیه، با هزینه‌های زندگی اقتصادی و بورسیه دولتی Türkiye Bursları.',
+    pros: [
+      'بدون نیاز به اخذ ویزای ورودی برای شهروندان ایرانی (اقامت ۹۰ روزه رایگان در هر سفر)',
+      'فاصله جغرافیایی بسیار کوتاه و پروازهای روزانه متعدد از شهرهای مختلف ایران',
+      'فراخوان بورسیه دولتی فول‌فاند سالانه ترکیه (Türkiye Bursları) با خوابگاه و بیمه رایگان',
+      'تشابهات فرهنگی عمیق و سهولت راه‌اندازی کسب‌وکار و خرید ملک'
+    ],
+    cons: [
+      'کاهش ارزش لیر و تورم اقتصادی در سال‌های اخیر',
+      'دشواری دریافت اقامت توریستی در شهرهای بزرگ مانند استانبول در قوانین جدید',
+      'حقوق پایه به لیر نسبت به کشورهای اروپای غربی پایین‌تر است'
+    ],
+    pathways: [
+      {
+        id: 'tr_work_permit',
+        title: 'مجوز کار رسمی ترکیه (Çalışma İzni)',
+        type: 'work',
+        description: 'اقامت کاری قانونی با عقد قرارداد با کارفرمای معتبر در ترکیه و بیمه تامین اجتماعی دولتی (SGK).',
+        costUSD: '1,500 - 3,000 $',
+        durationMonths: '1 تا 3 ماه',
+        requirements: [
+          'قرارداد کاری با شرکت ثبت‌شده در ترکیه (به ازای هر کارمند خارجی، ۵ کارمند ترک)',
+          'کارت اقامت معتبر یا ثبت درخواست از طریق سفارت ترکیه در ایران',
+          'بیمه SGK و حداقل حقوق رسمی مصوب وزارت کار ترکیه'
+        ],
+        isSuitableFor: (p) => {
+          let score = 40;
+          const reasons: string[] = [];
+          if (p.preferences.timeline === 'immediate') {
+            score += 30;
+            reasons.push('نیاز به مهاجرت فوق‌العاده سریع بدون معطلی ویزا');
+          }
+          if (p.finances.liquidBudgetUSD < 7000) {
+            score += 20;
+            reasons.push('تناسب با بودجه‌های شروع اقتصادی');
+          }
+          return { score: Math.min(score, 92), reason: reasons.join('، ') };
+        }
+      },
+      {
+        id: 'tr_study_burslari',
+        title: 'تحصیل دانشگاهی و بورسیه دولتی ترکیه (Türkiye Bursları / YÖS)',
+        type: 'study',
+        description: 'تحصیل در دانشگاه‌های برتر استانبول و آنکارا به زبان انگلیسی یا ترکی، با بورسیه دولتی جامع یا آزمون ورودی YÖS.',
+        costUSD: '2,000 - 4,500 $ (با بورسیه دولتی شهریه و خوابگاه کاملاً رایگان است)',
+        durationMonths: '3 تا 6 ماه',
+        requirements: [
+          'مدرک دیپلم یا کارشناسی با ترجمه رسمی به زبان ترکی یا انگلیسی',
+          'ثبت درخواست آنلاین در سامane Türkiye Bursları',
+          'شرکت در آزمون TR-YÖS در صورت اپلای مستقیم دانشگاه‌ها'
+        ],
+        isSuitableFor: (p) => {
+          let score = 45;
+          const reasons: string[] = [];
+          if (p.education.degree === 'highschool' || p.education.degree === 'bachelor') {
+            score += 25;
+            reasons.push('مناسب برای مقاطع کارشناسی و ارشد');
+          }
+          if (p.finances.needsScholarshipOrFreeTuition) {
+            score += 20;
+            reasons.push('هدف‌گذاری بورسیه دولتی ترکیه با خوابگاه و بیمه رایگان');
+          }
+          return { score: Math.min(score, 95), reason: reasons.join('، ') };
+        }
+      }
+    ]
   }
 ];
 

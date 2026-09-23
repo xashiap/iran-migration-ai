@@ -201,11 +201,11 @@ export function evaluateImmigrationProfile(profile: UserProfile): AnalysisResult
     }
 
     // اولویت هدف اصلی
-    if (profile.preferences.primaryGoal === 'quick_pr' && (country.id === 'canada' || country.id === 'germany' || country.id === 'sweden' || country.id === 'finland')) {
+    if (profile.preferences.primaryGoal === 'quick_pr' && (country.id === 'canada' || country.id === 'germany' || country.id === 'sweden' || country.id === 'finland' || country.id === 'australia' || country.id === 'usa')) {
       totalCountryScore += 8;
-    } else if (profile.preferences.primaryGoal === 'study_low_cost' && (country.id === 'italy' || country.id === 'germany' || country.id === 'austria' || country.id === 'finland' || country.id === 'norway')) {
+    } else if (profile.preferences.primaryGoal === 'study_low_cost' && (country.id === 'italy' || country.id === 'germany' || country.id === 'austria' || country.id === 'finland' || country.id === 'norway' || country.id === 'france' || country.id === 'turkey')) {
       totalCountryScore += 10;
-    } else if (profile.preferences.primaryGoal === 'job_immediate' && (country.id === 'uae_oman' || country.id === 'germany' || country.id === 'denmark' || country.id === 'sweden')) {
+    } else if (profile.preferences.primaryGoal === 'job_immediate' && (country.id === 'uae_oman' || country.id === 'germany' || country.id === 'denmark' || country.id === 'sweden' || country.id === 'uk' || country.id === 'netherlands' || country.id === 'turkey')) {
       totalCountryScore += 10;
     }
 
@@ -285,6 +285,20 @@ function generateDetailedRoadmap(profile: UserProfile, topCountry: CountryRecomm
     phases = getNorwayRoadmapPhases(profile, topCountry);
   } else if (cid === 'finland') {
     phases = getFinlandRoadmapPhases(profile, topCountry);
+  } else if (cid === 'australia') {
+    phases = getAustraliaRoadmapPhases(profile, topCountry);
+  } else if (cid === 'uk') {
+    phases = getUkRoadmapPhases(profile, topCountry);
+  } else if (cid === 'usa') {
+    phases = getUsaRoadmapPhases(profile, topCountry);
+  } else if (cid === 'netherlands') {
+    phases = getNetherlandsRoadmapPhases(profile, topCountry);
+  } else if (cid === 'france') {
+    phases = getFranceRoadmapPhases(profile, topCountry);
+  } else if (cid === 'japan') {
+    phases = getJapanRoadmapPhases(profile, topCountry);
+  } else if (cid === 'turkey') {
+    phases = getTurkeyRoadmapPhases(profile, topCountry);
   } else {
     phases = getGenericRoadmapPhases(profile, topCountry);
   }
@@ -2328,7 +2342,1331 @@ function getFinlandRoadmapPhases(profile: UserProfile, country: CountryRecommend
   return phases;
 }
 
-// ۱۰. نقشه راه جنریک برای سایر کشورها
+// ۱۰. نقشه راه اختصاصی استرالیا (اسکیلد ورکر، سیستم SkillSelect و ویزاهای ۱۹۰/۱۸۹/۴۹۱)
+function getAustraliaRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: پیگیری‌های اداری و اسناد هویتی در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'بررسی پاسپورت، آزادسازی اصل دانشنامه‌ها در سامانه سجاد و ترجمه رسمی ناتی (NAATI) یا دادگستری.',
+    steps: [
+      {
+        id: 'au-passport',
+        title: 'بررسی اعتبار ۲ تا ۳ ساله گذرنامه',
+        description: 'مراجعه به پلیس+۱۰ و اطمینان از اعتبار کافی پاسپورت جهت درج در اسسمنت و پرونده ImmiAccount.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'اعتبار پاسپورت برای صدور ویزای مهارتی استرالیا حیاتی است.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      ...(!profile.education.isDegreeReleased && profile.education.degree !== 'highschool' ? [{
+        id: 'au-sajjad',
+        title: 'لغو تعهد آموزش رایگان در سامانه سجاد و دریافت ریزنمرات رسمی',
+        description: 'اخذ بارکد صحت از وزارت علوم یا بهداشت جهت ترجمه رسمی مدارک تحصیلی کلیه مقاطع.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'استرالیا برای ارزیابی مدارک، ریزنمرات کامل و سرفصل دوره‌ها را مطالبه می‌کند.',
+        estimatedTime: '۲ تا ۵ هفته'
+      }] : []),
+      {
+        id: 'au-translation',
+        title: 'ترجمه رسمی کلیه مدارک با تاییدیه ناتی (NAATI) یا مهر دادگستری و امور خارجه',
+        description: 'ترجمه شناسنامه، کارت پایان خدمت، مدارک تحصیلی، ریزنمرات و گواهی‌های سابقه کار با مهر دارالترجمه رسمی.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'مترجمان ناتی مورد تایید مستقیم اداره مهاجرت استرالیا هستند و نیازی به مهرهای دادگستری/خارجه ندارند.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: کسب نمره زبان هدف (PTE Academic یا IELTS)',
+    duration: '۳ تا ۵ ماه',
+    summary: 'کسب نمره PTE 65+ (۱۰ امتیاز) یا PTE 79+ (۲۰ امتیاز طلایی) برای سیستم امتیازبندی استرالیا.',
+    steps: [
+      {
+        id: 'au-pte-prep',
+        title: 'آمادگی فشرده برای آزمون PTE Academic یا آیلتس',
+        description: 'آزمون PTE به دلیل ساختار کامپیوتری و الگوریتم تصحیح، گزینه محبوب‌تری نسبت به آیلتس برای ایرانیان متقاضی استرالیا است.',
+        category: 'language',
+        isIranSpecific: false,
+        tips: 'نمره ۶۵ در تمام مهارت‌های PTE معادل آیلتس ۷ (۱۰ امتیاز) و نمره ۷۹ معادل آیلتس ۸ (۲۰ امتیاز طلایی) است.',
+        estimatedTime: '۳ تا ۵ ماه'
+      },
+      {
+        id: 'au-pte-exam',
+        title: 'شرکت در آزمون رسمی PTE یا آیلتس در سنترهای معتبر',
+        description: 'رزرو سنترهای بین‌المللی PTE در کشورهای همسایه (ترکیه، ارمنستان، دبی) یا سنترهای آیلتس در تهران.',
+        category: 'language',
+        isIranSpecific: true,
+        tips: 'کارنامه آزمون برای اداره مهاجرت استرالیا ۳ سال اعتبار قانونی دارد.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: ارزیابی مدارک شغلی و تحصیلی در سازمان‌های ارزیاب (Skill Assessment)',
+    duration: '۲ تا ۳ ماه',
+    summary: 'ارزیابی پرونده توسط ACS (کامپیوتر)، Engineers Australia (مهندسی) یا VETASSESS.',
+    steps: [
+      {
+        id: 'au-skill-assessment',
+        title: 'ارسال مدارک به سازمان ارزیاب تخصصی استرالیا (Assessing Authority)',
+        description: profile.education.majorCategory === 'computer_it'
+          ? 'ارسال سوابق بیمه، نامه‌های شرح وظایف کاری و مدارک به انجمن کامپیوتر استرالیا (ACS).'
+          : profile.education.majorCategory === 'engineering'
+          ? 'نگارش سه گزارش ارزیابی شغلی (Career Episodes) و خلاصه بیانیه (Summary Statement) برای مهندسی استرالیا (Engineers Australia).'
+          : 'ارسال مدارک تحصیلی و شرح وظایف به موسسه وت‌اسس (VETASSESS) یا سازمان ارزیاب مربوطه.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'نامه‌های سابقه کار باید دقیقاً منطبق با شرح وظایف کد ANZSCO نوشته شده و همراه سوابق بیمه تامین اجتماعی باشد.',
+        estimatedTime: '۲ تا ۳ ماه'
+      },
+      {
+        id: 'au-assessment-result',
+        title: 'دریافت نتیجه مثبت اسسمنت (Positive Assessment Outcome)',
+        description: 'دریافت نامه رسمی تاییدیه سوابق کاری و مدرک تحصیلی جهت درج در سامانه SkillSelect.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'این نامه سند اصلی احراز صلاحیت حرفه‌ای شما برای مهاجرت مهارتی استرالیا است.',
+        estimatedTime: '۱ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: ثبت اظهار علاقه (EOI) در سامانه SkillSelect و اسپانسری ایالتی',
+    duration: '۲ تا ۶ ماه',
+    summary: 'ثبت اطلاعات امتیازی در سامانه دولتی SkillSelect برای ویزاهای ۱۸۹، ۱۹۰ و ۴۹۱.',
+    steps: [
+      {
+        id: 'au-skillselect-eoi',
+        title: 'ثبت فرم آنلاین EOI در درگاه دولتی SkillSelect',
+        description: 'محاسبه مجموع امتیازات بر اساس سن (تا ۳۰ امتیاز)، زبان (تا ۲۰ امتیاز)، مدرک (تا ۱۵ امتیاز) و سابقه کار (تا ۱۵ امتیاز).',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'کف امتیاز ورود به پول ۶۵ امتیاز است، اما برای رقابت در ویزای ۱۹۰ ایالتی امتیاز بالای ۷۵ توصیه می‌شود.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'au-state-nomination',
+        title: 'ثبت درخواست اسپانسری ایالت‌های استرالیا (مانند ویکتوریا، نیوساوث‌ولز، استرالیای جنوبی)',
+        description: 'ثبت نام در پرتال‌های مهاجرتی ایالت‌های هدف بر اساس لیست مشاغل دارای اولویت هر ایالت (۵ امتیاز اضافی برای ساب‌کلاس ۱۹۰ و ۱۵ امتیاز برای ۴۹۱).',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'ایالت‌هایی مثل South Australia و Western Australia ظرفیت‌های بسیار مناسبی برای تخصص‌های فنی دارند.',
+        estimatedTime: '۲ تا ۴ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: دریافت دعوت‌نامه (ITA) و لاج ویزا در سامانه ImmiAccount',
+    duration: '۶۰ روز مهلت لاج',
+    summary: 'دریافت دعوت‌نامه رسمی، واریز هزینه دولتی لاج ویزا و آپلود مدارک در سامانه وزارت کشور استرالیا.',
+    steps: [
+      {
+        id: 'au-invitation-receive',
+        title: 'دریافت دعوت‌نامه رسمی اپلای (Invitation to Apply - ITA)',
+        description: 'ابلاغ دعوت‌نامه از طریق ایمیل SkillSelect با مهلت قانونی ۶۰ روزه جهت ارسال پرونده نهایی.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'به محض دریافت دعوت‌نامه، کلیه مدارک تکمیلی از جمله گواهی عدم سوءپیشینه را آماده کنید.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'au-immiaccount-lodge',
+        title: 'لاج پرونده ویزا در سامانه رسمی ImmiAccount و پرداخت هزینه ارزی دولتی',
+        description: 'بارگذاری کلیه فرم‌های ۱۲۲۱ و ۸۰، ترجمه‌ها، مدارک هویتی و پرداخت هزینه دولتی ویزا (حدود ۴,۶۴۰ دلار استرالیا برای متقاضی اصلی) با کارت اعتباری بین‌المللی.',
+        category: 'financial',
+        isIranSpecific: false,
+        tips: 'فرم‌های امنیتی ۸۰ و ۱۲۲۱ برای ایرانیان بررسی دقیق دارند و باید سوابق ۱۰ سال گذشته دقیقاً قید شود.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: مدیکال استرالیا (eMedical)، بیومتریک در تهران و صدور ویزا (Grant)',
+    duration: '۳ تا ۶ ماه',
+    summary: 'آزمایشات مدیکال در مراکز معتمد تهران، بیومتریک در VFS و صدور گرنت ویزای اقامت دائم.',
+    steps: [
+      {
+        id: 'au-medical-biometrics',
+        title: 'انجام معاینات پزشکی (HAP ID) در بیمارستان دی/آتیه تهران و بیومتریک در VFS',
+        description: 'مراجعه به پزشک معتمد استرالیا در تهران با کد HAP ID جهت آزمایشات خون، ریه و سلامت عمومی و انجام انگشت‌نگاری در کارگزاری VFS.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'نتایج مدیکال مستقیماً به صورت آنلاین از طریق سامانه eMedical به اداره مهاجرت استرالیا ارسال می‌شود.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'au-visa-grant',
+        title: 'صدور ویزای رسمی استرالیا (Visa Grant Notice)',
+        description: 'دریافت نامه الکترونیکی گرنت ویزا حاوی تاریخ نخستین ورود الزامی (First Entry Date) و شماره اقامت دائم.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'ویزای استرالیا کاملاً الکترونیکی است و نیازی به لیبل فیزیکی در گذرنامه ندارد.',
+        estimatedTime: '۳ تا ۶ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: پرواز به استرالیا، شماره مالیاتی (TFN)، بیمه همگانی Medicare و حساب بانکی',
+    duration: '۲ تا ۳ هفته',
+    summary: 'ورود به سیدنی/ملبورن، ثبت TFN، کارت بیمه درمانی رایگان مدیکر و شروع زندگی با بالاترین استاندارد رفاه.',
+    steps: [
+      {
+        id: 'au-flight-arrival',
+        title: 'پرواز به استرالیا و ورود به عنوان دارنده اقامت دائم (PR Holder)',
+        description: 'خرید بلیت پرواز (امارات، قطر یا ترکیش) و ورود به خاک استرالیا پیش از مهلت First Entry Date.',
+        category: 'arrival',
+        isIranSpecific: true,
+        tips: 'دارندگان ویزای ۱۹۰ و ۱۸۹ از بدو ورود تمام حقوق شهروندی استرالیا را دارا می‌باشند.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'au-tfn-medicare',
+        title: 'ثبت نام شماره پرونده مالیاتی (TFN) و کارت بیمه سلامت رایگان (Medicare)',
+        description: 'مراجعه آنلاین به اداره مالیات استرالیا (ATO) برای صدور Tax File Number و مراجعه به شعبه Services Australia جهت فعال‌سازی کارت مدیکر.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'با مدیکر، کلیه خدمات درمانی عمومی و بیمارستان‌های دولتی استرالیا کاملاً رایگان است.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'au-bank-super',
+        title: 'افتتاح حساب بانکی (Commonwealth / ANZ) و فعال‌سازی حساب بازنشستگی (Superannuation)',
+        description: 'افتتاح حساب جاری و لینک کردن آن به TFN جهت دریافت مستقیم حقوق کاری و واریز سهم ۱۱.۵٪ بازنشستگی قانونی کارفرما.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'درآمدها در استرالیا بر پایه دو هفته یک‌بار (Fortnightly) پرداخت می‌شود.',
+        estimatedTime: '۱ هفته'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۱۱. نقشه راه اختصاصی انگلیس (ویزای نیروی کار ماهر، تحصیلی و اسپانسرشیپ Home Office)
+function getUkRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: پیگیری‌های اداری و اسناد اولیه در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'بررسی پاسپورت، آزادسازی اصل دانشنامه‌ها در سامانه سجاد و ترجمه رسمی انگلیسی.',
+    steps: [
+      {
+        id: 'uk-passport',
+        title: 'بررسی اعتبار ۲ ساله گذرنامه و عدم سوءپیشینه',
+        description: 'مراجعه به دفاتر پلیس+۱۰ و اطمینان از سلامت فیزیکی گذرنامه جهت ثبت اطلاعات در پرتال gov.uk.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'گواهی عدم سوءپیشینه برای ویزای کار بریتانیا با ترجمه رسمی الزامی است.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      ...(!profile.education.isDegreeReleased && profile.education.degree !== 'highschool' ? [{
+        id: 'uk-sajjad',
+        title: 'آزادسازی دانشنامه و بارکد صحت در سامانه سجاد',
+        description: 'لغو تعهد آموزش رایگان در portal.saorg.ir جهت دریافت ریزنمرات رسمی و تاییدیه مدارک تحصیلی.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'مدارک ترجمه‌شده رسمی انگلیسی به تایید وزارت دادگستری و امور خارجه می‌رسد.',
+        estimatedTime: '۲ تا ۵ هفته'
+      }] : []),
+      {
+        id: 'uk-translation',
+        title: 'ترجمه رسمی مدارک به زبان انگلیسی با مهرهای کامل',
+        description: 'ترجمه دانشنامه، ریزنمرات، سوابق بیمه و شناسنامه به زبان انگلیسی.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'کلیه دانشگاه‌ها و مراجع بریتانیا ترجمه رسمی انگلیسی را به رسمیت می‌شناسند.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: آزمون زبان انگلیسی مورد تایید ویزای بریتانیا (IELTS for UKVI)',
+    duration: '۳ تا ۵ ماه',
+    summary: 'کسب کارنامه آزمون IELTS for UKVI یا PTE Academic UKVI متناسب با سطح ویزا.',
+    steps: [
+      {
+        id: 'uk-ielts-ukvi',
+        title: 'شرکت در آزمون رسمی زبان انگلیسی IELTS for UKVI یا PTE UKVI',
+        description: 'توجه فرمایید آزمون باید حتماً نوع UKVI با کد رهگیری اختصاصی SELT باشد.',
+        category: 'language',
+        isIranSpecific: true,
+        tips: 'برای ویزای کاری Skilled Worker حداقل سطح B1 و برای تحصیل در مقطع ارشد حداقل B2 (آیلتس ۶.۵) نیاز است.',
+        estimatedTime: '۳ تا ۵ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: رزومه استاندارد بریتانیا (UK CV) و تطبیق با کدهای شغلی SOC',
+    duration: '۱ تا ۲ ماه',
+    summary: 'تدوین رزومه ۲ صفحه‌ای بدون عکس طبق استاندارد کارفرمایان انگلیس و بهینه‌سازی لینکدین.',
+    steps: [
+      {
+        id: 'uk-cv-prep',
+        title: 'نگارش رزومه بر اساس استانداردهای بازار کار بریتانیا',
+        description: 'رزومه بریتانیایی نباید حاوی عکس، تاریخ تولد یا وضعیت تاهل باشد و باید کاملاً بر نتایج کلیدی و ارقام متمرکز شود.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'پروفایل لینکدین خود را با کدهای استاندارد شغلی بریتانیا هماهنگ نمایید.',
+        estimatedTime: '۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: فرآیند اپلای (دریافت گواهی اسپانسرشیپ CoS یا نامه CAS دانشگاه)',
+    duration: '۲ تا ۳ ماه',
+    summary: 'اخذ جاب‌آفر از کارفرمای دارای مجوز اسپانسر یا پذیرش تحصیلی با شناسه CAS.',
+    steps: [
+      country.pathwayType === 'work' ? {
+        id: 'uk-cos-offer',
+        title: 'اخذ پیشنهاد کاری و گواهی اسپانسرشیپ رسمی (Certificate of Sponsorship - CoS)',
+        description: 'کارفرما باید مجوز جذب نیروی خارجی (A-rated Sponsor License) داشته باشد و شماره مرجع الکترونیکی CoS را به نام شما صادر کند. حداقل حقوق قانونی سالانه ۳۸,۷۰۰ پوند الزامی است.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'شماره مرجع CoS یک شناسه یکتا است که برای ثبت پرونده ویزا در سایت gov.uk ضروری است.',
+        estimatedTime: '۲ تا ۳ ماه'
+      } : {
+        id: 'uk-cas-admission',
+        title: 'اخذ نامه قطعی پذیرش دانشگاهی و گواهی CAS (Confirmation of Acceptance for Studies)',
+        description: 'ثبت درخواست در دانشگاه‌های انگلستان، پرداخت ودیعه شهریه و دریافت شماره مرجع CAS دانشگاه.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'دوره‌های کارشناسی ارشد در انگلستان اکثراً ۱ ساله فشرده هستند که هزینه‌های اقامت را به شدت کاهش می‌دهد.',
+        estimatedTime: '۲ تا ۳ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: تمکن مالی ۲۸ روزه و پرداخت مالیات بیمه سلامت همگانی (IHS)',
+    duration: '۱ ماه',
+    summary: 'نگهداری موجودی مصوب در حساب بانکی به مدت ۲۸ روز مداوم و پرداخت آنلاین هزینه IHS.',
+    steps: [
+      {
+        id: 'uk-bank-28days',
+        title: 'تامین و حفظ مبلغ تمکن مالی به مدت ۲۸ روز پیوسته در بانک ایرانی',
+        description: 'موجودی حساب (حداقل ۱,۲۷۰ پوند برای کار یا شهریه + ۱۰ تا ۱۳ هزار پوند هزینه زندگی سالانه برای تحصیل) نباید حتی برای ۱ روز در بازه ۲۸ روزه زیر مبلغ مصوب بیاید.',
+        category: 'financial',
+        isIranSpecific: true,
+        tips: 'تاریخ صدور نامه تمکن باید حداکثر ۳۱ روز قبل از تاریخ سابمیت ویزا باشد.',
+        estimatedTime: '۲۸ روز'
+      },
+      {
+        id: 'uk-ihs-payment',
+        title: 'پرداخت آنلاین هزینه ویزا و عوارض سلامت همگانی (Immigration Health Surcharge - IHS)',
+        description: 'پرداخت هزینه ویزا و عوارض سالانه درمان انگلستان (۱,۰۳۵ پوند به ازای هر سال اقامت) با کارت ارزی بین‌المللی.',
+        category: 'financial',
+        isIranSpecific: false,
+        tips: 'با پرداخت IHS، کلیه خدمات درمانی بیمارستان‌های دولتی NHS انگلستان برای شما کاملاً رایگان خواهد بود.',
+        estimatedTime: '۱ روز'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: ثبت در پرتال gov.uk، بیومتریک در کارگزاری VFS تهران و صدور ویزا',
+    duration: '۳ تا ۶ هفته',
+    summary: 'تکمیل فرم آنلاین دولتی، وقت انگشت‌نگاری در VFS تهران و صدور ویزای ورود.',
+    steps: [
+      {
+        id: 'uk-vfs-tehran',
+        title: 'رزرو نوبت و حضور در کارگزاری VFS Global بریتانیا در تهران (مرکز هروی سنتر)',
+        description: 'تحویل اصل پاسپورت، برگه وقت، آپلود مدارک در پرتال و ثبت اثر انگشت و اسکن چهره.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'امکان انتخاب سرویس Priority Visa جهت رسیدگی سریع ۵ روز کاری نیز وجود دارد.',
+        estimatedTime: '۱ روز کاری'
+      },
+      {
+        id: 'uk-vignette-stamp',
+        title: 'دریافت گذرنامه حاوی لیبل ویزای ورود (Vignette ۹۰ روزه)',
+        description: 'دریافت برچسب ورود به بریتانیا در گذرنامه و نامه تصمیم‌گیری رسمی اداره مهاجرت (Decision Letter).',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'در بازه ۹۰ روزه مهلت دارید وارد بریتانیا شوید و کارت BRP خود را تحویل بگیرید.',
+        estimatedTime: '۳ تا ۵ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: پرواز به لندن، تحویل کارت BRP یا eVisa، دریافت کد ملی NI و ثبت‌نام NHS',
+    duration: '۲ تا ۳ هفته',
+    summary: 'ورود به خاک بریتانیا، دریافت کارت اقامت، شماره بیمه ملی (NINo) و ثبت‌نام در مرکز پزشکی GP.',
+    steps: [
+      {
+        id: 'uk-arrival-brp',
+        title: 'پرواز به لندن و تحویل کارت هوشمند فیزیکی اقامت (BRP) از باجه پست مرکزی',
+        description: 'ورود به بریتانیا و مراجعه ظرف ۱۰ روز به دفتر پستی مشخص‌شده در نامه Decision Letter جهت تحویل کارت اقامت (BRP) یا فعال‌سازی حساب کاربری دیجیتال eVisa.',
+        category: 'arrival',
+        isIranSpecific: true,
+        tips: 'سیستم اقامت انگلستان از اواخر ۲۰۲۴ به سمت سیستم تمام دیجیتال (eVisa) ارتقا یافته است.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'uk-nino-gp',
+        title: 'دریافت شماره بیمه ملی (National Insurance Number) و ثبت‌نام در پزشک خانواده (GP)',
+        description: 'ثبت درخواست آنلاین در پرتال gov.uk برای صدور NINo جهت آغاز فعالیت کاری قانونی و ثبت‌نام در نزدیک‌ترین مرکز سلامت محلی NHS GP.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'افتتاح حساب آنلاین در بانک‌های مدرن بریتانیا (Monzo، Revolut یا Starling) ظرف کمتر از چند ساعت انجام می‌پذیرد.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۱۲. نقشه راه اختصاصی آمریکا (لاتاری گرین‌کارت، ویزای تحصیلی F-1 و گرین‌کارت نخبگان EB-2 NIW)
+function getUsaRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: آماده‌سازی مدارک، ترجمه رسمی انگلیسی و تاییدات WES در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'پاسپورت با اعتبار بالا، آزادسازی اصل دانشنامه در سجاد، ارزیابی در WES و ترجمه رسمی.',
+    steps: [
+      {
+        id: 'us-passport',
+        title: 'بررسی و تمدید گذرنامه با اعتبار حداقل ۲ تا ۳ سال',
+        description: 'مراجعه به دفاتر پلیس+۱۰ و اطمینان از اعتبار پاسپورت جهت درج در فرم‌های سفارت و پورتال‌های مهاجرتی آمریکا.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'به دلیل طولانی بودن احتمالی فرآیند کلیرنس، اعتبار بالای پاسپورت آرامش‌بخش است.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      ...(!profile.education.isDegreeReleased && profile.education.degree !== 'highschool' ? [{
+        id: 'us-wes-eval',
+        title: 'آزادسازی سجاد و ارسال آنلاین مدارک به سازمان ارزشیابی WES آمریکا',
+        description: 'تایید مدارک در portal.saorg.ir و ارسال مستقیم ریزنمرات به موسسه World Education Services جهت تطبیق با سیستم آموزش عالی آمریکا.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'دانشگاه‌های آمریکا تاییدیه WES یا ارزیابی‌های معادل را مبنای معدل GPA 4.0 قرار می‌دهند.',
+        estimatedTime: '۳ تا ۶ هفته'
+      }] : []),
+      {
+        id: 'us-translation',
+        title: 'ترجمه رسمی مدارک هویتی، شغلی و تحصیلی به زبان انگلیسی',
+        description: 'ترجمه شناسنامه، کارت پایان خدمت، اسناد مالی و مقالات علمی با مهرهای دادگستری و امور خارجه.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'برای سفارت آمریکا اصل ترجمه‌های رسمی با پلمپ معتبر باید در روز مصاحبه همراه متقاضی باشد.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: تسلط بر زبان انگلیسی و آزمون‌های استاندارد (TOEFL / IELTS / GRE)',
+    duration: '۳ تا ۶ ماه',
+    summary: 'کسب نمره تافل ۹۰+ یا آیلتس ۷.۰+ و آزمون GRE برای رشته‌های فنی و مدیریتی در صورت نیاز دانشگاه.',
+    steps: [
+      {
+        id: 'us-exam-prep',
+        title: 'شرکت در آزمون تافل اینترنتی (TOEFL iBT) یا آیلتس آکادمیک',
+        description: 'کسب نمرات بالا در سنترهای رسمی سازمان سنجش در ایران جهت واجد شرایط شدن برای فاند کامل (TA/RA).',
+        category: 'language',
+        isIranSpecific: true,
+        tips: 'برای دریافت دستیار آموزشی (Teaching Assistantship)، نمره مهارت Speaking بالای ۲۴ در تافل بسیار حائز اهمیت است.',
+        estimatedTime: '۳ تا ۵ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: فرآیند اپلای (لاتاری گرین‌کارت / اخذ فرم I-20 تحصیلی / پتیشن نخبگی NIW)',
+    duration: '۲ تا ۴ ماه',
+    summary: 'ثبت‌نام سالانه لاتاری، اخذ پذیرش دانشگاهی با فاند، یا تدوین پرونده نخبگان EB-2 NIW.',
+    steps: [
+      country.pathwayType === 'job_seeker' ? {
+        id: 'us-lottery-apply',
+        title: 'ثبت‌نام سالانه در پورتال رسمی لاتاری گرین‌کارت آمریکا (dvprogram.state.gov)',
+        description: 'ثبت‌نام کاملاً رایگان در مهر و آبان با عکس استاندارد ۶۰۰×۶۰۰، ذخیره کد تاییدیه (Confirmation Number)، استعلام نتیجه در اردیبهشت ماه، و در صورت قبولی تکمیل سریع فرم برندگان (DS-260).',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'ثبت‌نام لاتاری نیاز به هیچ موسسه یا پرداخت دلاری ندارد و شانس دریافت مستقیم گرین‌کارت دائم آمریکا را فراهم می‌آورد.',
+        estimatedTime: 'مهر و آبان'
+      } : country.pathwayType === 'study' ? {
+        id: 'us-study-apply',
+        title: 'مکاتبه با اساتید (Cold Email)، اپلای در پورتال دانشگاه و اخذ فرم رسمی I-20',
+        description: 'ارسال مدارک، انگیزه‌نامه قوی و توصیه‌نامه‌ها، جلب فاند کامل پژوهشی و دریافت فایل قانونی فرم I-20 از دانشگاه.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'در فرم I-20 حتماً نحوه پوشش مالی شهریه و هزینه زندگی قید شده باشد.',
+        estimatedTime: '۲ تا ۴ ماه'
+      } : {
+        id: 'us-niw-petition',
+        title: 'نگارش دادخواست و نامه‌های توصیه تخصصی جهت پتیشن نخبگان (EB-2 NIW)',
+        description: 'تدوین پرونده حقوقی فرم I-140 بر اساس ۳ شرط قانون مهاجرت آمریکا دال بر اهمیت بنیادین تخصص شما برای ایالات متحده.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'دریافت ۳ تا ۵ توصیه‌نامه از چهره‌های بین‌المللی شاخص کلید تایید پرونده NIW در USCIS است.',
+        estimatedTime: '۳ تا ۵ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: پرداخت کارمزد سامانه نظارت دانشجویی (SEVIS Fee I-901)',
+    duration: '۱ هفته',
+    summary: 'واریز اینترنتی کارمزد ۳۵۰ دلاری سامانه SEVIS وزارت امنیت میهن آمریکا (DHS).',
+    steps: [
+      {
+        id: 'us-sevis-payment',
+        title: 'پرداخت هزینه SEVIS I-901 در سایت fmjfee.com با کردیت‌کارت ارزی',
+        description: 'ورود شماره SEVIS ID مندرج در بالای فرم I-20 و پرداخت کارمزد ۳۵۰ دلاری دولتی.',
+        category: 'financial',
+        isIranSpecific: false,
+        tips: 'پرینت رسید الکترونیکی تایید پرداخت SEVIS (I-901 Confirmation) در روز مصاحبه الزامی است.',
+        estimatedTime: '۱ تا ۲ روز'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: تکمیل فرم آنلاین DS-160 و رزرو وقت مصاحبه در سفارت آمریکا',
+    duration: '۱ تا ۲ ماه',
+    summary: 'تکمیل دقیق فرم امنیتی DS-160 و وقت‌گیری در کنسولگری‌های آمریکا در آنکارا، ایروان یا دبی.',
+    steps: [
+      {
+        id: 'us-ds160-fill',
+        title: 'تکمیل دقیق و صادقانه فرم آنلاین ویزای غیرمهاجرتی DS-160',
+        description: 'درج سوابق کاری، تحصیلی، سفرهای خارجی و اطلاعات نظام وظیفه در سایت ceac.state.gov.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'اطلاعات این فرم مستقیماً وارد سیستم استعلام امنیتی واشنگتن می‌شود؛ صداقت و دقت مطلق حیاتی است.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'us-embassy-appointment',
+        title: 'رزرو نوبت مصاحبه کنسولی در سفارت آمریکا (ایروان، آنکارا یا دبی/ابوظبی)',
+        description: 'ایجاد حساب کاربری در پورتال وقت‌گیری رسمی (usvisascheduling / ais.usvisa-info) و پرداخت هزینه ۱۸۵ دلاری MRV Fee.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'سفارت آمریکا در ایروان و آنکارا دارای آفیسر‌های فارسی‌زبان مسلط هستند.',
+        estimatedTime: '۱ تا ۲ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: مصاحبه حضوری در سفارت آمریکا، کلیرنس امنیتی (AP) و صدور ویزا',
+    duration: '۱ تا ۳ ماه',
+    summary: 'حضور در مصاحبه، پاسخ به سوالات آفیسر، بررسی اداری و امنیتی و الصاق ویزای ورود.',
+    steps: [
+      {
+        id: 'us-interview-attend',
+        title: 'حضور در روز مصاحبه در کنسولگری آمریکا با مدارک، تمکن مالی و رزومه آکادمیک',
+        description: 'مصاحبه کوتاه ۵ تا ۱۰ دقیقه‌ای با آفیسر کنسولی درباره رشته تحصیلی، برنامه کاری و اهداف بازگشت.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'پاسخ‌ها باید شفاف، کوتاه و بدون استرس باشد؛ بر جنبه‌های غیرنظامی و صلح‌آمیز تحقیقات تاکید کنید.',
+        estimatedTime: '۱ روز کاری'
+      },
+      {
+        id: 'us-clearance-ap',
+        title: 'طی شدن فرآیند بررسی اداری و امنیتی (Administrative Processing / 221g)',
+        description: 'استعلام صلاحیت امنیتی در واشنگتن دی‌سی و دریافت ایمیل نهایی پاس‌ریکوئست (Pass Request).',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'زمان کلیرنس برای ایرانیان معمولاً بین ۳ تا ۸ هفته متغیر است.',
+        estimatedTime: '۴ تا ۸ هفته'
+      },
+      {
+        id: 'us-visa-stamp',
+        title: 'پیکاپ پاسپورت و چسبانده شدن ویزای رسمی ایالات متحده در گذرنامه',
+        description: 'ارسال پاسپورت از طریق آژانس‌های معتبر به سفارت و دریافت گذرنامه ویزا شده.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'تاریخ اعتبار و نوع ویزا (سینگل یا مالتیپل) را در بدو تحویل بررسی نمایید.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: پرواز به آمریکا، فرم ورود I-94، صدور کارت شماره تامین اجتماعی (SSN) و STEM OPT',
+    duration: '۳ تا ۴ هفته',
+    summary: 'ورود به خاک آمریکا، اخذ کارت ملی مالیاتی SSN، افتتاح حساب بانکی و شروع تحصیل/کار.',
+    steps: [
+      {
+        id: 'us-arrival-i94',
+        title: 'پرواز به آمریکا و ثبت ورود الکترونیکی در مرز گمرک (CBP I-94)',
+        description: 'ورود به یکی از فرودگاه‌های بین‌المللی آمریکا (JFK، لس‌آنجلس، شیکاگو، بوستون) و ثبت مهر ورود در سامانه آنلاین i94.cbp.dhs.gov.',
+        category: 'arrival',
+        isIranSpecific: true,
+        tips: 'فرم الکترونیکی I-94 مدرک رسمی حضور قانونی شما در آمریکا است و باید آن را دانلود و پرینت فرمایید.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'us-ssn-bank',
+        title: 'مراجعه به اداره تامین اجتماعی جهت دریافت کارت شماره ملی (Social Security Number - SSN)',
+        description: 'کارت ۹ رقمی SSN شاهرگ حیاتی زندگی اقتصادی در آمریکاست که برای افتتاح حساب بانکی، دریافت حقوق، اجاره خانه و ساخت سابقه اعتباری (Credit Score) الزامی است.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'دانشجویان از طریق کار پاره‌وقت در دانشگاه (On-campus job) به راحتی واجد شرایط صدور SSN می‌شوند.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۱۳. نقشه راه اختصاصی هلند (مهاجر ماهر Kennismigrant، ویزای جستجوی کار Zoekjaar و تحصیل)
+function getNetherlandsRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: پیگیری‌های اداری و اسناد هویتی در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'بررسی اعتبار پاسپورت، آزادسازی اصل دانشنامه‌ها در سامانه سجاد و ترجمه رسمی انگلیسی.',
+    steps: [
+      {
+        id: 'nl-passport',
+        title: 'اطمینان از اعتبار ۲ ساله گذرنامه',
+        description: 'مراجعه به پلیس+۱۰ و اطمینان از سلامت گذرنامه جهت ثبت اطلاعات در پرتال اداره مهاجرت هلند (IND).',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'هلند برای اقامت کاری کارت الکترونیکی صادر می‌کند که تا سقف اعتبار پاسپورت معتبر است.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      ...(!profile.education.isDegreeReleased && profile.education.degree !== 'highschool' ? [{
+        id: 'nl-sajjad',
+        title: 'لغو تعهد آموزش رایگان در سامانه سجاد و تاییدات دولتی',
+        description: 'اخذ بارکد صحت ۲۰ رقمی جهت پلمپ مدارک با مهرهای دادگستری و وزارت امور خارجه.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'اداره مهاجرت هلند (IND) ترجمه رسمی انگلیسی را با کمال میل می‌پذیرد.',
+        estimatedTime: '۲ تا ۵ هفته'
+      }] : []),
+      {
+        id: 'nl-translation',
+        title: 'ترجمه رسمی کلیه مدارک به زبان انگلیسی با مهرهای کامل',
+        description: 'ترجمه رسمی شناسنامه، دانشنامه‌ها، ریزنمرات و گواهی‌های شغلی به زبان انگلیسی.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'در هلند تمامی مکاتبات حرفه‌ای و اداری شرکت‌های های‌تک به زبان انگلیسی انجام می‌شود.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: تسلط بر زبان انگلیسی بین‌المللی',
+    duration: '۳ تا ۵ ماه',
+    summary: 'کسب نمره آیلتس ۶.۵+ یا تافل ۹۰+؛ هلند بالاترین درصد تسلط به انگلیسی را در بین کشورهای غیرانگلیسی‌زبان دارد.',
+    steps: [
+      {
+        id: 'nl-lang-prep',
+        title: 'آمادگی و شرکت در آزمون رسمی آیلتس یا تافل',
+        description: 'زبان انگلیسی زبان کاری رایج در غول‌های فناوری هلند مانند ASML، Booking.com، فیلیپس و ادین است.',
+        category: 'language',
+        isIranSpecific: true,
+        tips: 'برای ویزای کاری هلند نیازی به یادگیری زبان هلندی نیست؛ تسلط به مکالمه انگلیسی کافی است.',
+        estimatedTime: '۳ تا ۵ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: رزومه مدرن اروپایی و تدوین پورتفولیو در اکوسیستم های‌تک هلند',
+    duration: '۱ تا ۲ ماه',
+    summary: 'تنظیم رزومه و لینکدین منطبق بر فرهنگ کاری منعطف هلند و ارسال برای شرکت‌های آمستردام و آیندهوون.',
+    steps: [
+      {
+        id: 'nl-resume-prep',
+        title: 'تدوین رزومه و حضور فعال در لینکدین بین‌المللی',
+        description: 'شرکت‌های هلندی به استقلال فردی، مهارت‌های فنی قابل اثبات و توانایی کار تیمی ارزش ویژه‌ای می‌دهند.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'پورتال‌های کاریابی هلند نظیر Monsterboard.nl و پلتفرم‌های بین‌المللی را به دقت دنبال کنید.',
+        estimatedTime: '۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: فرآیند اپلای (جاب‌آفر طرح مهاجر ماهر Kennismigrant یا ویزای Zoekjaar)',
+    duration: '۲ تا ۳ ماه',
+    summary: 'عقد قرارداد با اسپانسر رسمی IND یا اخذ ویزای ۱ ساله جستجوی کار فارغ‌التحصیلان برتر دنیا.',
+    steps: [
+      country.pathwayType === 'work' ? {
+        id: 'nl-kennismigrant-offer',
+        title: 'دریافت جاب‌آفر از کارفرمای تاییدشده اداره مهاجرت هلند (IND Recognised Sponsor)',
+        description: 'کارفرما باید قرارداد استخدامی با حداقل حقوق مصوب قانون کار هلند منعقد کرده و مستقیماً پرونده اقامت شما را در پرتال IND ثبت نماید.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'طرح Kennismigrant هلند سریع‌ترین فرآیند رسیدگی و صدور مجوز اقامت را در میان کشورهای اتحادیه اروپا دارد.',
+        estimatedTime: '۲ تا ۳ ماه'
+      } : {
+        id: 'nl-study-apply',
+        title: 'اخذ پذیرش از دانشگاه‌های طراز اول هلند (TU Delft، آمستردام، آیندهوون، لیدن)',
+        description: 'ارسال اپلیکیشن تحصیلی به دانشگاه و دریافت نامه قطعی قبولی و شروع مراحل اقامت دانشجویی توسط دانشگاه.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'دانشجویان فارغ‌التحصیل در هلند بلافاصله ویزای ۱ ساله Zoekjaar برای جستجوی کار دریافت می‌کنند.',
+        estimatedTime: '۲ تا ۳ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: ثبت درخواست اقامت توسط کارفرما در اداره مهاجرت هلند (IND)',
+    duration: '۲ تا ۴ هفته',
+    summary: 'بررسی آنلاین پرونده توسط IND و صدور نامه تاییدیه اقامت و مجوز ورود (MVV).',
+    steps: [
+      {
+        id: 'nl-ind-process',
+        title: 'ثبت درخواست مجوز ورود و اقامت (TEV Procedure) در سامانه الکترونیکی IND',
+        description: 'کارفرمای اسپانسر کلیه مدارک و قرارداد را در پرتال IND بارگذاری کرده و هزینه دولتی را پرداخت می‌نماید.',
+        category: 'financial',
+        isIranSpecific: false,
+        tips: 'تصمیم‌گیری IND معمولاً ظرف کمتر از ۲ تا ۳ هفته صادر می‌گردد.',
+        estimatedTime: '۲ تا ۳ هفته'
+      },
+      {
+        id: 'nl-ind-approval',
+        title: 'دریافت نامه رسمی تاییدیه اداره مهاجرت هلند (IND Approval Letter)',
+        description: 'ابلاغ نتیجه مثبت پرونده به شما و ارسال همزمان تاییدیه به سفارت پادشاهی هلند در تهران.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'با این نامه می‌توانید فوراً نوبت تحویل پاسپورت در کارگزاری VFS تهران را رزرو فرمایید.',
+        estimatedTime: '۱ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: وقت کارگزاری VFS Global هلند در تهران و الصاق برچسب ویزای ورود MVV',
+    duration: '۲ تا ۴ هفته',
+    summary: 'مراجعه به VFS تهران (هروی سنتر)، ثبت بیومتریک و چسبانده شدن ویزای ورود نوع D در گذرنامه.',
+    steps: [
+      {
+        id: 'nl-vfs-appointment',
+        title: 'رزرو نوبت و حضور در مرکز VFS Global هلند در تهران جهت الصاق ویزای MVV',
+        description: 'تحویل اصل گذرنامه، عکس بیومتریک و پرینت نامه تاییدیه IND جهت صدور ویزای ورود موقت (Machtiging tot voorlopig verblijf).',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'ویزای MVV به شما اجازه سفر به هلند و تحویل کارت هوشمند فیزیکی اقامت را می‌دهد.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'nl-mvv-stamp',
+        title: 'دریافت پاسپورت حاوی ویزای MVV و آماده‌سازی پرواز',
+        description: 'تحویل پاسپورت با برچسب ویزای شنگن ملی نوع D هلند.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'اطلاعات درج شده در لیبل ویزا را بررسی و با بلیت پرواز هماهنگ نمایید.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: پرواز به آمستردام، شهرداری (Gemeente)، کد ملی BSN، هویت دیجیتال DigiD و معافیت ۳۰٪ مالیات',
+    duration: '۲ تا ۳ هفته',
+    summary: 'ورود به هلند، دریافت کد ملی شهروندی، کارت سلامت، شناسه دولتی DigiD و ثبت درخواست معافیت ۳۰ درصدی.',
+    steps: [
+      {
+        id: 'nl-arrival-bsn',
+        title: 'مراجعه به شهرداری محلی (Gemeente) و ثبت آدرس جهت دریافت شماره ملی (BSN)',
+        description: 'کد BSN (Burgerservicenummer) کلید اصلی تمام امور اداری، قرارداد کار، افتتاح حساب بانکی و بیمه سلامت هلند است.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'اطمینان حاصل فرمایید قرارداد اجاره مسکن شما قابلیت ثبت رسمی آدرس در شهرداری را دارد.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'nl-digid-30ruling',
+        title: 'فعال‌سازی هویت دیجیتال (DigiD)، افتتاح حساب بانکی و درخواست ۳۰٪ معافیت مالیاتی (30% Ruling)',
+        description: 'افتتاح حساب در بانک‌های معتبر (ING یا ABN AMRO)، فعال‌سازی DigiD بر روی تلفن همراه و ثبت درخواست مزیت طلایی معافیت مالیاتی ۳۰ درصدی به همراه کارفرما در اداره مالیات هلند (Belastingdienst).',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'با معافیت مالیاتی ۳۰ درصدی، بخش بزرگی از حقوق شما معاف از مالیات پرداخت می‌شود که درآمد خالص فوق‌العاده‌ای ایجاد می‌کند.',
+        estimatedTime: '۲ هفته'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۱۴. نقشه راه اختصاصی فرانسه (ویزای پاسپورت تلنت، کمپیوس فرانس و تحصیل رایگان)
+function getFranceRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: پیگیری‌های اداری و اسناد هویتی در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'بررسی پاسپورت، آزادسازی اصل دانشنامه‌ها در سامانه سجاد و ترجمه رسمی به زبان فرانسوی یا انگلیسی.',
+    steps: [
+      {
+        id: 'fr-passport',
+        title: 'بررسی سلامت و اعتبار ۲ ساله گذرنامه',
+        description: 'اقدام جهت صدور یا تمدید پاسپورت در پلیس+۱۰ جهت ثبت اطلاعات در سامانه کمپیوس فرانس و ویزای فرانسه.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'اعتبار پاسپورت برای صدور ویزای بلندمدت دانشجویی یا کاری VLS-TS اهمیت دارد.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      ...(!profile.education.isDegreeReleased && profile.education.degree !== 'highschool' ? [{
+        id: 'fr-sajjad',
+        title: 'لغو تعهد آموزش رایگان در سامانه سجاد و بارکد صحت',
+        description: 'دریافت تاییدیه وزارت علوم یا بهداشت در سامانه portal.saorg.ir جهت تحویل به دارالترجمه رسمی فرانسوی.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'سفارت فرانسه به تاییدات کامل دادگستری و وزارت امور خارجه روی مدارک تحصیلی اهمیت می‌دهد.',
+        estimatedTime: '۲ تا ۵ هفته'
+      }] : []),
+      {
+        id: 'fr-translation',
+        title: 'ترجمه رسمی کلیه مدارک به زبان فرانسوی با مهرهای کامل دادگستری و خارجه',
+        description: 'تحویل مدارک هویتی، شغلی و تحصیلی به دارالترجمه رسمی مورد تایید سفارت فرانسه.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'برای دوره‌های تحصیلی انگلیسی‌زبان، ترجمه انگلیسی مدارک نیز پذیرفته می‌شود.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: تسلط بر زبان فرانسوی (TCF/DELF) یا انگلیسی معتبر',
+    duration: '۳ تا ۶ ماه',
+    summary: 'کسب مدرک B2 زبان فرانسوی (TCF یا DELF) یا مدرک آیلتس ۶.۵ برای دوره‌های انگلیسی‌زبان.',
+    steps: [
+      {
+        id: 'fr-lang-exam',
+        title: 'شرکت در آزمون رسمی زبان فرانسوی (TCF Tout Public / DELF B2) در سنترهای تهران',
+        description: 'ثبت‌نام در سنتر کانون زبان ایران یا بخش فرهنگی سفارت جهت اخذ کارنامه رسمی زبان فرانسوی.',
+        category: 'language',
+        isIranSpecific: true,
+        tips: 'مدرک زبان B2 فرانسوی امکان تحصیل کاملاً رایگان در دانشگاه‌های دولتی فرانسه را فراهم می‌آورد.',
+        estimatedTime: '۳ تا ۶ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: ایجاد حساب در درگاه رسمی کمپیوس فرانس ایران (Etudes en France)',
+    duration: '۱ تا ۲ ماه',
+    summary: 'بارگذاری مدارک در سامانه pastel.diplomatie.gouv.fr و انتخاب رشته‌ها و دانشگاه‌های فرانسه.',
+    steps: [
+      {
+        id: 'fr-campus-account',
+        title: 'ثبت نام و ایجاد پرونده الکترونیکی در پورتال کمپیوس فرانس ایران',
+        description: 'بارگذاری ترجمه‌ها، کارنامه زبان و سوابق تحصیلی و انتخاب اولویت‌های دانشگاهی در سامانه متمرکز وزارت خارجه فرانسه.',
+        category: 'application',
+        isIranSpecific: true,
+        tips: 'ددلاین ارسال مدارک در کمپیوس فرانس معمولاً در اوایل زمستان برای ورودی سپتامبر سال بعد است.',
+        estimatedTime: '۲ تا ۴ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: مصاحبه حضوری در مرکز کمپیوس فرانس تهران و دریافت پذیرش رسمی / قرارداد تلنت',
+    duration: '۱ تا ۲ ماه',
+    summary: 'انجام مصاحبه حضوری در مرکز کمپیوس فرانس تهران و اخذ تاییدیه تحصیلی یا عقد قرارداد پاسپورت تلنت.',
+    steps: [
+      country.pathwayType === 'work' ? {
+        id: 'fr-talent-contract',
+        title: 'عقد قرارداد استخدامی طرح پاسپورت تلنت با شرکت فرانسوی (Passeport Talent)',
+        description: 'کارفرما قرارداد کاری با حداقل حقوق مصوب سالانه تنظیم کرده و کد پرونده اقامت تلنت ۴ ساله را آغاز می‌کند.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'طرح پاسپورت تلنت فرانسه نیازی به دریافت تاییدیه اداره کار فرانسه (DIRECCTE) ندارد.',
+        estimatedTime: '۲ تا ۳ ماه'
+      } : {
+        id: 'fr-campus-interview',
+        title: 'حضور در مصاحبه تخصصی و انگیزشی در مرکز کمپیوس فرانس تهران (خیابان نوفل‌لوشاتو)',
+        description: 'بررسی پرونده توسط کارشناس ایرانی-فرانسوی مرکز، گفتگو درباره اهداف تحصیلی و دریافت کد تاییدیه ویزا (Accord Préalable).',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'تسلط بر بیان اهداف تحصیلی و شغلی و توجیه مالی سفر نقشی کلیدی در موفقیت مصاحبه دارد.',
+        estimatedTime: '۱ روز کاری'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: تمکن مالی، حساب بانکی و آماده‌سازی هزینه‌های قانونی',
+    duration: '۲ تا ۳ هفته',
+    summary: 'صدور تمکن مالی بانکی لاتین معادل حداقل ۶۱۵ یورو در ماه (حدود ۷,۵۰۰ تا ۸,۵۰۰ یورو سالانه).',
+    steps: [
+      {
+        id: 'fr-financial-proof',
+        title: 'صدور گواهی تمکن مالی لاتین از بانک ایرانی یا تعهدنامه مالی حامی',
+        description: 'گواهی مانده موجودی به زبان انگلیسی از بانک‌های رسمی ایران با نرخ برابری ارز رسمی.',
+        category: 'financial',
+        isIranSpecific: true,
+        tips: 'در صورت داشتن حامی مالی در فرانسه یا ایران، فیش حقوقی و مدارک شغلی حامی نیز باید ضمیمه گردد.',
+        estimatedTime: '۳ تا ۵ روز'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: وقت کارگزاری VFS Global فرانسه در تهران و صدور ویزای VLS-TS',
+    duration: '۳ تا ۶ هفته',
+    summary: 'رزرو نوبت مرکز VFS تهران (هروی سنتر)، تحویل پوشه مدارک، بیومتریک و الصاق ویزای ورود.',
+    steps: [
+      {
+        id: 'fr-vfs-appointment',
+        title: 'حضور در مرکز VFS Global فرانسه در تهران جهت تحویل پرونده و بیومتریک',
+        description: 'ارائه برگه تاییدیه France-Visas، رسید کمپیوس فرانس، پاسپورت و ثبت ۱۰ اثر انگشت و اسکن چهره.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'پوشه مدارک را بر اساس ترتیب اعلامی چک‌لیست رسمی France-Visas مرتب فرمایید.',
+        estimatedTime: '۱ روز کاری'
+      },
+      {
+        id: 'fr-visa-stamp',
+        title: 'دریافت گذرنامه حاوی برچسب ویزای بلندمدت اقامتی (VLS-TS)',
+        description: 'صدور ویزای ورود بلندمدت که همزمان به عنوان اجازه اقامت رسمی در سال اول اقامت در فرانسه عمل می‌کند.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'این ویزا به شما حق کار دانشجویی پاره‌وقت و سفر آزادانه در حوزه شنگن را اعطا می‌نماید.',
+        estimatedTime: '۳ تا ۵ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: پرواز به فرانسه، تایید آنلاین در ANEF، کمک‌هزینه مسکن CAF و بیمه Ameli',
+    duration: '۲ تا ۳ هفته',
+    summary: 'ورود به پاریس، ولید کردن ویزا در سامانه اداره مهاجرت، دریافت کمک‌هزینه ماهانه مسکن و کارت بیمه رایگان.',
+    steps: [
+      {
+        id: 'fr-anef-validation',
+        title: 'اعتبارسنجی آنلاین ویزا در درگاه اداره مهاجرت فرانسه (ANEF) ظرف ۳ ماه اول',
+        description: 'ورود به سامانه administration-etrangers-en-france.interieur.gouv.fr، ثبت اطلاعات ورود و پرداخت آنلاین مالیات تمبر (Taxe de séjour).',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'بدون ولید کردن ویزا در سامانه ANEF، ویزای شما پس از ۹۰ روز از درجه اعتبار ساقط خواهد شد.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'fr-caf-ameli',
+        title: 'ثبت درخواست کمک‌هزینه مسکن دولتی (CAF) و ثبت‌نام در بیمه سلامت رایگان (Ameli)',
+        description: 'دولت فرانسه به کلیه دانشجویان بین‌المللی ماهانه بین ۱۰۰ تا ۲۵۰ یورو کمک‌هزینه نقدی اجاره مسکن (APL) از طریق سازمان CAF پرداخت می‌کند. همچنین ثبت‌نام در سامانه سلامت Ameli جهت صدور Carte Vitale رایگان انجام می‌پذیرد.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'فرانسه از سخاوتمندترین کشورهای اروپایی در حمایت رفاهی از دانشجویان بین‌المللی است.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۱۵. نقشه راه اختصاصی ژاپن (ویزای متخصصان بسیار ماهر HSP، بورسیه دولتی MEXT و گواهی COE)
+function getJapanRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: پیگیری‌های اداری و اسناد اولیه در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'بررسی پاسپورت، آزادسازی اصل دانشنامه‌ها در سامانه سجاد و ترجمه رسمی انگلیسی مدارک.',
+    steps: [
+      {
+        id: 'jp-passport',
+        title: 'بررسی اعتبار و سلامت فیزیکی گذرنامه',
+        description: 'مراجعه به دفاتر پلیس+۱۰ جهت صدور یا تمدید پاسپورت با حداقل ۱۸ ماه اعتبار.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'اطلاعات پاسپورت باید دقیقاً در گواهی صلاحیت اقامت ژاپن (COE) درج گردد.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      ...(!profile.education.isDegreeReleased && profile.education.degree !== 'highschool' ? [{
+        id: 'jp-sajjad',
+        title: 'لغو تعهد آموزش رایگان در سامانه سجاد و اخذ بارکد صحت',
+        description: 'دریافت تاییدیه وزارت علوم یا بهداشت در سامانه portal.saorg.ir جهت ترجمه رسمی مدارک تحصیلی.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'سفارت ژاپن مدارک تحصیلی تایید شده با مهرهای رسمی دادگستری و امور خارجه را می‌پذیرد.',
+        estimatedTime: '۲ تا ۵ هفته'
+      }] : []),
+      {
+        id: 'jp-translation',
+        title: 'ترجمه رسمی کلیه مدارک به زبان انگلیسی با مهرهای کامل',
+        description: 'ترجمه دانشنامه، ریزنمرات، سوابق بیمه و شناسنامه به زبان انگلیسی.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'نیازی به ترجمه به زبان ژاپنی نیست؛ مراجع مهاجرتی ژاپن زبان انگلیسی را به رسمیت می‌شناسند.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: تسلط بر زبان انگلیسی و آشنایی مقدماتی با ژاپنی',
+    duration: '۳ تا ۵ ماه',
+    summary: 'کسب نمره آیلتس ۶.۵+ و یادگیری مکالمه مقدماتی ژاپنی (سطح JLPT N5/N4).',
+    steps: [
+      {
+        id: 'jp-lang-prep',
+        title: 'آمادگی زبان انگلیسی و یادگیری عبارات کاربردی ژاپنی',
+        description: 'در شرکت‌های غول فناوری ژاپن (مانند راکوتن و لاین) زبان کاری تماماً انگلیسی است؛ اما ژاپنی پایه زندگی روزمره را بسیار دلپذیر می‌کند.',
+        category: 'language',
+        isIranSpecific: false,
+        tips: 'داشتن مدرک آزمون رسمی JLPT در جدول امتیازات متخصصان بسیار ماهر (HSP) تا ۱۵ امتیاز اضافی دارد.',
+        estimatedTime: '۳ تا ۵ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: رزومه استاندارد سبک ژاپنی و ارزیابی جدول امتیازات HSP',
+    duration: '۱ تا ۲ ماه',
+    summary: 'تنظیم رزومه و بررسی کسب حداقل ۷۰ تا ۸۰ امتیاز در سیستم متخصصان بسیار ماهر ژاپن.',
+    steps: [
+      {
+        id: 'jp-resume-prep',
+        title: 'تنظیم رزومه تخصصی منطبق بر ساختار شرکت‌های فناوری ژاپن',
+        description: 'تمرکز بر مهارت‌های فنی اثبات‌شده، دقت در کار، مسئولیت‌پذیری و انگیزه برای یادگیری فرهنگ ژاپنی.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'کسب ۸۰ امتیاز در جدول HSP امکان دریافت اقامت دائم ژاپن را ظرف تنها ۱ سال فراهم می‌آورد.',
+        estimatedTime: '۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: فرآیند اپلای (اخذ جاب‌آفر از کارفرمای ژاپنی یا قبولی در بورسیه MEXT)',
+    duration: '۲ تا ۴ ماه',
+    summary: 'عقد قرارداد کاری با شرکت ژاپنی یا پذیرش در دانشگاه‌های دولتی برتر با فاند MEXT.',
+    steps: [
+      country.pathwayType === 'work' ? {
+        id: 'jp-job-offer',
+        title: 'دریافت پیشنهاد کاری معتبر از شرکت مستقر در ژاپن (مانند توکیو یا اوزاکا)',
+        description: 'انجام مصاحبه‌های فنی آنلاین به زبان انگلیسی و امضای قرارداد کاری با حداقل درآمد قانونی سالانه.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'کارفرمایان ژاپنی کلیه تشریفات اخذ گواهی صلاحیت اقامت (COE) را در خاک ژاپن تقبل می‌کنند.',
+        estimatedTime: '۲ تا ۴ ماه'
+      } : {
+        id: 'jp-mext-apply',
+        title: 'ثبت‌نام در فراخوان بورسیه دولتی فول‌فاند ژاپن (MEXT Embassy Recommendation)',
+        description: 'ارائه مدارک، نگارش پروپوزال علمی، شرکت در آزمون کتبی و مصاحبه حضوری در سفارت ژاپن در تهران.',
+        category: 'application',
+        isIranSpecific: true,
+        tips: 'بورسیه MEXT معافیت ۱۰۰٪ شهریه، بلیت رایگان هواپیما و حقوق ماهانه عالی به شما اعطا می‌کند.',
+        estimatedTime: 'اردیبهشت و خرداد'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: صدور گواهی صلاحیت اقامت (Certificate of Eligibility - COE) در ژاپن',
+    duration: '۱ تا ۲ ماه',
+    summary: 'ثبت درخواست توسط کارفرما/دانشگاه در اداره مهاجرت منطقه‌ای ژاپن و صدور برگه رسمی COE.',
+    steps: [
+      {
+        id: 'jp-coe-issue',
+        title: 'صدور گواهی رسمی صلاحیت اقامت (COE) توسط اداره مهاجرت توکیو',
+        description: 'بررسی مدارک، قرارداد و اعتبار شرکت توسط اداره مهاجرت ژاپن و صدور برگه رسمی هولوگرام‌دار COE.',
+        category: 'financial',
+        isIranSpecific: false,
+        tips: 'اصل برگه COE از ژاپن با پست بین‌المللی DHL به آدرس شما در ایران ارسال می‌شود.',
+        estimatedTime: '۴ تا ۸ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: تحویل مدارک به سفارت ژاپن در تهران (خیابان وزرا) و صدور سریع ویزا',
+    duration: '۱ تا ۲ هفته',
+    summary: 'مراجعه به سفارت ژاپن در تهران با اصل برگه COE و صدور ویزای ورود ظرف کمتر از ۵ روز کاری.',
+    steps: [
+      {
+        id: 'jp-embassy-tehran',
+        title: 'مراجعه حضوری به بخش کنسولی سفارت پادشاهی ژاپن در تهران (خیابان وزرا)',
+        description: 'تحویل اصل پاسپورت، اصل برگه COE، عکس و فرم ویزای سفارت ژاپن بدون نیاز به صف‌های طولانی.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'صدور ویزا در صورت داشتن برگه COE تقریباً قطعی بوده و تشریفات بوروکراتیک بسیار کوتاهی دارد.',
+        estimatedTime: '۳ تا ۵ روز کاری'
+      },
+      {
+        id: 'jp-visa-stamp',
+        title: 'دریافت پاسپورت ویزا شده و ویزای ورود رسمی ژاپن',
+        description: 'الصاق لیبل ویزای ژاپن در گذرنامه با مهلت ورود ۳ ماهه.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'تاریخ اعتبار ویزای ورود را بررسی کرده و بلیت پرواز را هماهنگ نمایید.',
+        estimatedTime: '۱ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: پرواز به توکیو، دریافت کارت اقامت (Zairyu Card)، کد My Number و حساب بانکی',
+    duration: '۲ تا ۳ هفته',
+    summary: 'ورود به توکیو، دریافت زایریو کارت در فرودگاه، ثبت شهرداری (Kuyakusho) و افتتاح حساب بانکی.',
+    steps: [
+      {
+        id: 'jp-airport-zairyu',
+        title: 'ورود به فرودگاه بین‌المللی توکیو (ناریتا یا هانه‌دا) و صدور آنی کارت اقامت (Zairyu Card)',
+        description: 'آفیسرهای فرودگاه توکیو کارت هوشمند اقامت فیزیکی (Resident Card) شما را در گیت ورودی گمرک صادر و تحویل می‌دهند.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'همراه داشتن زایریو کارت در تمام اوقات در خاک ژاپن الزامی است.',
+        estimatedTime: '۱ روز'
+      },
+      {
+        id: 'jp-kuyakusho-mynumber',
+        title: 'مراجعه به شهرداری منطقه (Kuyakusho) جهت ثبت آدرس، صدور My Number و بیمه ملی (NHI)',
+        description: 'ثبت آدرس سکونت ظرف ۱۴ روز، دریافت شماره شناسایی ملی ۱۲ رقمی (My Number)، فعال‌سازی بیمه سلامت ملی و افتتاح حساب در Japan Post Bank.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'امنیت اجتماعی مثال‌زدنی، تمیزی فوق‌العاده و احترام اجتماعی در ژاپن تجربه‌ای تکرارنشدنی برای شما خلق خواهد کرد.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۱۶. نقشه راه اختصاصی ترکیه (مجوز کار رسمی Çalışma İzni، بورسیه دولتی و کارت اقامت Kimlik)
+function getTurkeyRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: پیگیری‌های اداری و اسناد اولیه در ایران',
+    duration: '۲ تا ۴ هفته',
+    summary: 'بررسی اعتبار گذرنامه، آزادسازی اصل دانشنامه‌ها در سامانه سجاد و ترجمه رسمی به زبان ترکی استانبولی.',
+    steps: [
+      {
+        id: 'tr-passport',
+        title: 'اطمینان از اعتبار گذرنامه (حداقل ۱ سال اعتبار)',
+        description: 'مراجعه به دفاتر پلیس+۱۰ جهت صدور یا تمدید پاسپورت برای درج در سیستم اقامتی ترکیه.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'پاسپورت معتبر برای ورود بدون ویزا و ثبت پرونده اقامت ترکیه الزامی است.',
+        estimatedTime: '۱ هفته'
+      },
+      ...(!profile.education.isDegreeReleased && profile.education.degree !== 'highschool' ? [{
+        id: 'tr-sajjad',
+        title: 'لغو تعهد آموزش رایگان در سامانه سجاد و تاییدات دولتی',
+        description: 'اخذ بارکد صحت برای دانشنامه و ریزنمرات در portal.saorg.ir جهت ترجمه رسمی به زبان ترکی.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'مهرهای دادگستری و امور خارجه برای ارزشیابی مدارک در ترکیه (دنکلیک Denklik) نیاز است.',
+        estimatedTime: '۲ تا ۴ هفته'
+      }] : []),
+      {
+        id: 'tr-translation',
+        title: 'ترجمه رسمی کلیه مدارک به زبان ترکی استانبولی با مهرهای کامل',
+        description: 'ترجمه شناسنامه، مدارک تحصیلی و گواهی‌های شغلی به زبان ترکی استانبولی.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'ترجمه‌ها در ترکیه نیز باید در دفاتر اسناد رسمی (Noter) تایید شوند.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: تسلط بر زبان ترکی استانبولی (TÖMER) یا انگلیسی تجاری',
+    duration: '۲ تا ۴ ماه',
+    summary: 'تقویت مکالمه ترکی استانبولی یا کسب نمره زبان جهت کار در شرکت‌های بین‌المللی استانبول.',
+    steps: [
+      {
+        id: 'tr-lang-prep',
+        title: 'آمادگی زبان ترکی استانبولی و آشنایی با اصطلاحات اداری و کاری',
+        description: 'یادگیری زبان ترکی به دلیل نزدیکی فرهنگی و ریشه‌های زبانی برای ایرانیان بسیار سریع و دلپذیر است.',
+        category: 'language',
+        isIranSpecific: false,
+        tips: 'داشتن مدرک آزمون تومر (TÖMER) دانشگاه آنکارا یا استانبول برای تحصیل و استخدام در شرکت‌های ترک مزیت بزرگی است.',
+        estimatedTime: '۲ تا ۴ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: رزومه استاندارد ترکیه و پورتال‌های استخدامی (Kariyer.net)',
+    duration: '۲ تا ۴ هفته',
+    summary: 'تنظیم رزومه به فرمت استاندارد ترکیه و حضور در سایت‌های استخدامی معتبر استانبول و آنکارا.',
+    steps: [
+      {
+        id: 'tr-resume-prep',
+        title: 'تدوین رزومه استاندارد در پورتال‌های کاریابی ترکیه',
+        description: 'ایجاد پروفایل در سایت‌های Kariyer.net، Yenibiris و لینکدین ترکیه به دو زبان ترکی و انگلیسی.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'مهندسان نرم‌افزار، طراحان محصول و کارشناسان مارکتینگ تقاضای بالایی در شرکت‌های استارتاپی استانبول دارند.',
+        estimatedTime: '۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: فرآیند اپلای (قرارداد کاری مجوز کار یا قبولی در بورسیه Türkiye Bursları)',
+    duration: '۱ تا ۳ ماه',
+    summary: 'امضای قرارداد کاری با شرکت ثبت‌شده در ترکیه یا پذیرش در بورسیه دولتی فول‌فاند.',
+    steps: [
+      country.pathwayType === 'work' ? {
+        id: 'tr-work-contract',
+        title: 'امضای قرارداد کاری رسمی با شرکت معتبر دارای صلاحیت جذب نیروی خارجی',
+        description: 'کارفرمای ترک باید به ازای هر نیروی کار خارجی، حداقل ۵ کارمند بومی ترک را در لیست بیمه SGK داشته باشد.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'قرارداد باید حاوی حداقل حقوق رسمی مصوب وزارت کار ترکیه برای رده‌های تخصصی باشد.',
+        estimatedTime: '۱ تا ۲ ماه'
+      } : {
+        id: 'tr-burslari-apply',
+        title: 'ثبت درخواست در سامانه سراسری بورسیه دولتی ترکیه (Türkiye Bursları)',
+        description: 'ثبت‌نام در پورتال tbbs.turkiyeburslari.gov.tr، انتخاب اولویت‌های دانشگاهی و شرکت در مصاحبه حضوری در تهران یا تبریز.',
+        category: 'application',
+        isIranSpecific: true,
+        tips: 'بورسیه دولتی ترکیه کلیه هزینه‌های تحصیل، خوابگاه، بیمه و حقوق ماهانه را پوشش می‌دهد.',
+        estimatedTime: '۱ تا ۲ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: درخواست مجوز کار (Çalışma İzni) در وزارت کار ترکیه',
+    duration: '۲ تا ۴ هفته',
+    summary: 'ثبت درخواست الکترونیکی توسط کارفرما در درگاه وزارت کار و تامین اجتماعی ترکیه.',
+    steps: [
+      {
+        id: 'tr-work-permit-submit',
+        title: 'ثبت پرونده در پرتال وزارت کار و رفاه اجتماعی ترکیه (ÇSGB)',
+        description: 'بارگذاری قرارداد، روزنامه رسمی شرکت و مدارک متقاضی توسط حسابدار رسمی کارفرما در درگاه الکترونیکی دولت ترکیه (e-Devlet).',
+        category: 'financial',
+        isIranSpecific: false,
+        tips: 'کارت مجوز کار صادره از وزارت کار همزمان به عنوان کارت اقامت رسمی ترکیه عمل می‌نماید.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: سفر بدون نیاز به ویزا به استانبول/آنکارا و ثبت راندوو در اداره مهاجرت (Göç İdaresi)',
+    duration: '۱ تا ۲ هفته',
+    summary: 'ورود آزادانه به ترکیه با پاسپورت، رزرو نوبت راندوو و تحویل مدارک به اداره مهاجرت.',
+    steps: [
+      {
+        id: 'tr-travel-randevu',
+        title: 'پرواز به ترکیه و ثبت نوبت الکترونیکی در سامانه راندوو (e-İkamet)',
+        description: 'شهروندان ایرانی نیازی به اخذ ویزای ورودی ندارند و با مهر ورود فرودگاهی وارد ترکیه می‌شوند. ثبت نوبت در پورتال e-ikamet.goc.gov.tr انجام می‌پذیرد.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'حضور در روز مصاحبه راندوو با اصل مدارک، اجاره‌نامه نوتر شده و عکس بیومتریک الزامی است.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'tr-goc-attend',
+        title: 'حضور در اداره کل مهاجرت استانبول/آنکارا (İl Göç İdaresi) و تحویل مدارک',
+        description: 'پرداخت مالیات حق اقامت (Harc) و هزینه کارت کیملیک و ثبت انگشت‌نگاری بیومتریک.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'برگه موقت اقامت ممهور (Müracaat Belgesi) تا زمان تحویل کارت فیزیکی به شما اعطا می‌گردد.',
+        estimatedTime: '۱ روز کاری'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: ثبت آدرس در اداره نفوس (Nüfus)، تحویل کارت کیملیک، بیمه SGK و حساب بانکی زراعت',
+    duration: '۲ تا ۳ هفته',
+    summary: 'ثبت آدرس مسکونی در سامانه نفوس، دریافت کارت هوشمند اقامت (İkametgah)، فعال‌سازی بیمه دولتی و افتتاح حساب زراعت بانک.',
+    steps: [
+      {
+        id: 'tr-nufus-kimlik',
+        title: 'ثبت آدرس سکونت در اداره ثبت احوال و نفوس (Nüfus Müdürlüğü) و تحویل کارت کیملیک از پست PTT',
+        description: 'ثبت رسمی آدرس منزل در سامانه سراسری دولت ترکیه و تحویل گرفتن کارت هوشمند فیزیکی اقامت (کد شناسایی ۱۱ رقمی اتباع با ۹۹) از طریق مامور پست PTT.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'کارت کیملیک مدرک رسمی اقامت قانونی شما و خانواده در کشور ترکیه است.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'tr-bank-ziraat',
+        title: 'افتتاح حساب بانکی بین‌المللی در زراعت بانک (Ziraat Bankası) یا ایش بانک (İşbank)',
+        description: 'مراجعه به بانک با کارت اقامت و برگه مالیاتی، افتتاح حساب‌های لیر، یورو و دلار و دریافت کارت‌های بین‌المللی متصل به مسترکارت/ویزا.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'حساب‌های بانکی ترکیه امکان نقل و انتقال سریع مالی بین‌المللی و استفاده از اپلیکیشن‌های پرداخت نوین را مهیا می‌سازند.',
+        estimatedTime: '۱ روز'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۱۷. نقشه راه جنریک برای سایر کشورها
 function getGenericRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
   const phases: RoadmapPhase[] = [];
 
@@ -2501,16 +3839,28 @@ function calculateFinancialEstimate(profile: UserProfile, topCountry: CountryRec
 
   let credentialUSD = '150 - 300 $';
   if (topCountry.countryId === 'canada') credentialUSD = '280 $ (WES ECA)';
+  else if (topCountry.countryId === 'usa') credentialUSD = '220 - 300 $ (WES / ECE)';
   else if (topCountry.countryId === 'germany') credentialUSD = '220 € (ZAB در صورت لزوم)';
+  else if (topCountry.countryId === 'australia') credentialUSD = '450 - 800 $ AUD (ACS / Engineers Australia)';
+  else if (topCountry.countryId === 'uk') credentialUSD = '250 $ (ECCTIS)';
   else if (topCountry.countryId === 'sweden' || topCountry.countryId === 'norway' || topCountry.countryId === 'denmark' || topCountry.countryId === 'finland') credentialUSD = 'رایگان یا حدود ۱۵۰ $ (UHR / HK-dir)';
 
   let applicationFees = '150 - 500 $';
   if (topCountry.pathwayType === 'work') applicationFees = '100 - 250 $';
+  if (topCountry.countryId === 'australia') applicationFees = '3,000 - 4,640 $ AUD (هزینه لاج دولتی)';
+  else if (topCountry.countryId === 'usa' && topCountry.pathwayType === 'work') applicationFees = '700 - 1,500 $';
 
   let blockedOrProof = '۵,۰۰۰ تا ۱۵,۰۰۰ $';
   if (topCountry.countryId === 'germany') blockedOrProof = '11,904 € (حساب مسدود برای ۱ سال)';
   else if (topCountry.countryId === 'italy') blockedOrProof = '6,000 € (صرفاً در حساب ریالی ایران جهت تمکن)';
   else if (topCountry.countryId === 'canada') blockedOrProof = '20,635 $ CAD (تمکن قانونی)';
+  else if (topCountry.countryId === 'australia') blockedOrProof = '29,710 $ AUD (تمکن سالانه قانونی تحصیلی یا درآمد کار)';
+  else if (topCountry.countryId === 'uk') blockedOrProof = '1,270 £ کاری یا حدود 12,000 £ تحصیلی';
+  else if (topCountry.countryId === 'usa') blockedOrProof = '25,000 - 35,000 $ (تمکن بانکی در صورت ویزای تحصیلی F-1)';
+  else if (topCountry.countryId === 'netherlands') blockedOrProof = '14,500 € (تمکن سالانه تحصیلی یا جاب‌آفر بالای مصوب IND)';
+  else if (topCountry.countryId === 'france') blockedOrProof = '7,380 € (۶۱۵ یورو در ماه برای ۱ سال تحصیلی)';
+  else if (topCountry.countryId === 'japan') blockedOrProof = '2,000,000 ¥ (حدود ۱۳,۰۰۰ دلار برای ویزای تحصیلی)';
+  else if (topCountry.countryId === 'turkey') blockedOrProof = '3,000 - 5,000 $ (تمکن در حساب بانکی شخص)';
   else if (topCountry.countryId === 'sweden') blockedOrProof = 'حدود ۱۰,۳۱۴ کرون سوئد در ماه (حدود ۱۲,۰۰۰ دلار برای ۱ سال تحصیلی)';
   else if (topCountry.countryId === 'norway') blockedOrProof = '۱۵۱,۶۹۰ کرون نروژ (حدود ۱۴,۰۰۰ دلار در حساب امانی دانشگاه)';
   else if (topCountry.countryId === 'denmark') blockedOrProof = 'تمکن بانکی لاتین یا جاب‌آفر بالای مصوب Pay Limit';
@@ -2520,6 +3870,13 @@ function calculateFinancialEstimate(profile: UserProfile, topCountry: CountryRec
   let totalStartingUSD = '12,000 - 16,000 $';
   if (topCountry.countryId === 'italy') totalStartingUSD = '4,500 - 6,500 $';
   else if (topCountry.countryId === 'uae_oman') totalStartingUSD = '3,000 - 5,000 $';
+  else if (topCountry.countryId === 'turkey') totalStartingUSD = '2,500 - 4,500 $';
+  else if (topCountry.countryId === 'japan') totalStartingUSD = '4,500 - 7,500 $';
+  else if (topCountry.countryId === 'france') totalStartingUSD = '6,000 - 9,000 $';
+  else if (topCountry.countryId === 'netherlands') totalStartingUSD = '10,000 - 15,000 $';
+  else if (topCountry.countryId === 'uk') totalStartingUSD = '14,000 - 22,000 $';
+  else if (topCountry.countryId === 'australia') totalStartingUSD = '16,000 - 24,000 $';
+  else if (topCountry.countryId === 'usa') totalStartingUSD = '18,000 - 28,000 $';
   else if (topCountry.countryId === 'canada') totalStartingUSD = '18,000 - 25,000 $';
   else if (topCountry.countryId === 'finland' && topCountry.pathwayType === 'work') totalStartingUSD = '3,500 - 6,000 $';
 
