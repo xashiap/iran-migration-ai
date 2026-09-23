@@ -258,8 +258,8 @@ export async function addOpportunity(opp: GlobalOpportunity): Promise<boolean> {
     memoryDeletedIds.delete(opp.id);
     lastCacheSync = Date.now();
 
-    // سینک غیرهمگام با گیت‌هاب کلود
-    persistOppToCloud(opp).catch((e) => console.warn('Cloud sync error:', e));
+    // سینک همگام با گیت‌هاب کلود برای پایداری در سرورلس
+    await persistOppToCloud(opp).catch((e) => console.warn('Cloud sync error:', e));
 
     return true;
   } catch (error) {
@@ -281,7 +281,7 @@ export async function deleteOpportunity(id: string): Promise<boolean> {
     memoryDynamicOpps = localDynamic;
     lastCacheSync = Date.now();
 
-    closeCloudOpp(id).catch((e) => console.warn('Close cloud issue error:', e));
+    await closeCloudOpp(id).catch((e) => console.warn('Close cloud issue error:', e));
     return true;
   } catch (error) {
     console.error('Failed to delete opportunity:', error);
