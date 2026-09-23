@@ -551,10 +551,11 @@ export const DossierDashboard: React.FC<DossierDashboardProps> = ({
           </button>
         </div>
 
-        {/* تب ۱: نقشه راه */}
+        {/* تب ۱: نقشه راه اختصاصی کشور انتخاب شده */}
         {activeTab === 'roadmap' && (
           <RoadmapTimeline
-            phases={result.primaryRoadmap.phases}
+            key={selectedCountry.countryId}
+            phases={selectedCountry.roadmap?.phases || result.primaryRoadmap.phases}
             targetCountry={selectedCountry.countryName}
             pathwayTitle={selectedCountry.recommendedPathway}
           />

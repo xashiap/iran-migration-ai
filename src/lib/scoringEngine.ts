@@ -232,10 +232,14 @@ export function evaluateImmigrationProfile(profile: UserProfile): AnalysisResult
   // مرتب‌سازی کشورها بر اساس بیشترین تطابق
   countryEvaluations.sort((a, b) => b.matchScore - a.matchScore);
   const topCountries = countryEvaluations.slice(0, 5);
-  const selectedTop = topCountries[0];
 
-  // ۶. تولید رودمپ گام‌به‌گام اختصاصی از فاز صفر تا لندینگ
-  const primaryRoadmap = generateDetailedRoadmap(profile, selectedTop);
+  // ۶. تولید رودمپ گام‌به‌گام اختصاصی برای تک‌تک کشورهای برتر
+  topCountries.forEach((country) => {
+    country.roadmap = generateDetailedRoadmap(profile, country);
+  });
+
+  const selectedTop = topCountries[0];
+  const primaryRoadmap = selectedTop.roadmap || generateDetailedRoadmap(profile, selectedTop);
 
   // ۷. تخمین هزینه‌های تفکیک شده
   const financialEstimate = calculateFinancialEstimate(profile, selectedTop);
@@ -260,293 +264,22 @@ export function evaluateImmigrationProfile(profile: UserProfile): AnalysisResult
 }
 
 function generateDetailedRoadmap(profile: UserProfile, topCountry: CountryRecommendation): AnalysisResult['primaryRoadmap'] {
-  const phases: RoadmapPhase[] = [];
+  const cid = topCountry.countryId;
+  let phases: RoadmapPhase[] = [];
 
-  // فاز ۰: کارهای اداری و قانونی درون ایران (Step 0 - داخل کشور)
-  const phase0Steps: RoadmapStep[] = [];
-
-  if (profile.personal.gender === 'male') {
-    phase0Steps.push({
-      id: 'step-military',
-      title: 'تعیین تکلیف وضعیت نظام وظیفه و سامانه سخا',
-      description: profile.personal.militaryStatus === 'completed'
-        ? 'اطمینان از داشتن کارت هوشمند پایان خدمت و عدم مخدوش بودن آن جهت تحویل به دارالترجمه رسمی.'
-        : 'ورود به سامانه سخا (sakha.epolice.ir) و ثبت درخواست معافیت تحصیلی یا بررسی وضعیت وثیقه خروج از کشور.',
-      category: 'iran_admin',
-      isIranSpecific: true,
-      tips: 'کارت‌های پایان خدمت قدیمی پیش از سال ۱۳۹۰ نیاز به تعویض با کارت هوشمند دارند.',
-      estimatedTime: '۱ تا ۲ هفته'
-    });
-  }
-
-  phase0Steps.push({
-    id: 'step-passport',
-    title: 'بررسی یا صدور گذرنامه جدید (پلیس+۱۰)',
-    description: 'در صورتی که گذرنامه ندارید یا کمتر از ۱۸ ماه از اعتبار آن باقی مانده، به دفاتر پلیس+۱۰ مراجعه و گذرنامه جدید دریافت کنید.',
-    category: 'iran_admin',
-    isIranSpecific: true,
-    tips: 'همواره اسپل لاتین نام و نام خانوادگی خود را در گذرنامه با مدارک قبلی هماهنگ نگه دارید.',
-    estimatedTime: '۱ تا ۲ هفته'
-  });
-
-  if (!profile.education.isDegreeReleased && profile.education.degree !== 'highschool') {
-    phase0Steps.push({
-      id: 'step-sajjad',
-      title: 'آزادسازی دانشنامه و ثبت در سامانه سجاد (portal.saorg.ir)',
-      description: 'اقدام برای لغو تعهد خدمت آموزش رایگان از طریق تسویه با دانشگاه، سابقه کار بیمه‌ای پس از تحصیل، یا نامه عدم کاریابی اداره کار، و سپس اخذ تاییدیه و بارکد سجاد.',
-      category: 'iran_admin',
-      isIranSpecific: true,
-      tips: 'بدون کد سجاد، دادگستری و وزارت امور خارجه مدارک را تایید و مهر نخواهند کرد.',
-      estimatedTime: '۲ تا ۶ هفته'
-    });
-  }
-
-  phase0Steps.push({
-    id: 'step-translation',
-    title: 'ترجمه رسمی مدارک هویتی و تحصیلی با مهرهای دادگستری و وزارت امور خارجه',
-    description: 'تحویل دانشنامه، ریزنمرات، شناسنامه، کارت ملی و کارت پایان خدمت به دارالترجمه رسمی رسمی زبان مقصد (انگلیسی، آلمانی یا ایتالیایی).',
-    category: 'documents',
-    isIranSpecific: true,
-    tips: 'همیشه ۲ تا ۳ نسخه ترجمه رسمی تهیه کنید تا در مراحل مختلف با کمبود نسخه پلمپ‌شده مواجه نشوید.',
-    estimatedTime: '۲ تا ۳ هفته'
-  });
-
-  phases.push({
-    phaseNumber: 0,
-    phaseTitle: 'فاز صفر: پیگیری‌های اداری و اسناد هویتی در ایران',
-    duration: '۱ تا ۲ ماه',
-    summary: 'تکلیف نظام وظیفه، دریافت پاسپورت، آزادسازی اصل دانشنامه‌ها، تاییدیه سجاد و ترجمه رسمی.',
-    steps: phase0Steps
-  });
-
-  // فاز ۱: تقویت زبان و آزمون‌های بین‌المللی
-  const phase1Steps: RoadmapStep[] = [];
-  phase1Steps.push({
-    id: 'step-language-prep',
-    title: topCountry.countryId === 'germany' || topCountry.countryId === 'austria'
-      ? 'فشرده‌سازی یادگیری زبان آلمانی یا ارتقای انگلیسی'
-      : 'تمرکز بر تکنیک‌های آزمون زبان (IELTS / TOEFL / PTE)',
-    description: topCountry.countryId === 'germany'
-      ? 'برای کارت شانس حداقل زبان آلمانی A1/A2 یا انگلیسی B2 و برای کار تخصصی تلاش برای رسیدن به مدرک Goethe B1/B2.'
-      : 'ثبت‌نام در دوره‌های آمادگی آزمون آیلتس آکادمیک یا جنرال و آزمون‌های ماک (شبیه‌ساز).',
-    category: 'language',
-    isIranSpecific: false,
-    tips: 'آزمون‌های ماک استاندارد در تهران به شما در سنجش زمان و ارزیابی نقاط ضعف ریدینگ و رایتینگ کمک شایانی می‌کند.',
-    estimatedTime: '۲ تا ۵ ماه'
-  });
-
-  phase1Steps.push({
-    id: 'step-language-exam',
-    title: 'ثبت‌نام و شرکت در آزمون رسمی زبان در مراکز معتبر',
-    description: 'رزرو سنتر آزمون (سنترهای رسمی آیلتس و تافل در ایران یا آزمون گوته DSIT تهران در خیابان دیباجی).',
-    category: 'language',
-    isIranSpecific: true,
-    tips: 'به دلیل تقاضای بالا، ثبت‌نام در سنتر گوته یا آیلتس تهران نیازمند رصد زمان‌بندی باز شدن سایت است.',
-    estimatedTime: '۲ تا ۳ هفته'
-  });
-
-  phases.push({
-    phaseNumber: 1,
-    phaseTitle: 'فاز یک: تسلط بر زبان و مدرک بین‌المللی',
-    duration: '۳ تا ۶ ماه',
-    summary: 'کسب نمره هدف در آیلتس/تافل یا اخذ مدرک زبان آلمانی/ایتالیایی متناسب با پرونده.',
-    steps: phase1Steps
-  });
-
-  // فاز ۲: آماده‌سازی مدارک بین‌المللی و رزومه‌سازی استاندارد
-  const phase2Steps: RoadmapStep[] = [];
-  phase2Steps.push({
-    id: 'step-cv-sop',
-    title: 'نگارش رزومه بین‌المللی (EuroPass / Canadian Resume) و انگیزه‌نامه (SOP)',
-    description: 'تنظیم رزومه تک‌صفحه‌ای یا دو‌صفحه‌ای استاندارد بدون اطلاعات حاشیه‌ای و نگارش انگیزه‌نامه قانع‌کننده که علت انتخاب مقصد و اهداف آینده را تبیین کند.',
-    category: 'documents',
-    isIranSpecific: false,
-    tips: 'از فرمت‌های رایج مثل LaTeX یا تمپلیت‌های دانشگاه هاروارد یا یورپاس استفاده کنید.',
-    estimatedTime: '۲ تا ۳ هفته'
-  });
-
-  if (topCountry.countryId === 'germany') {
-    phase2Steps.push({
-      id: 'step-zab-anabin',
-      title: 'بررسی در سامانه آنابین (Anabin) و اخذ تاییدیه زاب (ZAB Statement of Comparability)',
-      description: 'بررسی وضعیت اعتبار دانشگاه (H+) و رشته در بانک اطلاعاتی آنابین آلمان جهت معادل‌سازی رسمی مدارک تحصیلی.',
-      category: 'documents',
-      isIranSpecific: false,
-      tips: 'اگر دانشگاه شما در آنابین H+ باشد، پرینت صفحه آنابین برای اکثر سفارت‌ها و کارگزاری کفایت می‌کند.',
-      estimatedTime: '۲ تا ۴ هفته'
-    });
-  } else if (topCountry.countryId === 'canada') {
-    phase2Steps.push({
-      id: 'step-wes',
-      title: 'ارزیابی مدارک تحصیلی از طریق WES کانادا (ECA)',
-      description: 'ایجاد پروفایل در WES، ارسال ریزنمرات دانشگاهی به صورت مستقیم یا دیجیتال، و دریافت گزارش معادل‌سازی کانادایی.',
-      category: 'documents',
-      isIranSpecific: false,
-      tips: 'دانشگاه آزاد و برخی دانشگاه‌های سراسری امکان ارسال مستقیم و الکترونیکی نمرات به WES را دارند.',
-      estimatedTime: '۴ تا ۶ هفته'
-    });
-  }
-
-  if (profile.work.hasOfficialInsurance) {
-    phase2Steps.push({
-      id: 'step-insurance-history',
-      title: 'دریافت سوابق بیمه با کد اصالت و QR Code از سامانه eservices.tamin.ir',
-      description: 'استخراج سوابق پرداخت حق بیمه تامین اجتماعی و ارائه به دارالترجمه جهت مهر دادگستری.',
-      category: 'documents',
-      isIranSpecific: true,
-      tips: 'آفیسرهای ویزا کد QR و اصالت سابقه بیمه تامین اجتماعی ایران را به صورت آنلاین استعلام می‌کنند.',
-      estimatedTime: '۱ هفته'
-    });
-  }
-
-  phases.push({
-    phaseNumber: 2,
-    phaseTitle: 'فاز دو: پرونده‌سازی تخصصی و معادل‌سازی مدارک',
-    duration: '۱ تا ۲ ماه',
-    summary: 'معادل‌سازی مدرک تحصیلی، ساخت رزومه استاندارد بین‌المللی، استعلام بیمه و نگارش انگیزه‌نامه.',
-    steps: phase2Steps
-  });
-
-  // فاز ۳: اپلای، ارسال درخواست و دریافت پذیرش یا جاب‌آفر
-  const phase3Steps: RoadmapStep[] = [];
-  if (topCountry.pathwayType === 'study') {
-    phase3Steps.push({
-      id: 'step-study-apply',
-      title: 'ارسال اپلیکیشن تحصیلی به دانشگاه‌های مقصد',
-      description: 'ثبت درخواست در پورتال‌های دانشگاهی (مانند Uni-Assist برای آلمان، Universitaly برای ایتالیا، یا پورتال مستقیم دانشگاه‌ها).',
-      category: 'application',
-      isIranSpecific: false,
-      tips: 'پرداخت اپلیکیشن فی با استفاده از کارت‌های اعتباری بین‌المللی (مسترکارت/ویزا) از طریق صرافی‌ها یا شرکت‌های پرداخت ارزی ایرانی.',
-      estimatedTime: '۲ تا ۳ ماه'
-    });
-    phase3Steps.push({
-      id: 'step-offer-letter',
-      title: 'دریافت نامه پذیرش رسمی (Admission Letter / Zulassung)',
-      description: 'بررسی شروط پذیرش (مشروط به زبان یا غیرمشروط) و پرداخت دیپازیت در صورت الزام دانشگاه.',
-      category: 'application',
-      isIranSpecific: false,
-      tips: 'پذیرش قطعی را برای اقدامات ویزا بلافاصله آماده داشته باشید.',
-      estimatedTime: '۳ تا ۶ هفته'
-    });
+  if (cid === 'germany') {
+    phases = getGermanyRoadmapPhases(profile, topCountry);
+  } else if (cid === 'canada') {
+    phases = getCanadaRoadmapPhases(profile, topCountry);
+  } else if (cid === 'italy') {
+    phases = getItalyRoadmapPhases(profile, topCountry);
+  } else if (cid === 'austria') {
+    phases = getAustriaRoadmapPhases(profile, topCountry);
+  } else if (cid === 'uae_oman') {
+    phases = getUaeOmanRoadmapPhases(profile, topCountry);
   } else {
-    phase3Steps.push({
-      id: 'step-job-apply',
-      title: 'جستجوی فرصت‌های شغلی و ارسال درخواست هدفمند',
-      description: 'فعالیت در لینکدین (LinkedIn)، پورتال‌های استخدامی کشور مقصد (مانند StepStone و Indeed) و ارسال رزومه سفارشی‌سازی شده.',
-      category: 'application',
-      isIranSpecific: false,
-      tips: 'پروفایل لینکدین خود را کاملاً به انگلیسی تغییر دهید و لوکیشن یا تمایل به جابجایی (Open to Relocate) را فعال نمایید.',
-      estimatedTime: '۲ تا ۴ ماه'
-    });
+    phases = getGenericRoadmapPhases(profile, topCountry);
   }
-
-  phases.push({
-    phaseNumber: 3,
-    phaseTitle: 'فاز سه: فرآیند اپلای و دریافت تاییدیه اولیه',
-    duration: '۲ تا ۴ ماه',
-    summary: 'ارسال مدارک به موسسات، مصاحبه‌های اولیه آنلاین و دریافت تاییدیه معتبر یا نوبت کارت شانس.',
-    steps: phase3Steps
-  });
-
-  // فاز ۴: تدارک امور مالی، تمکن و حساب بانکی
-  const phase4Steps: RoadmapStep[] = [];
-  if (topCountry.countryId === 'germany') {
-    phase4Steps.push({
-      id: 'step-blocked-account',
-      title: 'افتتاح حساب مسدود ارزی آلمان (Sperrkonto)',
-      description: 'افتتاح حساب آنلاین در موسساتی چون Fintiba یا Expatrio یا Coracle و واریز مبلغ تمکن یک‌ساله (حدود ۱۲ هزار یورو) از طریق صرافی‌های معتبر.',
-      category: 'financial',
-      isIranSpecific: true,
-      tips: 'انتقال حواله صرافی به حساب آلمان حدود ۳ تا ۵ روز کاری زمان می‌برد؛ نامه تایید مسدودی (Blocking Confirmation) فوراً صادر می‌شود.',
-      estimatedTime: '۱ تا ۲ هفته'
-    });
-  } else {
-    phase4Steps.push({
-      id: 'step-bank-statement',
-      title: 'اخذ گواهی تمکن مالی و گردش حساب ۳ تا ۶ ماهه از بانک ایرانی',
-      description: 'مراجعه به شعبه ارزی بانک در ایران و صدور نامه رسمی تمکن به زبان انگلیسی با درج معادل ارزی و مهر بین‌الملل بانک.',
-      category: 'financial',
-      isIranSpecific: true,
-      tips: 'تاریخ صدور گواهی تمکن نباید بیش از ۲ الی ۳ هفته با روز تحویل مدارک به سفارت فاصله داشته باشد.',
-      estimatedTime: '۳ تا ۵ روز'
-    });
-  }
-
-  phases.push({
-    phaseNumber: 4,
-    phaseTitle: 'فاز چهار: تمکن مالی، حساب مسدود و اقدامات ارزی',
-    duration: '۳ تا ۴ هفته',
-    summary: 'انتقال وجوه لازم، دریافت گواهی تمکن لاتین با نرخ روز و آماده‌سازی تاییدیه‌های مالی.',
-    steps: phase4Steps
-  });
-
-  // فاز ۵: وقت سفارت، روز مصاحبه و صدور ویزا
-  const phase5Steps: RoadmapStep[] = [];
-  phase5Steps.push({
-    id: 'step-embassy-appointment',
-    title: `رزرو نوبت در کارگزاری (${topCountry.countryId === 'germany' || topCountry.countryId === 'italy' ? 'ویزامتریک تهران' : 'VFS Global یا کشور همسایه'})`,
-    description: 'ثبت‌نام آنلاین و دریافت وقت مصاحبه / تحویل مدارک به همراه فیش پرداخت هزینه نوبت‌گیری.',
-    category: 'embassy',
-    isIranSpecific: true,
-    tips: 'پوشه مدارک را دقیقاً طبق چک‌لیست سفارت و به ترتیب خواسته شده در دو نسخه اصل و کپی مرتب کنید.',
-    estimatedTime: '۱ تا ۴ ماه بسته به ترافیک وقت‌ها'
-  });
-
-  phase5Steps.push({
-    id: 'step-visa-interview',
-    title: 'حضور در روز مصاحبه و تحویل بیومتریک (انگشت‌نگاری)',
-    description: 'پاسخ شفاف و بدون استرس به سوالات متداول آفیسر در خصوص اهداف سفر، تامین مالی، انگیزه و بازگشت به کشور.',
-    category: 'embassy',
-    isIranSpecific: false,
-    tips: 'لباس رسمی و آراسته بپوشید و از پاسخ‌های مبهم یا متناقض با فرم اپلیکیشن شدیداً پرهیز کنید.',
-    estimatedTime: '۱ روز کاری'
-  });
-
-  phase5Steps.push({
-    id: 'step-visa-pickup',
-    title: 'پیگیری پرونده، تحویل گذرنامه و چسباندن لیبل ویزا',
-    description: 'دریافت ایمیل نتیجه از سفارت و مراجعه برای تحویل پاسپورت ویزا شده.',
-    category: 'embassy',
-    isIranSpecific: false,
-    tips: 'تاریخ شروع و پایان ویزا و املای نام و نام خانوادگی روی لیبل ویزا را دقیقاً کنترل فرمایید.',
-    estimatedTime: '۴ تا ۱۰ هفته'
-  });
-
-  phases.push({
-    phaseNumber: 5,
-    phaseTitle: 'فاز پنج: وقت سفارت، مصاحبه و اخذ ویزا',
-    duration: '۲ تا ۴ ماه',
-    summary: 'ارائه پرونده به آفیسر، انگشت‌نگاری و انتظار برای بررسی امنیتی و صدور ویزا.',
-    steps: phase5Steps
-  });
-
-  // فاز ۶: اقدامات پیش از سفر و فرودگاه مقصد
-  phases.push({
-    phaseNumber: 6,
-    phaseTitle: 'فاز شش: آماده‌سازی پرواز و استقرار در مقصد',
-    duration: '۳ تا ۴ هفته',
-    summary: 'خرید بلیت، رزرو خوابگاه/هتل اولیه، خرید بیمه مسافرتی و باز کردن حساب بانکی بدو ورود.',
-    steps: [
-      {
-        id: 'step-flight-ticket',
-        title: 'خرید بلیت پرواز و پرداخت عوارض خروج از کشور',
-        description: 'تهیه بلیت هواپیما و پرداخت عوارض خروج از طریق سامانه سداد یا درگاه اینترنتی بانک ملی.',
-        category: 'arrival',
-        isIranSpecific: true,
-        tips: 'عوارض خروج را حداقل ۲۴ ساعت قبل از پرواز آنلاین پرداخت کنید تا در سامانه فرودگاه امام خمینی ثبت شود.',
-        estimatedTime: '۱ هفته'
-      },
-      {
-        id: 'step-accommodation',
-        title: 'رزرو اقامتگاه اولیه یا خوابگاه دانشجویی در شهر مقصد',
-        description: 'هماهنگی قرارداد اجاره موقت (WG، خوابگاه یا AirBnB) جهت داشتن آدرس معتبر برای ثبت‌نام در شهرداری (Anmeldung).',
-        category: 'arrival',
-        isIranSpecific: false,
-        tips: 'قبل از رسیدن به مقصد، به هیچ عنوان به آگهی‌های مشکوک مسکن پول ودیعه پرداخت نکنید.',
-        estimatedTime: '۲ تا ۳ هفته'
-      }
-    ]
-  });
 
   return {
     targetCountry: topCountry.countryName,
@@ -555,6 +288,1322 @@ function generateDetailedRoadmap(profile: UserProfile, topCountry: CountryRecomm
     estimatedTotalDuration: topCountry.estimatedTimeMonths,
     phases
   };
+}
+
+// ۱. نقشه راه اختصاصی آلمان (کارت شانس، بلوکارت و تحصیلی)
+function getGermanyRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  // فاز ۰
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: پیگیری‌های اداری و اسناد هویتی در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'تعیین تکلیف نظام وظیفه، دریافت پاسپورت، آزادسازی اصل دانشنامه‌ها، تاییدیه سجاد و ترجمه رسمی آلمانی.',
+    steps: [
+      ...(profile.personal.gender === 'male' ? [{
+        id: 'de-military',
+        title: 'تعیین تکلیف نظام وظیفه و سامانه سخا',
+        description: profile.personal.militaryStatus === 'completed'
+          ? 'اطمینان از داشتن کارت هوشمند پایان خدمت و عدم مخدوش بودن آن جهت تحویل به دارالترجمه رسمی.'
+          : 'ورود به سامانه سخا (sakha.epolice.ir) و ثبت درخواست معافیت تحصیلی یا بررسی وضعیت وثیقه خروج از کشور.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'کارت‌های پایان خدمت قدیمی پیش از سال ۱۳۹۰ نیاز به تعویض با کارت هوشمند دارند.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }] : []),
+      {
+        id: 'de-passport',
+        title: 'بررسی یا صدور گذرنامه جدید با حداقل ۱۸ ماه اعتبار',
+        description: 'مراجعه به دفاتر پلیس+۱۰ جهت صدور یا تمدید پاسپورت. هماهنگی اسپل لاتین نام و نام خانوادگی الزامی است.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'حداقل ۱۸ ماه اعتبار پاسپورت برای صدور ویزای ملی آلمان (Type D) توصیه می‌شود.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      ...(!profile.education.isDegreeReleased && profile.education.degree !== 'highschool' ? [{
+        id: 'de-sajjad',
+        title: 'آزادسازی دانشنامه و بارکد صحت در سامانه سجاد (portal.saorg.ir)',
+        description: 'لغو تعهد آموزش رایگان از طریق تسویه با دانشگاه، سابقه کار بیمه‌ای پس از فراغت از تحصیل، یا گواهی عدم کاریابی.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'بدون کد سجاد، دادگستری و امور خارجه مدارک تحصیلی شما را تایید نخواهند کرد.',
+        estimatedTime: '۲ تا ۶ هفته'
+      }] : []),
+      {
+        id: 'de-translation',
+        title: 'ترجمه رسمی مدارک به زبان آلمانی یا انگلیسی با مهرهای دادگستری و امور خارجه',
+        description: 'تحویل دانشنامه، ریزنمرات، شناسنامه و کارت پایان خدمت به دارالترجمه رسمی معتبر.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'برای سفارت آلمان، ترجمه آلمانی یا انگلیسی معتبر است؛ ۲ نسخه کامل پلمپ‌شده تهیه نمایید.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  // فاز ۱
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: تسلط بر زبان آلمانی یا انگلیسی',
+    duration: '۳ تا ۶ ماه',
+    summary: 'کسب مدرک رسمی گوته (Goethe) یا آیلتس متناسب با نوع ویزا (کارت شانس یا بلوکارت).',
+    steps: [
+      {
+        id: 'de-lang-prep',
+        title: 'آمادگی فشرده برای آزمون گوته (Goethe-Zertifikat) یا آیلتس',
+        description: country.pathwayType === 'job_seeker'
+          ? 'برای کارت شانس داشتن مدرک A1/A2 آلمانی امتیاز دارد و B1/B2 شانس کاریابی حضوری را چندین برابر می‌کند.'
+          : 'برای دوره‌های انگلیسی آیلتس ۶.۵+ و برای موقعیت‌های کاری آلمانی سطح B1/B2 الزامی است.',
+        category: 'language',
+        isIranSpecific: false,
+        tips: 'تمرکز بر بخش‌های مکالمه (Sprechen) و نگارش (Schreiben) کلید موفقیت در سنتر آزمون است.',
+        estimatedTime: '۳ تا ۵ ماه'
+      },
+      {
+        id: 'de-lang-exam',
+        title: 'ثبت‌نام و شرکت در آزمون رسمی زبان در سنتر دیباجی تهران (DSIT)',
+        description: 'رزرو به موقع سنتر گوته در تهران یا سنترهای بین‌المللی آیلتس/تافل در ایران.',
+        category: 'language',
+        isIranSpecific: true,
+        tips: 'به دلیل ترافیک ثبت‌نام در موسسه گوته تهران، تقویم باز شدن ظرفیت‌ها را به صورت ماهانه رصد کنید.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  // فاز ۲
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: ارزشیابی مدارک در آنابین، زاب و رزومه‌سازی آلمانی',
+    duration: '۱ تا ۲ ماه',
+    summary: 'تطبیق دانشگاه و رشته در سامانه Anabin، تاییدیه ZAB و ساخت رزومه استاندارد Lebenslauf.',
+    steps: [
+      {
+        id: 'de-anabin',
+        title: 'بررسی وضعیت دانشگاه در آنابین (Anabin) و صدور تاییدیه ZAB',
+        description: 'بررسی وضعیت H+ دانشگاه ایرانی و مقطع تحصیلی در پورتال Anabin. در صورت نیاز به ارزشیابی، ارسال پرونده به دفتر مرکزی زاب (ZAB) در بن آلمان.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'پرینت وضعیت H+ دانشگاه و رشته از سایت آنابین برای اکثر پرونده‌های سفارت الزامی است.',
+        estimatedTime: '۲ تا ۴ هفته'
+      },
+      ...(profile.education.majorCategory === 'medical_health' ? [{
+        id: 'de-approbation',
+        title: 'اقدام برای تاییدیه صلاحیت حرفه‌ای کادر درمان (Defizitbescheid / Anerkennung)',
+        description: 'ارسال مدارک پزشکی یا پرستاری به اداره بهداشت ایالت مقصد در آلمان جهت تطبیق و صدور نقص مدرک (Defizitbescheid).',
+        category: 'documents' as const,
+        isIranSpecific: false,
+        tips: 'پرستاران و پزشکان با این نامه می‌توانند ویزای ۱۶d برای دوره انطباق و آزمون کنتکت دریافت کنند.',
+        estimatedTime: '۲ تا ۳ ماه'
+      }] : []),
+      {
+        id: 'de-lebenslauf',
+        title: 'تنظیم رزومه استاندارد آلمانی (Lebenslauf) و انگیزه‌نامه تخصصی (Motivationsschreiben)',
+        description: 'تدوین رزومه به زبان آلمانی یا انگلیسی با ساختار جدول‌بندی دقیق بدون فاصله‌های زمانی خالی (Lückenloser Lebenslauf).',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'کارفرمایان آلمانی به درج دقیق تاریخ‌های شروع و پایان هر پروژه و نقش فنی شما اهمیت ویژه‌ای می‌دهند.',
+        estimatedTime: '۲ هفته'
+      },
+      ...(profile.work.hasOfficialInsurance ? [{
+        id: 'de-tamin',
+        title: 'استخراج سوابق بیمه تامین اجتماعی همراه با کد رهگیری QR',
+        description: 'دریافت نسخه رسمی سوابق از درگاه خدمات الکترونیک سازمان تامین اجتماعی و تحویل به دارالترجمه.',
+        category: 'documents' as const,
+        isIranSpecific: true,
+        tips: 'آفیسرهای ویزامتریک اصالت سابقه کار را از طریق QR کد تامین اجتماعی استعلام می‌کنند.',
+        estimatedTime: '۱ هفته'
+      }] : [])
+    ]
+  });
+
+  // فاز ۳
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: فرآیند اپلای (کارت شانس / جاب‌آفر / یونی‌اسیست)',
+    duration: '۲ تا ۳ ماه',
+    summary: 'محاسبه ۶ امتیاز کارت شانس و ثبت درخواست یا اخذ پذیرش از Uni-Assist / پورتال‌های استخدامی.',
+    steps: [
+      country.pathwayType === 'job_seeker' ? {
+        id: 'de-chancenkarte-calc',
+        title: 'محاسبه رسمی امتیازات کارت شانس آلمان (حداقل ۶ امتیاز از ۱۴)',
+        description: 'جمع‌بندی امتیازات بر اساس مدرک تحصیلی (۴ امتیاز)، سن زیر ۳۵ سال (۲ امتیاز)، مدرک زبان (۱ تا ۳ امتیاز) و سوابق کاری مرتبط.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'داشتن مدرک دانشگاهی معتبر + مدرک زبان B2 انگلیسی یا A2 آلمانی به راحتی کف امتیاز ۶ را پوشش می‌دهد.',
+        estimatedTime: '۱ تا ۲ هفته'
+      } : country.pathwayType === 'study' ? {
+        id: 'de-uni-assist',
+        title: 'ارسال اپلیکیشن تحصیلی از طریق سامانه Uni-Assist یا پورتال دانشگاه',
+        description: 'بارگذاری مدارک تایید شده در یونی‌اسیست، پرداخت اپلیکیشن فی با ویزاکارت و دریافت تاییدیه VPD.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'اپلیکیشن فی برای دانشگاه اول ۷۵ یورو و برای دانشگاه‌های بعدی ۳۰ یورو است.',
+        estimatedTime: '۴ تا ۸ هفته'
+      } : {
+        id: 'de-job-hunting',
+        title: 'ارسال هدفمند رزومه در StepStone، LinkedIn و پورتال‌های استخدامی آلمان',
+        description: 'برقراری ارتباط مستقیم با شرکت‌ها و کارفرمایان آلمانی، شرکت در مصاحبه‌های فنی آنلاین و عقد قرارداد کاری معتبر با حداقل حقوق مصوب بلوکارت.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'پروفایل لینکدین خود را روی لوکیشن آلمان با عنوان Open to Relocate تنظیم فرمایید.',
+        estimatedTime: '۲ تا ۴ ماه'
+      },
+      {
+        id: 'de-official-doc',
+        title: 'دریافت تاییدیه رسمی پذیرش یا قرارداد کاری معتبر (Arbeitsvertrag)',
+        description: 'بررسی بندهای قرارداد کاری، بیمه درمانی و ساعت کاری یا دریافت نامه قطعی پذیرش (Zulassung).',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'قرارداد کاری باید امضای کارفرما و مشخصات کامل شرکت با شناسه مالیاتی آلمان را داشته باشد.',
+        estimatedTime: '۲ تا ۴ هفته'
+      }
+    ]
+  });
+
+  // فاز ۴
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: افتتاح حساب مسدود ارزی آلمان (Sperrkonto)',
+    duration: '۲ تا ۴ هفته',
+    summary: 'افتتاح آنلاین حساب در Expatrio / Fintiba و واریز ۱۱,۹۰۴ یورو مبلغ تمکن قانونی.',
+    steps: [
+      {
+        id: 'de-open-sperrkonto',
+        title: 'افتتاح آنلاین حساب مسدود در موسسات رسمی (Expatrio، Fintiba یا Coracle)',
+        description: 'ثبت‌نام آنلاین با تصویر پاسپورت، انتخاب پکیج ارزش (شامل حساب مسدود + بیمه مسافرتی و بیمه دولتی رایگان TK).',
+        category: 'financial',
+        isIranSpecific: false,
+        tips: 'موسسه Expatrio و Coracle کمترین کارمزد افتتاح حساب و سریع‌ترین فرآیند فعال‌سازی را برای ایرانیان دارند.',
+        estimatedTime: '۲ تا ۳ روز'
+      },
+      {
+        id: 'de-transfer-funds',
+        title: 'حواله ارزی مبلغ تمکن یکساله (حدود ۱۲ هزار یورو) از طریق صرافی معتبر',
+        description: 'واریز وجه ریالی به صرافی در ایران و ارسال حواله سوییفت به شماره IBAN حساب مسدود آلمان شما.',
+        category: 'financial',
+        isIranSpecific: true,
+        tips: 'انتقال حواله معمولاً ۳ تا ۵ روز کاری زمان می‌برد؛ به محض وصول، نامه تایید مسدودی (Blocking Confirmation) فوراً صادر می‌شود.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }
+    ]
+  });
+
+  // فاز ۵
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: وقت کارگزاری ویزامتریک تهران و مصاحبه ویزا',
+    duration: '۲ تا ۳ ماه',
+    summary: 'رزرو نوبت ویزامتریک تهران، تحویل پوشه مدارک، انگشت‌نگاری و صدور ویزای ملی نوع D.',
+    steps: [
+      {
+        id: 'de-visametric-book',
+        title: 'رزرو نوبت در سامانه کارگزاری ویزامتریک تهران (خیابان بهشتی)',
+        description: 'ورود به پورتال visametric.com/iran و پرداخت ودیعه ریالی کارت بانکی جهت قرارگیری در صف نوبت سفارت آلمان.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'در انتخاب نوع ویزا (کارت شانس، دانشجویی یا بلوکارت) دقت فرمایید تا پرونده به درستی هدایت شود.',
+        estimatedTime: '۱ تا ۲ ماه بسته به ترافیک وقت‌ها'
+      },
+      {
+        id: 'de-interview-attend',
+        title: 'حضور در کارگزاری ویزامتریک، تحویل مدارک در دو نسخه و انجام بیومتریک',
+        description: 'چیدمان پوشه مدارک دقیقاً طبق چک‌لیست سفارت (یک نسخه اصل و دو نسخه کپی) و مصاحبه کوتاه با کارشناس ایرانی کارگزاری.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'پاسخ‌های شما درباره برنامه کاری یا تحصیلی باید کاملاً با انگیزه‌نامه انطباق داشته باشد.',
+        estimatedTime: '۱ روز کاری'
+      },
+      {
+        id: 'de-visa-stamp',
+        title: 'پیگیری پرونده در باجه پستی و درج لیبل ویزای شنگن ملی نوع D',
+        description: 'دریافت پیامک تحویل پاسپورت و چسبانده شدن ویزای شنگن در گذرنامه.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'تاریخ شروع و پایان ویزا و اطلاعات درج‌شده را به دقت چک کنید.',
+        estimatedTime: '۴ تا ۸ هفته'
+      }
+    ]
+  });
+
+  // فاز ۶
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: پرواز، ثبت آدرس و استقرار در آلمان',
+    duration: '۳ تا ۴ هفته',
+    summary: 'خرید بلیت، ثبت آدرس شهرداری (Anmeldung)، فعال‌سازی بیمه TK و صدور کارت اقامت.',
+    steps: [
+      {
+        id: 'de-flight',
+        title: 'خرید بلیت پرواز به آلمان و پرداخت عوارض خروج',
+        description: 'خرید بلیت یک‌طرفه یا رفت‌وبرگشت به مقصد فرانکفورت، مونیخ، دوسلدورف یا برلین.',
+        category: 'arrival',
+        isIranSpecific: true,
+        tips: 'عوارض خروج را حداقل ۲۴ ساعت قبل از پرواز در سامانه سداد بانک ملی پرداخت نمایید.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'de-anmeldung-step',
+        title: 'رزرو اقامتگاه اولیه و ثبت آدرس رسمی در شهرداری (Anmeldung)',
+        description: 'مراجعه به اداره ثبت شهروندان (Bürgeramt / Rathaus) ظرف ۱۴ روز پس از ورود با برگه تاییدیه موجر (Wohnungsgeberbestätigung).',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'بدون برگه ثبت آدرس شهرداری، امکان افتتاح حساب بانکی جاری و دریافت کارت شناسایی مالیاتی (Steuer-ID) وجود ندارد.',
+        estimatedTime: '۲ هفته'
+      },
+      {
+        id: 'de-residence-card',
+        title: 'فعال‌سازی حساب مسدود، بیمه سلامت و دریافت کارت اقامت (Aufenthaltstitel)',
+        description: 'ارسال برگه ثبت آدرس به اکسپاتریو/فینتیبا جهت آزاد شدن ماهانه مبالغ، و مراجعه به اداره اتباع (Ausländerbehörde) جهت دریافت کارت هوشمند اقامت.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'کارت اقامت الکترونیکی (eAT) حاوی اطلاعات هویتی و مجوز کار رسمی شما در آلمان است.',
+        estimatedTime: '۳ تا ۶ هفته'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۲. نقشه راه اختصاصی کانادا (اکسپرس اینتری، ویزای تحصیلی و استانی)
+function getCanadaRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  // فاز ۰
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: پیگیری‌های اداری و اسناد اولیه در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'بررسی اعتبار ۲ تا ۳ ساله پاسپورت، آزادسازی مدارک در سجاد و ترجمه رسمی انگلیسی.',
+    steps: [
+      {
+        id: 'ca-passport',
+        title: 'بررسی و تمدید پاسپورت با اعتبار بالا (۲ تا ۳ سال)',
+        description: 'به دلیل اینکه مدت ویزا و پرمیت کانادا دقیقاً تا سقف اعتبار پاسپورت صادر می‌شود، داشتن حداکثر اعتبار حیاتی است.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'اگر کمتر از ۲ سال اعتبار دارید، پیش از شروع پروسه درخواست پاسپورت جدید ثبت نمایید.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      ...(!profile.education.isDegreeReleased && profile.education.degree !== 'highschool' ? [{
+        id: 'ca-sajjad',
+        title: 'لغو تعهد آموزش رایگان در سامانه سجاد و دریافت ریزنمرات پلمپ‌شده',
+        description: 'ثبت درخواست لغو تعهد در portal.saorg.ir و اخذ تاییدیه دانشنامه و ریزنمرات کامل دوره‌های دانشگاهی.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'کانادا ریزنمرات تمامی ترم‌ها همراه با نمرات دروس افتاده را به طور کامل می‌خواهد.',
+        estimatedTime: '۲ تا ۵ هفته'
+      }] : []),
+      {
+        id: 'ca-trans',
+        title: 'ترجمه رسمی انگلیسی مدارک با مهرهای دادگستری و وزارت امور خارجه',
+        description: 'ترجمه رسمی مدارک هویتی، شناسنامه، سند ازدواج، سوابق تحصیلی و اسناد مالی به زبان انگلیسی.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'سفارت کانادا به اصالت نام مترجم رسمی و بارکد دارالترجمه اهمیت بسیار زیادی می‌دهد.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  // فاز ۱
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: آزمون زبان بین‌المللی (IELTS / CELPIP / TEF)',
+    duration: '۳ تا ۵ ماه',
+    summary: 'کسب نمره هدف CLB 7 تا CLB 9 در آیلتس جنرال یا آیلتس آکادمیک ۶.۵+ برای کانادا.',
+    steps: [
+      {
+        id: 'ca-ielts',
+        title: 'شرکت در آزمون رسمی IELTS (جنرال برای اکسپرس اینتری، آکادمیک برای تحصیلی)',
+        description: 'کسب نمره هدف (حداقل ۷ در هر چهار مهارت جهت رسیدن به CLB 9 که نمره اکسپرس اینتری را به اوج می‌رساند).',
+        category: 'language',
+        isIranSpecific: false,
+        tips: 'در سیستم CRS کانادا، نمره ۸ لیسنینگ و ۷ در سایر مهارت‌ها بیش از ۵۰ امتیاز پاداش به همراه دارد.',
+        estimatedTime: '۳ تا ۴ ماه'
+      },
+      {
+        id: 'ca-tef',
+        title: '(اختیاری و امتیازآور) شرکت در آزمون زبان فرانسه TEF یا TCF Canada',
+        description: 'با توجه به اولویت‌های استراتژیک جدید اداره مهاجرت کانادا (Francophone Category Draws)، تسلط نسبی به زبان فرانسه قبولی شما را قطعی می‌کند.',
+        category: 'language',
+        isIranSpecific: false,
+        tips: 'داشتن سطح متوسط فرانسوی (NCLC 7) نمره قبولی در دراوهای اکسپرس اینتری را تا بیش از ۱۰۰ امتیاز پایین می‌آورد.',
+        estimatedTime: '۳ تا ۶ ماه'
+      }
+    ]
+  });
+
+  // فاز ۲
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: معادل‌سازی مدارک در WES کانادا (ECA) و ارزیابی سوابق',
+    duration: '۱ تا ۲ ماه',
+    summary: 'ایجاد پروفایل در WES Canada، ارسال الکترونیکی نمرات و تنظیم رزومه کانادایی.',
+    steps: [
+      {
+        id: 'ca-wes',
+        title: 'ارزیابی مدارک تحصیلی از طریق WES کانادا (Educational Credential Assessment)',
+        description: 'ایجاد پرونده در wes.org/ca، دریافت کد ارجاع WES Reference Number و ارسال الکترونیکی یا پستی دانشنامه از دانشگاه ایرانی به تورنتو.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'دانشگاه آزاد و اکثر دانشگاه‌های سراسری امکان ارسال مستقیم کارنامه دیجیتال به WES را فراهم کرده‌اند.',
+        estimatedTime: '۴ تا ۶ هفته'
+      },
+      {
+        id: 'ca-resume',
+        title: 'نگارش رزومه استاندارد کانادایی (Canadian Resume Format) و تطبیق با کدهای NOC/TEER',
+        description: 'حذف کامل عکس، سن، جنسیت و وضعیت تاهل از رزومه و نگارش نامه‌های سابقه کاری دقیقاً مطابق شرح وظایف کدهای شغلی کانادا.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'نامه‌های سابقه کار باید در سربرگ رسمی شرکت با درج حقوق، ساعات کاری در هفته و مهر مدیر باشد.',
+        estimatedTime: '۲ هفته'
+      }
+    ]
+  });
+
+  // فاز ۳
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: سابمیت پروفایل Express Entry یا پذیرش تحصیلی با تاییدیه استانی (PAL)',
+    duration: '۲ تا ۴ ماه',
+    summary: 'ثبت پروفایل در سامانه IRCC و رصد دراوها، یا اخذ LOA و نامه استانی PAL برای تحصیلی.',
+    steps: [
+      country.pathwayType === 'study' ? {
+        id: 'ca-loa-pal',
+        title: 'اخذ نامه پذیرش رسمی (LOA) از دانشگاه‌های DLI و دریافت نامه تاییدیه استانی (PAL)',
+        description: 'ارسال مدارک به کالج یا دانشگاه دارای کد DLI در کانادا، پرداخت بیعانه شهریه و دریافت نامه استانی جدید PAL الزامی برای ویزای تحصیلی.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'طبق قوانین جدید کانادا، بدون داشتن Provincial Attestation Letter (PAL) پرونده ویزای تحصیلی مستقیماً رد می‌شود.',
+        estimatedTime: '۴ تا ۸ هفته'
+      } : {
+        id: 'ca-ee-profile',
+        title: 'سابمیت پروفایل اکسپرس اینتری و رصد برنامه‌های نامزدی استانی (PNP)',
+        description: 'ورود به پورتال مهاجرت کانادا (IRCC)، بارگذاری کدهای WES و آیلتس و قرارگیری در استخر متقاضیان (Express Entry Pool).',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'اگر نمره CRS شما برای دراوهای فدرال لب‌مرزی است، استان‌های پرتقاضا مثل آلبرتا، انتاریو یا ساسکاچوان را برای نامزدی استانی (۶۰۰ امتیاز اضافه) هدف بگیرید.',
+        estimatedTime: '۲ تا ۴ ماه'
+      }
+    ]
+  });
+
+  // فاز ۴
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: تمکن مالی، گواهی استطاعت (POF) و پرداخت هزینه‌های IRCC',
+    duration: '۳ تا ۴ هفته',
+    summary: 'صدور گواهی تمکن بانکی لاتین بر اساس جدول LICO اداره مهاجرت کانادا و اثبات منبع وجوه.',
+    steps: [
+      {
+        id: 'ca-bank-statement',
+        title: 'صدور گواهی تمکن بانکی لاتین و گردش حساب ۴ تا ۶ ماهه از بانک ایرانی',
+        description: 'مراجعه به بانک در ایران و صدور نامه رسمی تمکن مالی به دلار کانادا مطابق آخرین جدول حداقل سرمایه سالانه LICO کانادا.',
+        category: 'financial',
+        isIranSpecific: true,
+        tips: 'از واریز پول ناگهانی سنگین درست چند روز قبل از صدور تمکن پرهیز کنید؛ آفیسر پرینت حساب با گردش طبیعی و منطقی را ملاک می‌داند.',
+        estimatedTime: '۳ تا ۵ روز'
+      },
+      {
+        id: 'ca-source-funds',
+        title: 'آماده‌سازی سند منبع پول (Source of Funds) و اسناد مالیاتی و ملکی',
+        description: 'ترجمه اسناد مالکیت ملک، فیش حقوقی، جواز کسب یا فروش دارایی جهت اثبات قانونی بودن سرمایه به آفیسر ویزا.',
+        category: 'financial',
+        isIranSpecific: true,
+        tips: 'توضیحات مالی شفاف در کاور لتر، ریسک ریجکت پرونده به دلایل مالی را به صفر نزدیک می‌کند.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }
+    ]
+  });
+
+  // فاز ۵
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: سابمیت پرونده در پورتال IRCC، سفر به کشور همسایه برای بیومتریک و پیکاپ ویزا',
+    duration: '۲ تا ۵ ماه',
+    summary: 'آپلود مدارک در IRCC، سفر به مراکز VAC استانبول/دبی/ایروان برای انگشت‌نگاری و پیکاپ پاسپورت.',
+    steps: [
+      {
+        id: 'ca-portal-submit',
+        title: 'آپلود کامل فرم‌های IMM و مدارک در پورتال رسمی اداره مهاجرت کانادا (IRCC)',
+        description: 'تکمیل فرم‌های IMM 1294 یا IMM 0008، آپلود مدارک ترجمه‌شده و پرداخت هزینه بررسی ویزا و بیومتریک با کردیت‌کارت.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'تمام فایل‌های پی‌دی‌اف باید طبق حجم مجاز اعلامی و شفافیت بالا آپلود شوند.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'ca-vac-trip',
+        title: 'سفر به یکی از دفاتر VAC در کشورهای همسایه (ترکیه، دبی، باکو یا ایروان) جهت انگشت‌نگاری',
+        description: 'به دلیل عدم حضور سفارت فعال کانادا در تهران، دریافت نامه Biometric Instruction Letter و مراجعه به مراکز وک در استانبول/آنکارا/دبی ظرف ۳۰ روز.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'نوبت‌گیری آنلاین مرکز VAC را بلافاصله پس از دریافت نامه BIL رزرو نمایید.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'ca-ppr-pickup',
+        title: 'دریافت ایمیل پاسپورت ریکوئست (PPR) و ارسال گذرنامه با خدمات پیکاپ',
+        description: 'ارسال پاسپورت از طریق آژانس‌های معتبر دارای مجوز پیکاپ ویزای کانادا جهت الصاق ویزا به گذرنامه در کنسولگری آنکارا یا ابوظبی.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'برگه نامه ارسالی همراه با پاسپورت را پرینت و امضا نمایید.',
+        estimatedTime: '۲ تا ۴ هفته'
+      }
+    ]
+  });
+
+  // فاز ۶
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: لندینگ در کانادا، صدور پرمیت و آغاز زندگی',
+    duration: '۳ تا ۴ هفته',
+    summary: 'ورود به مرز هوایی کانادا، دریافت پرمیت کاغذی، صدور شماره ملی بیمه (SIN) و افتتاح حساب بانکی.',
+    steps: [
+      {
+        id: 'ca-landing',
+        title: 'خرید بلیت پرواز، لندینگ در فرودگاه کانادا (POE) و دریافت پرمیت کاغذی',
+        description: 'ارائه نامه معرفی (Port of Entry Letter) به آفیسر مرزبانی CBSA در فرودگاه تورنتو، مونترال یا ونکوور و پرینت مجوز رسمی کار یا تحصیل.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'پرمیت کاغذی را قبل از خروج از اتاق افسر مرزبانی کنترل کنید تا مشخصات هویتی و اجازه کار در آن به درستی درج شده باشد.',
+        estimatedTime: '۱ روز'
+      },
+      {
+        id: 'ca-sin-number',
+        title: 'مراجعه به شعب Service Canada جهت دریافت شماره بیمه ملی (SIN Number)',
+        description: 'اخذ کد ۹ رقمی SIN جهت استخدام قانونی، پرداخت مالیات و بهره‌مندی از خدمات دولتی کانادا.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'صدور SIN Number در مراکز سرویس کانادا ظرف کمتر از نیم ساعت انجام می‌شود.',
+        estimatedTime: '۱ تا ۲ روز'
+      },
+      {
+        id: 'ca-bank-account',
+        title: 'افتتاح حساب بانکی کانادایی (RBC، TD، Scotiabank یا CIBC)',
+        description: 'مراجعه حضوری به بانک و فعال‌سازی حساب چک‌پوینت، کردیت‌کارت کانادایی و انتقال وجوه ارزی.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'اکثر بانک‌های کانادایی طرح‌های ویژه Newcomer بدون کارمزد ماهانه برای سال اول ارائه می‌دهند.',
+        estimatedTime: '۱ هفته'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۳. نقشه راه اختصاصی ایتالیا (تحصیل ارشد با بورسیه DSU و کار)
+function getItalyRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: پیگیری‌های اداری و اسناد تحصیلی در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'لغو تعهد سجاد، دریافت ریزنمرات رسمی و ترجمه دادگستری به زبان انگلیسی یا ایتالیایی.',
+    steps: [
+      {
+        id: 'it-passport',
+        title: 'بررسی اعتبار پاسپورت (حداقل ۱۸ ماه اعتبار)',
+        description: 'مراجعه به پلیس+۱۰ جهت تمدید یا تعویض گذرنامه برای پیشگیری از تداخل با اعتبار ویزای نوع D ایتالیا.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'حداقل ۱۸ ماه اعتبار پاسپورت برای صدور ویزای تحصیلی ایتالیا الزامی است.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'it-sajjad',
+        title: 'لغو تعهد آموزش رایگان در سامانه سجاد و دریافت بارکد صحت الکترونیکی',
+        description: 'اقدام برای آزادسازی دانشنامه در سامانه سجاد (portal.saorg.ir) جهت امکان پلمپ دادگستری و امور خارجه.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'سفارت ایتالیا مدارک تحصیلی بدون بارکد صحت وزارت علوم را به هیچ عنوان نمی‌پذیرد.',
+        estimatedTime: '۲ تا ۵ هفته'
+      },
+      {
+        id: 'it-trans',
+        title: 'ترجمه رسمی مدارک تحصیلی و شناسنامه‌ای به زبان انگلیسی یا ایتالیایی',
+        description: 'پلمپ رسمی مدارک با مهرهای دادگستری و وزارت امور خارجه جهت ارائه به کارگزاری ویزامتریک.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'برای اکثر دانشگاه‌های انگلیسی‌زبان ایتالیا، ترجمه رسمی انگلیسی کفایت می‌کند و نیازی به ترجمه ایتالیایی نیست.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: تسلط بر زبان انگلیسی یا ایتالیایی',
+    duration: '۲ تا ۴ ماه',
+    summary: 'کسب نمره آیلتس ۶.۰+ یا تافل برای دوره‌های انگلیسی، یا آزمون CILS برای دوره‌های ایتالیایی.',
+    steps: [
+      {
+        id: 'it-lang-exam',
+        title: 'شرکت در آزمون آیلتس آکادمیک (حداقل نمره ۶ یا ۶.۵) یا تافل اینترنتی (۷۸+)',
+        description: 'اخذ مدرک زبان بین‌المللی مورد تایید پورتال دانشگاه‌های ایتالیا نظیر پلی‌تکنیک میلان، ساپینزا یا تورین.',
+        category: 'language',
+        isIranSpecific: false,
+        tips: 'برخی دانشگاه‌های ایتالیا نمره دولینگو بالای ۱۰۰ یا نامه انگلیسی‌بودن مقطع قبلی (Medium of Instruction) را نیز قبول دارند.',
+        estimatedTime: '۲ تا ۴ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: ارزشیابی مدارک (Dichiarazione di Valore / CIMEA) و انگیزه‌نامه',
+    duration: '۱ تا ۲ ماه',
+    summary: 'اخذ تاییدیه ارزش تحصیلی DoV از کنسولگری تهران یا گواهی الکترونیکی چیمه (CIMEA).',
+    steps: [
+      {
+        id: 'it-dov-cimea',
+        title: 'ثبت درخواست گواهی تطبیق ارزش تحصیلی (DoV) یا ارزشیابی آنلاین CIMEA',
+        description: 'ارسال مدارک به مرکز اطلاعات تحصیلی ایتالیا (CIMEA Statement of Comparability) یا نوبت سفارت تهران جهت صدور برگه ارزش تحصیلی (DoV).',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'دریافت گواهی CIMEA آنلاین و سریع‌تر از روند حضوری DoV در سفارت تهران است.',
+        estimatedTime: '۳ تا ۵ هفته'
+      },
+      {
+        id: 'it-sop',
+        title: 'نگارش انگیزه‌نامه (Motivation Letter) و رزومه استاندارد دانشگاهی',
+        description: 'تبیین دقیق علل انتخاب رشته و دانشگاه در ایتالیا، اساتید مورد نظر و برنامه‌های پس از فارغ‌التحصیلی.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'دانشگاه‌های دولتی ایتالیا به تطابق سیلابس درسی مقطع کارشناسی با رشته ارشد توجه ویژه‌ای دارند.',
+        estimatedTime: '۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: پیش‌ثبت‌نام پورتال Universitaly و اقدام برای پرونده بورسیه استانی (DSU)',
+    duration: '۲ تا ۳ ماه',
+    summary: 'پیش‌ثبت‌نام در سامانه دولتی Universitaly و آماده‌سازی مدارک بورسیه استانی ۸۰۰۰ یورویی DSU.',
+    steps: [
+      {
+        id: 'it-universitaly-apply',
+        title: 'پیش‌ثبت‌نام در سامانه دولتی وزارت علوم ایتالیا (Universitaly.it)',
+        description: 'ایجاد پروفایل در سامانه رسمی Universitaly، بارگذاری مدرک پذیرش دانشگاه و انتخاب سفارت ایتالیا در تهران جهت ارسال اتوماتیک تاییدیه.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'بدون تاییدیه نهایی Universitaly، سفارت ایتالیا پرونده ویزای شما را تحویل نخواهد گرفت.',
+        estimatedTime: '۲ تا ۴ هفته'
+      },
+      {
+        id: 'it-dsu-docs',
+        title: 'تشکیل پرونده مدارک بورسیه استانی (DSU / EDiSU / LazioDisco / ER.GO)',
+        description: 'ترجمه رسمی مدارک مالی خانواده در ایران: فیش حقوقی یا حکم بازنشستگی سرپرست، اجاره‌نامه مسکونی یا سند ملکی، و اقرارنامه مالی خانواده به همراه تاییدات دادگستری و امور خارجه.',
+        category: 'application',
+        isIranSpecific: true,
+        tips: 'بورسیه استانی ایتالیا سالانه حدود ۸۰۰۰ یورو کمک‌هزینه نقدی بلاعوض، کارت غذای رایگان سلف و معافیت کامل شهریه به دانشجویان ایرانی اختصاص می‌دهد.',
+        estimatedTime: '۳ تا ۶ هفته'
+      },
+      {
+        id: 'it-isee-calc',
+        title: 'اخذ گواهی شاخص وضعیت اقتصادی برابر (ISEE Parificato) از مراکز CAF ایتالیا',
+        description: 'ارسال مدارک ترجمه‌شده درآمد خانواده به مراکز مالیاتی CAF در ایتالیا جهت محاسبه شاخص ایزه و بارگذاری در پورتال بورسیه استان مربوطه.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'عدد ISEE خانواده‌های ایرانی به دلیل تبدیل ریال به یورو همیشه بسیار پایین‌تر از سقف مجاز (۲۵ هزار یورو) درمی‌آید و شانس دریافت بورسیه بالای ۹۵٪ است.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: تمکن مالی ریالی در حساب بانک ایرانی (بدون نیاز به حساب مسدود)',
+    duration: '۲ تا ۳ هفته',
+    summary: 'صدور نامه تمکن مالی ارزی از بانک ایرانی معادل حدود ۶۰۰۰ یورو بر مبنای نرخ رسمی ETS.',
+    steps: [
+      {
+        id: 'it-bank-cert',
+        title: 'صدور گواهی تمکن مالی لاتین از بانک ایرانی (حدود ۶۰۰۰ یورو)',
+        description: 'مراجعه به بانک در ایران و صدور گواهی تمکن مالی لاتین به نام متقاضی یا سرپرست بر پایه نرخ ارز سامانه ETS / مرکز مبادله.',
+        category: 'financial',
+        isIranSpecific: true,
+        tips: 'برخلاف آلمان، ایتالیا نیازی به مسدود کردن پول در خارج از کشور ندارد و وجه پس از صدور گواهی در حسابتان باقی می‌ماند.',
+        estimatedTime: '۳ تا ۵ روز'
+      },
+      {
+        id: 'it-financial-affidavit',
+        title: 'تنظیم تعهدنامه مالی محضری سرپرست در دفتر اسناد رسمی',
+        description: 'تعهد رسمی پدر یا مادر مبنی بر تقبل کلیه مخارج تحصیلی و اقامتی دانشجو در ایتالیا و ترجمه رسمی آن با مهر دادگستری.',
+        category: 'financial',
+        isIranSpecific: true,
+        tips: 'تعهد محضری به همراه فیش حقوقی سرپرست، سند معتبر حمایت مالی نزد آفیسر کنسولی تلقی می‌شود.',
+        estimatedTime: '۱ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: وقت کارگزاری ویزامتریک تهران (بخش ایتالیا) و مصاحبه ویزای ملی (Type D)',
+    duration: '۱ تا ۳ ماه',
+    summary: 'رزرو نوبت در ویزامتریک تهران، تحویل پوشه مدارک و اخذ ویزای یک‌ساله شنگن تحصیلی.',
+    steps: [
+      {
+        id: 'it-visametric-book',
+        title: 'رزرو نوبت ویزامتریک تهران در بازه زمانی بازگشایی تقویم دانشجویی (تابستان)',
+        description: 'ورود به پورتال کارگزاری ویزامتریک تهران (بخش سفارت ایتالیا)، رزرو نوبت تحویل مدارک دانشجویی و پرداخت ودیعه ریالی.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'تقویم وقت‌های دانشجویی معمولاً از اواخر بهار تا مردادماه باز می‌شود؛ به محض باز شدن ثبت‌نام کنید.',
+        estimatedTime: '۳ تا ۶ هفته'
+      },
+      {
+        id: 'it-visa-submit',
+        title: 'تحویل حضوری مدارک، انجام انگشت‌نگاری و بررسی ویزای نوع D',
+        description: 'ارائه پرینت تاییدیه Universitaly، نامه تمکن مالی، مدارک بورسیه استانی، بیمه مسافرتی و اصل پاسپورت.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'نسخه‌های اصل ترجمه‌ها و کپی‌های واضح از تمام صفحات پاسپورت همراه داشته باشید.',
+        estimatedTime: '۱ روز کاری'
+      },
+      {
+        id: 'it-visa-collect',
+        title: 'تحویل گذرنامه ویزا شده از باجه پستی یا باجه تحویل کارگزاری',
+        description: 'دریافت گذرنامه به همراه برچسب ویزای ملی نوع D ایتالیا با اعتبار اولیه یک‌ساله.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'تاریخ اعتبار ویزا معمولاً از اوایل سپتامبر (شروع سال تحصیلی) آغاز می‌شود.',
+        estimatedTime: '۳ تا ۶ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: ورود به ایتالیا، پرمسو دی سوجورنو (Permesso) و دریافت بورسیه',
+    duration: '۳ تا ۴ هفته',
+    summary: 'پرواز به ایتالیا، ارسال کیت پستی کارت اقامت ظرف ۸ روز کاری و اخذ کد مالیاتی.',
+    steps: [
+      {
+        id: 'it-flight',
+        title: 'خرید بلیت پرواز به رم یا میلان و عوارض خروج از ایران',
+        description: 'تهیه بلیت هواپیما و ورود به خاک ایتالیا پیش از شروع کلاس‌های توجیهی دانشگاه.',
+        category: 'arrival',
+        isIranSpecific: true,
+        tips: 'پرینت مدارک پذیرش و آدرس محل سکونت اولیه را در چمدان دستی همراه داشته باشید.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'it-permesso',
+        title: 'مراجعه به اداره پست (Poste Italiane) ظرف ۸ روز کاری جهت درخواست پرمسو (کارت اقامت)',
+        description: 'دریافت بسته کیت زرد‌رنگ اقامت از باجه Sportello Amico اداره پست، الصاق تمبر مالیاتی (Marca da Bollo ۱۶ یورویی) و دریافت برگه رسید پستی (Ricevuta).',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'برگه رسید پستی ریچه‌ووتا (Ricevuta) تا زمان صدور کارت فیزیکی حکم اقامت قانونی و معتبر شما را دارد.',
+        estimatedTime: '۸ روز اول ورود'
+      },
+      {
+        id: 'it-codice-fiscale',
+        title: 'اخذ کد مالیاتی (Codice Fiscale) و افتتاح حساب بانکی پستی (Postepay Evolution)',
+        description: 'مراجعه به اداره درآمد ایتالیا (Agenzia delle Entrate) جهت دریافت برگه کد مالیاتی، و افتتاح حساب بانکی برای واریز اقساط بورسیه استانی DSU.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'شماره IBAN حساب بانکی ایتالیایی خود را سریعاً در پورتال بورسیه دانشگاه ثبت نمایید تا قسط اول بورسیه واریز شود.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۴. نقشه راه اختصاصی اتریش (تحصیل، گواهی عدم ممانعت، و کارت قرمز-سفید-قرمز)
+function getAustriaRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: پیگیری‌های اداری، سجاد و ترجمه رسمی آلمانی در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'آزادسازی دانشنامه در سجاد و ترجمه رسمی کلیه مدارک منحصراً به زبان آلمانی.',
+    steps: [
+      {
+        id: 'at-passport',
+        title: 'بررسی اعتبار گذرنامه با حداقل ۲ سال اعتبار',
+        description: 'مراجعه به دفاتر پلیس+۱۰ جهت صدور گذرنامه جدید با بالاترین اعتبار ممکن جهت پوشش پروسه ویزای اتریش.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'پروسه اداری اتریش ممکن است تا ۶ الی ۹ ماه زمان ببرد؛ داشتن پاسپورت معتبر ضروری است.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      ...(!profile.education.isDegreeReleased && profile.education.degree !== 'highschool' ? [{
+        id: 'at-sajjad',
+        title: 'آزادسازی مدارک در سامانه سجاد و دریافت کد صحت وزارت علوم',
+        description: 'لغو تعهد آموزش رایگان و اخذ اصل دانشنامه و ریزنمرات جهت امکان تاییدات رسمی.',
+        category: 'iran_admin' as const,
+        isIranSpecific: true,
+        tips: 'بدون بارکد سجاد، اداره مترجمان دادگستری مدارک را برای اتریش پلمپ نخواهد کرد.',
+        estimatedTime: '۲ تا ۵ هفته'
+      }] : []),
+      {
+        id: 'at-trans-german',
+        title: 'ترجمه رسمی کلیه اسناد هویتی و تحصیلی منحصراً به زبان آلمانی',
+        description: 'تحویل دانشنامه، ریزنمرات، شناسنامه و گواهی‌های دانشگاهی به دارالترجمه رسمی آلمانی با مهرهای دادگستری و امور خارجه.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'دانشگاه‌های دولتی و سفارت اتریش در تهران ترجمه انگلیسی را برای بسیاری از فرآیندها نمی‌پذیرند؛ حتماً زبان آلمانی باشد.',
+        estimatedTime: '۲ تا ۴ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: تسلط بر زبان آلمانی یا انگلیسی',
+    duration: '۳ تا ۵ ماه',
+    summary: 'کسب مدرک زبان آلمانی ÖSD اتریش یا گوته، یا آیلتس برای دوره‌های بین‌المللی.',
+    steps: [
+      {
+        id: 'at-lang-exam',
+        title: 'شرکت در آزمون زبان آلمانی ÖSD یا گوته (حداقل A2/B1 برای پذیرش مشروط با کالج زبان، یا C1 مستقیم)',
+        description: 'ثبت‌نام در سنترهای رسمی آزمون ÖSD در تهران جهت دریافت مدرک زبان استاندارد اتریش.',
+        category: 'language',
+        isIranSpecific: false,
+        tips: 'دانشگاه‌های اتریش به شما اجازه می‌دهند با مدرک A2 زبان آلمانی پذیرش مشروط بگیرید و دوره‌های زبان را در دانشگاه وین بگذرانید.',
+        estimatedTime: '۳ تا ۵ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: گواهی عدم ممانعت تحصیلی در ایران و لگالایز سفارت اتریش در تهران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'اخذ گواهی اشتغال به تحصیل دانشگاه دولتی ایران و تایید (لگالایز) مدارک در سفارت اتریش.',
+    steps: [
+      {
+        id: 'at-studienplatz',
+        title: 'اخذ گواهی اشتغال به تحصیل یا عدم ممانعت تحصیلی در ایران (Bestätigung der Studienplatz)',
+        description: 'اخذ گواهی رسمی قبولی کنکور سراسری یا اشتغال به تحصیل در رشته و مقطع مشابه از دانشگاه سراسری یا آزاد معتبر در ایران (شرط کلیدی دانشگاه‌های دولتی اتریش).',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'اتریش طبق قانون آموزش عالی خود تاکید دارد که متقاضی باید در کشور خود حق ادامه تحصیل در آن رشته را داشته باشد.',
+        estimatedTime: '۲ تا ۳ هفته'
+      },
+      {
+        id: 'at-legalize',
+        title: 'رزرو نوبت تایید مدارک (لگالایزیشن) در سفارت اتریش در تهران',
+        description: 'حضور در سفارت اتریش (خیابان نیاوران / باهنر)، پرداخت هزینه لگالایزیشن یورویی و پلمپ دیپلماتیک مدارک ترجمه شده.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'نوبت لگالایزیشن سفارت اتریش نیازمند ثبت‌نام در سامانه وقت‌دهی سفارت است؛ پوشه مدارک را با دقت بررسی کنید.',
+        estimatedTime: '۳ تا ۶ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: ارسال پستی پرونده لگالایز شده به دانشگاه‌های اتریش و اخذ پذیرش',
+    duration: '۲ تا ۳ ماه',
+    summary: 'پست فیزیکی مدارک به دانشگاه وین (Universität Wien) یا گراتس و دریافت Zulassung.',
+    steps: [
+      {
+        id: 'at-post-uni',
+        title: 'ارسال پستی مدارک اصل لگالایز شده به دانشگاه وین (Uni Wien) یا TU Wien',
+        description: 'ارسال بسته پلمپ‌شده از طریق پست بین‌المللی سریع (DHL یا TNT) به دبیرخانه پذیرش دانشجویان بین‌المللی دانشگاه مقصد.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'دانشگاه‌های اتریش بررسی پرونده را منحصراً پس از دریافت اصل نسخه فیزیکی لگالایز شده آغاز می‌کنند.',
+        estimatedTime: '۴ تا ۸ هفته'
+      },
+      {
+        id: 'at-admission-letter',
+        title: 'دریافت برگه رسمی پذیرش قطعی (Zulassungsbescheid)',
+        description: 'پرداخت شهریه هر ترم (حدود ۷۴۵ یورو در هر ترم برای دانشگاه‌های دولتی اتریش) و دریافت نامه تاییدیه رسمی جهت اقدام ویزا.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'نامه زولاسونگ اتریش تا ۳ ترم تحصیلی اعتبار دارد و به شما فرصت کافی برای اقدامات اقامتی می‌دهد.',
+        estimatedTime: '۲ تا ۴ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: تامین تمکن مالی و اثبات منبع وجوه (Source of Funds)',
+    duration: '۳ تا ۴ هفته',
+    summary: 'تامین تمکن در حساب ارزی طبق جدول قانون NAG اتریش و شفاف‌سازی منبع دارایی.',
+    steps: [
+      {
+        id: 'at-bank-pof',
+        title: 'تامین تمکن مالی در حساب ارزی شخصی مطابق قانون اقامت اتریش (NAG)',
+        description: 'صدور گواهی تمکن بانکی لاتین (برای متقاضیان زیر ۲۴ سال حدود ۶۵۰ یورو در ماه و برای بالای ۲۴ سال حدود ۱۲۵۰ یورو در ماه برای مدت یک سال).',
+        category: 'financial',
+        isIranSpecific: true,
+        tips: 'مبلغ باید در حساب بانکی معتبر با درج معادل یورویی نگهداری شود.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'at-source-funds',
+        title: 'اثبات شفاف منبع درآمد (Source of Funds) و اسناد مالی سرپرست به زبان آلمانی',
+        description: 'ترجمه فیش‌های حقوقی سرپرست، اسناد شغلی، مالیاتی و ملکی به زبان آلمانی جهت اقناع آفیسر مالی سفارت.',
+        category: 'financial',
+        isIranSpecific: true,
+        tips: 'سفارت اتریش نسبت به منبع شفاف پول واریزی بسیار حساس و دقیق است.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: وقت مستقیم سفارت اتریش در تهران و ارسال پرونده به اداره اقامت (MA35 وین)',
+    duration: '۲ تا ۴ ماه',
+    summary: 'مصاحبه حضوری در سفارت اتریش تهران، بررسی امنیتی در MA35 اتریش و صدور ویزای ورود Visa D.',
+    steps: [
+      {
+        id: 'at-embassy-appointment',
+        title: 'حضور در روز مصاحبه در سفارت اتریش در تهران (خیابان نیاوران)',
+        description: 'تحویل پرونده درخواست مجوز اقامت دانشجویی (Aufenthaltsbewilligung Student)، پرداخت هزینه بررسی اقامت و انجام انگشت‌نگاری.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'تمام فرم‌ها باید به زبان آلمانی و با خط خوانا امضا و تکمیل شده باشند.',
+        estimatedTime: '۱ روز کاری'
+      },
+      {
+        id: 'at-ma35-process',
+        title: 'بررسی پرونده در اداره امور اقامت و شهروندی اتریش (مانند MA35 در وین)',
+        description: 'ارسال فیزیکی پرونده از تهران به اتریش، استعلام عدم سوءپیشینه و موافقت اداره اقامت محلی اتریش.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'در صورت نیاز به مدرک تکمیلی، اداره MA35 از طریق ایمیل با شما مکاتبه خواهد کرد.',
+        estimatedTime: '۲ تا ۴ ماه'
+      },
+      {
+        id: 'at-visa-d-stamp',
+        title: 'صدور ویزای ورود ۴ ماهه نوع D (Visa D) جهت دریافت کارت فیزیکی در اتریش',
+        description: 'مراجعه به سفارت اتریش در تهران با برگه بیمه مسافرتی و الصاق لیبل ویزای ورود در گذرنامه.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'این ویزا صرفاً برای ورود به اتریش و تحویل کارت هوشمند اقامت صادر می‌شود.',
+        estimatedTime: '۱ تا ۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: پرواز به وین، ثبت شهرداری (Meldezettel) و دریافت کارت اقامت شینگن',
+    duration: '۲ تا ۳ هفته',
+    summary: 'ورود به اتریش، ثبت آدرس مسکونی ظرف ۳ روز در Meldeamt و دریافت کارت هوشمند اقامت.',
+    steps: [
+      {
+        id: 'at-flight',
+        title: 'خرید بلیت پرواز به وین و ورود به خاک اتریش',
+        description: 'تهیه بلیت هواپیما و ورود به اتریش پیش از انقضای مهلت ثبت‌نام حضوری دانشگاه.',
+        category: 'arrival',
+        isIranSpecific: true,
+        tips: 'عوارض خروج از کشور را به صورت اینترنتی قبل از پرواز پرداخت فرمایید.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'at-meldezettel',
+        title: 'مراجعه به اداره شهرداری محلی (Meldeamt) ظرف ۳ روز کاری جهت ثبت آدرس (Meldezettel)',
+        description: 'پر کردن برگه Meldezettel با امضای صاحبخانه یا خوابگاه دانشجویی و دریافت برگه رسمی ثبت سکونت.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'برگه ملدزتل سند هویتی مهم برای افتتاح حساب بانکی و بیمه درمانی دولتی اتریش است.',
+        estimatedTime: '۳ روز اول ورود'
+      },
+      {
+        id: 'at-rwr-card',
+        title: 'مراجعه به اداره MA35 جهت دریافت کارت فیزیکی اقامت و ثبت‌نام در بیمه ÖGK',
+        description: 'تحویل کارت اقامت هوشمند پلاستیکی، فعال‌سازی بیمه سلامت دولتی دانشجویی اتریش (ÖGK با حق بیمه حدود ۶۵ یورو در ماه) و افتتاح حساب بانکی (Erste Bank یا Bank Austria).',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'با دریافت این کارت، اقامت شینگن معتبر دارید و اجازه کار پاره‌وقت دانشجویی تا ۲۰ ساعت در هفته برای شما فعال می‌گردد.',
+        estimatedTime: '۲ هفته'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۵. نقشه راه اختصاصی امارات و عمان (ویزای کاری، جستجوی کار، دیتافلو و E-Visa)
+function getUaeOmanRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: مدارک اولیه و تاییدات کنسولگری در تهران',
+    duration: '۳ تا ۵ هفته',
+    summary: 'بررسی اعتبار پاسپورت، ترجمه رسمی انگلیسی و تایید نهایی سفارت امارات یا عمان در تهران.',
+    steps: [
+      {
+        id: 'gulf-passport',
+        title: 'اطمینان از اعتبار گذرنامه (حداقل ۶ تا ۱۲ ماه اعتبار)',
+        description: 'بررسی تاریخ انقضا و سلامت فیزیکی گذرنامه جهت ثبت اطلاعات در پورتال‌های مهاجرتی خلیج فارس.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'حداقل ۶ ماه اعتبار پاسپورت برای صدور مجوز ورود (Entry Permit) امارات الزامی است.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'gulf-attest',
+        title: 'ترجمه رسمی مدارک تحصیلی و شغلی با تایید وزارت خارجه و سفارت امارات/عمان در تهران',
+        description: 'ترجمه مدارک به زبان انگلیسی با تایید دادگستری و امور خارجه، و ارجاع به سفارت امارات در تهران (خیابان ولیعصر) یا سفارت عمان جهت الصاق لیبل تاییدیه (Attestation).',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'تاییدیه سفارت امارات در تهران برای دریافت اقامت کارمندی در دبی و ابوظبی ضروری است.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: انگلیسی کاربردی تجاری و تنظیم رزومه حوزه خلیج فارس (Gulf Format)',
+    duration: '۱ تا ۲ ماه',
+    summary: 'بازنویسی رزومه طبق استانداردهای خلیج فارس (با عکس و مشخصات ویزا) و آمادگی مصاحبه آنلاین.',
+    steps: [
+      {
+        id: 'gulf-resume',
+        title: 'تنظیم رزومه استاندارد متناسب با بازار کار دبی و مسقط (Gulf CV Format)',
+        description: 'درج عکس پرسنلی حرفه‌ای با کت و شلوار، ملیت، وضعیت تاهل، شماره تماس واتس‌اپ با پیش‌شماره بین‌المللی و وضعیت فعلی ویزا.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'برخلاف اروپا و کانادا، کارفرمایان امارات و عمان اصرار به دیدن عکس پرسنلی رسمی و مشخصات هویتی در صفحه اول رزومه دارند.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'gulf-english',
+        title: 'تقویت مهارت گفتگوی انگلیسی تجاری برای مصاحبه‌های فشرده با کارفرمایان چندملیتی',
+        description: 'تمرکز بر اصطلاحات تخصصی حوزه کاری و شبیه‌سازی مصاحبه‌های ویدئویی در پلتفرم‌های Teams و Zoom.',
+        category: 'language',
+        isIranSpecific: false,
+        tips: 'اکثر مصاحبه‌های شرکت‌های دبی با مدیران منابع انسانی بین‌المللی (اروپایی، هندی و عربی) به زبان انگلیسی روان انجام می‌شود.',
+        estimatedTime: '۱ تا ۲ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: ارزیابی و استعلام مدارک (Dataflow / Equivalency / Prometric)',
+    duration: '۱ تا ۲ ماه',
+    summary: 'استعلام اصالت مدارک در سامانه دیتافلو، آزمون پرومتریک و معادل‌سازی مدرک در امارات.',
+    steps: [
+      ...(profile.education.majorCategory === 'medical_health' ? [{
+        id: 'gulf-dataflow',
+        title: 'ویژه کادر درمان و پزشکی: ثبت پرونده در سامانه Dataflow و آزمون پرومتریک',
+        description: 'ارسال مدارک به موسسه بین‌المللی دیتافلو جهت استعلام مستقیم از دانشگاه و بیمارستان ایرانی، و اخذ مجوز آزمون DHA دبی یا Prometric عمان.',
+        category: 'documents' as const,
+        isIranSpecific: false,
+        tips: 'گزارش تاییدیه مثبت دیتافلو (PSV Report) شرط اصلی استخدام هرگونه پزشک، دندانپزشک، داروساز و پرستار در کشورهای حوزه خلیج فارس است.',
+        estimatedTime: '۴ تا ۸ هفته'
+      }] : [{
+        id: 'gulf-equiv',
+        title: 'معادل‌سازی دانشنامه در سامانه وزارت آموزش عالی امارات (MOE Equivalency)',
+        description: 'بارگذاری مدارک تایید شده در پورتال moj.gov.ae یا moe.gov.ae جهت تطبیق رتبه مدرک با استانداردهای شغلی امارات.',
+        category: 'documents' as const,
+        isIranSpecific: false,
+        tips: 'معادل‌سازی وزارت آموزش امارات برای اخذ پوزیشن‌های مدیریتی و تخصصی الزامی است.',
+        estimatedTime: '۲ تا ۴ هفته'
+      }])
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: کاریابی مستقیم در پورتال‌های خلیج فارس یا اقدام برای ویزای طلایی / جستجوی کار',
+    duration: '۱ تا ۳ ماه',
+    summary: 'ارسال هدفمند رزومه در Bayt، لینکدین امارات یا اقدام برای ویزای ۶۰ روزه جستجوی کار.',
+    steps: [
+      {
+        id: 'gulf-job-hunt',
+        title: 'کاریابی فعال در پورتال‌های استخدامی معتبر (Bayt.com، GulfTalent، LinkedIn UAE و Indeed دبی)',
+        description: 'ارسال رزومه سفارشی‌سازی شده برای آگهی‌های دارای پشتیبانی ویزای کاری (Visa Sponsorship Provided).',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'بخش پیام خصوصی لینکدین و ارتباط با استخدام‌کنندگان (Recruiters) شرکت‌های مستقر در دبی نرخ پاسخ‌دهی بسیار بالایی دارد.',
+        estimatedTime: '۱ تا ۳ ماه'
+      },
+      {
+        id: 'gulf-job-seeker-visa',
+        title: 'بررسی گزینه ویزای ۶۰ روزه جستجوی کار یا ویزای توریستی جهت حضور مستقیم در دبی',
+        description: 'سفر به دبی با ویزای کوتاه‌مدت جهت شرکت در جلسات مصاحبه حضوری، شبکه ارتباطی و تبدیل مستقیم ویزا به اقامت کاری بدون خروج از کشور.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'بسیاری از شرکت‌های اماراتی ترجیح می‌دهند با کارجویانی مصاحبه کنند که هم‌اکنون در خاک دبی حضور فیزیکی دارند.',
+        estimatedTime: '۱ تا ۲ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: قرارداد رسمی (Job Offer) و صدور مجوز ورود کاری (Entry Permit)',
+    duration: '۲ تا ۳ هفته',
+    summary: 'امضای قرارداد با کارفرما طبق فرمت وزارت کار امارات (MOHRE) و صدور تاییدیه ورود الکترونیکی.',
+    steps: [
+      {
+        id: 'gulf-offer-sign',
+        title: 'امضای پیشنهاد کاری استاندارد وزارت کار امارات (MOHRE Offer Letter)',
+        description: 'بررسی جزئیات حقوق ماهانه (Basic + Allowances)، بیمه درمان، مسکن، مرخصی سالانه و پاداش پایان خدمت (Gratuity).',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'قرارداد استاندارد دو زبانه (انگلیسی و عربی) ملاک قانونی حل اختلافات کاری در مراجع قضایی امارات است.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'gulf-entry-permit',
+        title: 'درخواست کارفرما برای صدور مجوز ورود استخدامی (Employment Entry Permit) از اداره اقامت (GDRFA)',
+        description: 'ثبت اطلاعات پاسپورت شما در سامانه اداره کل اقامت و امور اتباع خارجی دبی (GDRFA) یا پلیس عمان توسط اسپانسر.',
+        category: 'financial',
+        isIranSpecific: false,
+        tips: 'کلیه هزینه‌های دولتی صدور مجوز ورود کاری طبق قانون کار امارات بر عهده کارفرما/اسپانسر است.',
+        estimatedTime: '۳ تا ۷ روز کاری'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: صدور آنی ویزای الکترونیکی (E-Visa) بدون نیاز به مصاحبه در سفارت',
+    duration: '۱ هفته',
+    summary: 'صدور سریع ویزای الکترونیکی PDF بدون نیاز به مراجعه به سفارت یا صف‌های طولانی.',
+    steps: [
+      {
+        id: 'gulf-evisa-issue',
+        title: 'دریافت فایل الکترونیکی ویزای ورود کاری (E-Visa PDF) با بارکد رسمی',
+        description: 'برخلاف کشورهای غربی، صدور ویزای ورود کاری امارات و عمان کاملاً دیجیتال است و نیازی به حضور در سفارت تهران یا مصاحبه کنسولی ندارد.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'فایل الکترونیکی ویزا به صورت فایل PDF ارسال می‌شود که باید پرینت رنگی باکیفیت از آن تهیه فرمایید.',
+        estimatedTime: '۳ تا ۵ روز'
+      },
+      {
+        id: 'gulf-ok-to-board',
+        title: 'تاییدیه پرواز (Ok to Board) در شرکت هواپیمایی',
+        description: 'ثبت شماره ویزا در سیستم ایرلاین (ماهان، فلای‌دبی، امارات یا ایرعربیا) جهت بلامانع بودن سوار شدن به هواپیما.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'حداقل ۴۸ ساعت قبل از پرواز، نسخه ویزا را به دفتر ایرلاین تحویل دهید تا استعلام تایید شود.',
+        estimatedTime: '۱ تا ۲ روز'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: پرواز، انجام مدیکال، ثبت بیومتریک کارت اقامت (Emirates ID) و حساب بانکی',
+    duration: '۲ تا ۳ هفته',
+    summary: 'پرواز به دبی/مسقط، آزمایش خون و ریه، صدور کارت ملی هوشمند اقامت و افتتاح حساب بانکی.',
+    steps: [
+      {
+        id: 'gulf-arrival',
+        title: 'پرواز به دبی/شارجه/ابوظبی یا مسقط و ورود با مجوز الکترونیکی',
+        description: 'ارائه پرینت E-Visa به گیت مهاجرت فرودگاه مقصد و مهر ورود (Entry Stamp) در پاسپورت.',
+        category: 'arrival',
+        isIranSpecific: true,
+        tips: 'از لحظه ورود به امارات، ۶۰ روز مهلت دارید تا آزمایشات مدیکال و مراحل کارت هویت را نهایی کنید.',
+        estimatedTime: '۱ روز'
+      },
+      {
+        id: 'gulf-medical-test',
+        title: 'مراجعه به مراکز خدمات سلامت جهت آزمایشات پزشکی الزامی (Medical Fitness Test)',
+        description: 'انجام آزمایش خون و عکس‌برداری قفسه سینه در مراکز رسمی سلامت جهت دریافت گواهی عدم ابتلا به بیماری‌های واگیردار.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'نتیجه آزمایش مدیکال معمولاً ظرف ۲۴ تا ۴۸ ساعت صادر و مستقیماً به اداره اقامت ارسال می‌گردد.',
+        estimatedTime: '۲ تا ۳ روز'
+      },
+      {
+        id: 'gulf-emirates-id',
+        title: 'مراجعه به مراکز ICP جهت انگشت‌نگاری و صدور کارت هویت هوشمند (Emirates ID / بطاقة مقیم)',
+        description: 'ثبت اثر انگشت و اسکن چهره، الصاق مهر ویزای اقامت رسمی ۲ تا ۳ ساله و تحویل کارت هوشمند فیزیکی از طریق پست.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'کارت هویت هوشمند امارات (Emirates ID) کلید اصلی زندگی در امارات برای قرارداد اجاره خانه (Ejari)، خط تلفن و گواهینامه رانندگی است.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'gulf-bank-account',
+        title: 'افتتاح حساب بانکی شخصی و حقوقی (Emirates NBD، ADCB، Mashreq یا بانک مسقط)',
+        description: 'مراجعه به بانک با کارت هویت و قرارداد کاری، افتتاح حساب جاری و دریافت دبیت‌کارت بین‌المللی جهت دریافت مستقیم حقوق به درهم یا ریال عمان.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'اپلیکیشن‌های بانکی امارات امکان انتقال ارز سریع بین‌المللی بدون مالیات بر درآمد فردی را به شما می‌دهند.',
+        estimatedTime: '۳ تا ۵ روز'
+      }
+    ]
+  });
+
+  return phases;
+}
+
+// ۶. نقشه راه جنریک برای سایر کشورها
+function getGenericRoadmapPhases(profile: UserProfile, country: CountryRecommendation): RoadmapPhase[] {
+  const phases: RoadmapPhase[] = [];
+
+  phases.push({
+    phaseNumber: 0,
+    phaseTitle: 'فاز صفر: پیگیری‌های اداری و اسناد اولیه در ایران',
+    duration: '۱ تا ۲ ماه',
+    summary: 'بررسی اعتبار پاسپورت، آزادسازی مدارک در سجاد و ترجمه رسمی با مهرهای کامل.',
+    steps: [
+      {
+        id: 'gen-passport',
+        title: 'بررسی اعتبار گذرنامه با حداقل ۱۸ ماه اعتبار',
+        description: 'اقدام جهت صدور یا تعویض پاسپورت از طریق دفاتر پلیس+۱۰.',
+        category: 'iran_admin',
+        isIranSpecific: true,
+        tips: 'اسپل لاتین نام را با مدارک تحصیلی و رزومه هماهنگ نمایید.',
+        estimatedTime: '۱ تا ۲ هفته'
+      },
+      {
+        id: 'gen-trans',
+        title: 'ترجمه رسمی مدارک با مهرهای دادگستری و وزارت امور خارجه',
+        description: 'تحویل مدارک هویتی، شغلی و تحصیلی به دارالترجمه رسمی.',
+        category: 'documents',
+        isIranSpecific: true,
+        tips: 'همواره دو نسخه پلمپ‌شده از مدارک تهیه نمایید.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 1,
+    phaseTitle: 'فاز یک: تسلط بر زبان بین‌المللی و آزمون‌های معتبر',
+    duration: '۳ تا ۵ ماه',
+    summary: 'کسب نمره هدف در آزمون آیلتس، تافل یا زبان بومی کشور مقصد.',
+    steps: [
+      {
+        id: 'gen-lang-exam',
+        title: 'شرکت در آزمون رسمی زبان (IELTS / TOEFL / PTE)',
+        description: 'ثبت‌نام در سنترهای رسمی و اخذ کارنامه معتبر بین‌المللی.',
+        category: 'language',
+        isIranSpecific: false,
+        tips: 'نمره زبان بالاتر شانس اخذ ویزا و پذیرش را به طور چشمگیری افزایش می‌دهد.',
+        estimatedTime: '۳ تا ۵ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 2,
+    phaseTitle: 'فاز دو: آماده‌سازی مدارک بین‌المللی و رزومه‌سازی استاندارد',
+    duration: '۱ تا ۲ ماه',
+    summary: 'نگارش رزومه بین‌المللی، انگیزه‌نامه هدفمند و استعلام سوابق بیمه.',
+    steps: [
+      {
+        id: 'gen-resume',
+        title: 'نگارش رزومه بین‌المللی استاندارد و انگیزه‌نامه قوی (SOP)',
+        description: 'تنظیم ساختار رزومه بر اساس استانداردهای بین‌المللی و ارائه شفاف دستاوردها.',
+        category: 'documents',
+        isIranSpecific: false,
+        tips: 'رزومه باید بر مهارت‌های قابل اثبات و پروژه‌های واقعی متمرکز باشد.',
+        estimatedTime: '۲ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 3,
+    phaseTitle: 'فاز سه: فرآیند اپلای و دریافت پذیرش / پیشنهاد کاری',
+    duration: '۲ تا ۴ ماه',
+    summary: 'ارسال درخواست به موسسات آموزشی یا کارفرمایان و دریافت تاییدیه معتبر.',
+    steps: [
+      {
+        id: 'gen-apply',
+        title: `ارسال درخواست رسمی به مقصد ${country.countryName}`,
+        description: 'ثبت اپلیکیشن در پورتال‌های رسمی و پیگیری پاسخ‌های دانشگاه یا کارفرما.',
+        category: 'application',
+        isIranSpecific: false,
+        tips: 'کلیه مدارک خواسته شده را با فرمت پی‌دی‌اف خوانا و حجم استاندارد آپلود کنید.',
+        estimatedTime: '۲ تا ۳ ماه'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 4,
+    phaseTitle: 'فاز چهار: تمکن مالی، حساب بانکی و اقدامات ارزی',
+    duration: '۳ تا ۴ هفته',
+    summary: 'صدور گواهی تمکن بانکی لاتین و آماده‌سازی هزینه‌های قانونی سفارت.',
+    steps: [
+      {
+        id: 'gen-bank-statement',
+        title: 'اخذ گواهی تمکن مالی و گردش حساب از بانک ایرانی',
+        description: 'صدور نامه رسمی تمکن مالی به زبان انگلیسی با درج معادل ارزی.',
+        category: 'financial',
+        isIranSpecific: true,
+        tips: 'تاریخ صدور گواهی نباید بیش از ۲ تا ۳ هفته با روز تحویل مدارک فاصله داشته باشد.',
+        estimatedTime: '۳ تا ۵ روز'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 5,
+    phaseTitle: 'فاز پنج: وقت سفارت، روز مصاحبه و صدور ویزا',
+    duration: '۲ تا ۴ ماه',
+    summary: 'حضور در سفارت یا کارگزاری، تحویل مدارک و پیگیری تا الصاق برچسب ویزا.',
+    steps: [
+      {
+        id: 'gen-embassy-attend',
+        title: `رزرو نوبت و حضور در سفارت یا کارگزاری رسمی ${country.countryName}`,
+        description: 'تحویل پوشه مدارک، انگشت‌نگاری و پاسخ به سوالات آفیسر در خصوص اهداف سفر.',
+        category: 'embassy',
+        isIranSpecific: true,
+        tips: 'پوشه مدارک را دقیقاً مطابق چک‌لیست سفارت مرتب نمایید.',
+        estimatedTime: '۱ تا ۳ ماه'
+      },
+      {
+        id: 'gen-visa-stamp',
+        title: 'پیگیری ویزا و دریافت گذرنامه ویزا شده',
+        description: 'بررسی ایمیل نتیجه و مراجعه جهت تحویل پاسپورت با برچسب ویزا.',
+        category: 'embassy',
+        isIranSpecific: false,
+        tips: 'اطلاعات درج شده روی ویزا را در همان روز تحویل کنترل فرمایید.',
+        estimatedTime: '۳ تا ۶ هفته'
+      }
+    ]
+  });
+
+  phases.push({
+    phaseNumber: 6,
+    phaseTitle: 'فاز شش: آماده‌سازی پرواز و استقرار در مقصد',
+    duration: '۳ تا ۴ هفته',
+    summary: 'خرید بلیت، رزرو اقامتگاه اولیه، ورود به خاک مقصد و دریافت کارت اقامت.',
+    steps: [
+      {
+        id: 'gen-flight',
+        title: 'خرید بلیت پرواز و پرداخت عوارض خروج از کشور',
+        description: 'تهیه بلیت هواپیما و پرداخت عوارض خروج در سامانه سداد بانک ملی.',
+        category: 'arrival',
+        isIranSpecific: true,
+        tips: 'عوارض خروج را حداقل ۲۴ ساعت قبل از پرواز پرداخت نمایید.',
+        estimatedTime: '۱ هفته'
+      },
+      {
+        id: 'gen-arrival-setup',
+        title: `ورود به خاک ${country.countryName} و نهایی‌سازی مدارک اقامتی`,
+        description: 'مراجعه به مراجع قانونی محلی جهت ثبت آدرس، دریافت کارت هویت و افتتاح حساب بانکی.',
+        category: 'arrival',
+        isIranSpecific: false,
+        tips: 'قبل از رسیدن به مقصد از اعتبار مدارک اقامتی موقت خود مطمئن شوید.',
+        estimatedTime: '۲ تا ۳ هفته'
+      }
+    ]
+  });
+
+  return phases;
 }
 
 function calculateFinancialEstimate(profile: UserProfile, topCountry: CountryRecommendation): AnalysisResult['financialEstimate'] {

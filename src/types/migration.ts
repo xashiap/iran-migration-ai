@@ -131,6 +131,13 @@ export interface CountryRecommendation {
   keyRequirements: string[];
   pros: string[];
   cons: string[];
+  roadmap?: {
+    targetCountry: string;
+    pathwayTitle: string;
+    totalPhasesCount: number;
+    estimatedTotalDuration: string;
+    phases: RoadmapPhase[];
+  };
 }
 
 export interface RoadmapStep {
