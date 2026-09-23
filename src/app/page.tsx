@@ -234,10 +234,15 @@ export default function Home() {
                   <button
                     type="button"
                     onClick={() => setIsRadarOpen(!isRadarOpen)}
-                    className="inline-flex items-center gap-2 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-300 border border-zinc-700/60 px-3 py-1 rounded-full text-xs font-medium transition cursor-pointer"
+                    className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition shadow-sm cursor-pointer border ${
+                      isRadarOpen
+                        ? 'bg-indigo-600 text-white border-indigo-500 shadow-indigo-600/30'
+                        : 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/30 hover:to-purple-500/30 text-indigo-300 border-indigo-500/40 shadow-sm'
+                    }`}
                   >
                     <Radio className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
-                    <span>رادار بخشنامه‌ها و وقت‌های سفارت ({isRadarOpen ? 'بستن' : 'مشاهده'})</span>
+                    <span>رادار فرصت‌های روزانه جهان (شغلی و تحصیلی) {isRadarOpen ? '✕ بستن' : '⚡ مشاهده'}</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping mr-0.5"></span>
                   </button>
                 </div>
 

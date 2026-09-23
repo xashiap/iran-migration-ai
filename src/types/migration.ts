@@ -222,3 +222,36 @@ export interface ApplicantStatistics {
   recentCountWeek: number;
 }
 
+export type WorldRegion = 'all' | 'americas' | 'gulf' | 'asia_turkey' | 'europe';
+export type OpportunityType = 'all' | 'job_offer' | 'university_admission' | 'scholarship' | 'job_seeker_visa';
+
+export interface GlobalOpportunity {
+  id: string;
+  title: string;
+  region: 'americas' | 'gulf' | 'asia_turkey' | 'europe';
+  country: string;
+  countryFlag: string;
+  city?: string;
+  type: 'job_offer' | 'university_admission' | 'scholarship' | 'job_seeker_visa';
+  typeLabel: string;
+  institutionOrCompany: string;
+  salaryOrFund: string;
+  languageRequirement: string;
+  deadline: string;
+  visaType: string;
+  iranianCompatibility: {
+    successRate: number; // e.g. 95%
+    embassyDifficulty: 'easy' | 'moderate' | 'challenging';
+    militarySensitive: boolean;
+    keyRequirements: string[];
+    embassyNotes: string;
+  };
+  summary: string;
+  stepsToApply: string[];
+  applyUrl: string;
+  tags: string[];
+  publishedDate: string;
+  isHot?: boolean;
+}
+
+
