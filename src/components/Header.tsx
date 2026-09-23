@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Compass, Key, Sparkles, RefreshCw, CheckCircle2, Radio } from 'lucide-react';
-import { SAMPLE_PROFILES, SampleProfileItem } from '@/data/sampleProfiles';
+import { Compass, Key, RefreshCw, CheckCircle2, Radio } from 'lucide-react';
+
 interface HeaderProps {
-  onSelectSample: (sample: SampleProfileItem) => void;
   onReset: () => void;
   apiKey: string;
   onSaveApiKey: (key: string) => void;
@@ -13,7 +12,6 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  onSelectSample,
   onReset,
   apiKey,
   onSaveApiKey,
@@ -22,7 +20,6 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState(apiKey);
-  const [showSampleDropdown, setShowSampleDropdown] = useState(false);
 
   const handleSaveKey = () => {
     onSaveApiKey(tempKey);
@@ -70,47 +67,6 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="sm:hidden">رادار</span>
             </button>
           )}
-
-          {/* Sample Profiles Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setShowSampleDropdown(!showSampleDropdown)}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium rounded-xl bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition"
-              title="بارگذاری نمونه‌های آماده برای تست سریع"
-            >
-              <Sparkles className="w-4 h-4 text-indigo-400" />
-              <span className="hidden md:inline">نمونه‌های آماده</span>
-              <span className="md:hidden">نمونه‌ها</span>
-            </button>
-
-            {showSampleDropdown && (
-              <div className="absolute left-0 sm:right-0 sm:left-auto mt-2 w-72 sm:w-80 bg-[#11141d] border border-white/[0.08] rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95">
-                <div className="text-xs font-semibold text-zinc-400 px-3 py-1.5 border-b border-white/[0.06] mb-1">
-                  انتخاب پروفایل پیش‌فرض برای تست سریع:
-                </div>
-                {SAMPLE_PROFILES.map((sample) => (
-                  <button
-                    key={sample.id}
-                    onClick={() => {
-                      onSelectSample(sample);
-                      setShowSampleDropdown(false);
-                    }}
-                    className="w-full text-right p-2.5 rounded-xl hover:bg-zinc-800/60 flex items-start gap-2.5 transition text-zinc-200 group"
-                  >
-                    <span className="text-xl bg-zinc-850 p-2 rounded-lg">{sample.icon}</span>
-                    <div>
-                      <div className="text-xs sm:text-sm font-bold text-zinc-100 group-hover:text-indigo-300">
-                        {sample.label}
-                      </div>
-                      <div className="text-[11px] text-zinc-400 leading-snug line-clamp-2">
-                        {sample.description}
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* Gemini API Key Setting Button */}
           <button

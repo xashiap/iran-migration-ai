@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { UserProfile, AnalysisResult } from '@/types/migration';
-import { INITIAL_EMPTY_PROFILE, SAMPLE_PROFILES, SampleProfileItem } from '@/data/sampleProfiles';
+import { INITIAL_EMPTY_PROFILE } from '@/data/sampleProfiles';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { StepIndicator } from '@/components/Wizard/StepIndicator';
@@ -17,7 +17,7 @@ import { CurrencyBar } from '@/components/CurrencyBar';
 import { ImmigrationRadar } from '@/components/Radar/ImmigrationRadar';
 import { CurrencyData, DEFAULT_CURRENCY } from '@/lib/currency';
 import { ThreeDimensionalDecorations } from '@/components/ThreeDimensionalDecorations';
-import { Sparkles, ChevronRight, Zap, Radio } from 'lucide-react';
+import { Sparkles, Radio } from 'lucide-react';
 
 export default function Home() {
   const [profile, setProfile] = useState<UserProfile>(INITIAL_EMPTY_PROFILE);
@@ -58,40 +58,6 @@ export default function Home() {
   const handleSaveApiKey = (key: string) => {
     setApiKey(key);
     localStorage.setItem('gemini_api_key', key);
-  };
-
-  const handleSelectSample = (sample: SampleProfileItem) => {
-    setProfile(sample.data);
-    setError(null);
-    // اسکرول نرم به ابتدای فرم
-    window.scrollTo({ top: 380, behavior: 'smooth' });
-  };
-
-  const handleQuickAnalyzeSample = async (sample: SampleProfileItem) => {
-    setProfile(sample.data);
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          profile: sample.data,
-          apiKey: apiKey || undefined,
-        }),
-      });
-
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'خطا در برقراری ارتباط');
-
-      setAnalysisResult(json.data);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطایی رخ داد.');
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleReset = () => {
@@ -181,7 +147,6 @@ export default function Home() {
       />
 
       <Header
-        onSelectSample={handleSelectSample}
         onReset={handleReset}
         apiKey={apiKey}
         onSaveApiKey={handleSaveApiKey}
@@ -253,36 +218,6 @@ export default function Home() {
                 <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-2xl">
                   اطلاعات تحصیلی، شغلی، سطح زبان و تمکن مالی خود را وارد کنید. هوش مصنوعی با در نظر گرفتن کلیه محدودیت‌های داخلی ایران (نظام وظیفه، سامانه سجاد و لغو تعهد رایگان، تمکن ریالی و چالش‌های وقت سفارت)، بهترین کشورها، مناسب‌ترین روش مهاجرتی و نقشه راه قدم‌به‌قدم از نقطه صفر تا فرودگاه را برای شما تدوین می‌کند.
                 </p>
-              </div>
-
-              {/* کارت‌های نمونه آزمایشی سریع */}
-              <div className="mt-6 pt-5 border-t border-white/[0.06]">
-                <div className="text-xs font-semibold text-zinc-400 mb-2.5 flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>آزمون سریع با پروفایل‌های واقعی ایرانیان (یک کلیک برای تحلیل فوری):</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  {SAMPLE_PROFILES.map((sample) => (
-                    <button
-                      key={sample.id}
-                      onClick={() => handleQuickAnalyzeSample(sample)}
-                      disabled={isLoading}
-                      className="text-right p-3 rounded-xl bg-[#0c0f16]/90 hover:bg-[#141824] border border-white/[0.06] hover:border-indigo-500/40 transition-all duration-200 group flex items-center justify-between gap-2 shadow-sm hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
-                    >
-                      <div className="min-w-0">
-                        <div className="text-xs font-bold text-zinc-200 group-hover:text-indigo-300 flex items-center gap-1.5">
-                          <span>{sample.icon}</span>
-                          <span className="truncate">{sample.label}</span>
-                        </div>
-                        <div className="text-[10px] text-zinc-500 truncate mt-0.5">
-                          {sample.description}
-                        </div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-indigo-400 flex-shrink-0" />
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
 
