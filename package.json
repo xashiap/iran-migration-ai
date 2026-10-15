@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "restore:conversations": "bash .antigravity-backup/restore_on_mac.sh"
   },
   "dependencies": {
     "react": "^18",

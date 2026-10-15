@@ -3,125 +3,78 @@
 import React from 'react';
 
 /**
- * تم مینیمال، مدرن و سه‌بعدی (Minimalist Modern 3D Theme)
- * - تعداد رنگ بسیار محدود (پالت مونوکروم مشکی/گرافیتی/زینک با یک رنگ مکمل نیلی ملایم)
- * - المان‌های ژئومتریک سه‌بعدی و ایزومتریک در ۴ گوشه صفحه با خطوط مدرن
- * - بهینه‌سازی شده برای جلوگیری از خستگی چشم در گوشی و مانیتور
- * - کاملاً سبک، بدون لگ و با قابلیت هماهنگی در سایزهای مختلف نمایشگر
+ * AuthKit by WorkOS Design Canvas:
+ * - Theatrical Spotlights: Multiple soft gradient light cones radiating from the top
+ * - Hairline Orthogonal Grid: Precision 1px grid guides fading into dark space
+ * - Dot Matrix Grid: 28px radial dot pattern
+ * - Corner Crosshairs: Distinctive AuthKit '+' cross markers at grid intersections
  */
 export const ThreeDimensionalDecorations: React.FC = () => {
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none" aria-hidden="true">
-      {/* ۱. صفحه پرسپکتیو سه‌بعدی مینیمال در پس‌زمینه (شبکه هندسی با افق نرم) */}
+      {/* ۱. کانوای ماتریس نقطه‌ای سبک AuthKit (Dot Matrix Overlay) */}
       <div 
-        className="absolute inset-0 opacity-[0.03] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_40%,#000_60%,transparent_100%)]"
+        className="absolute inset-0 opacity-[0.45]"
         style={{
-          backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)`,
-          backgroundSize: '40px 40px',
-          transform: 'perspective(900px) rotateX(28deg) translateY(-50px)',
-          transformOrigin: 'center top',
+          backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+          maskImage: 'radial-gradient(ellipse 90% 70% at 50% 20%, #000 40%, transparent 95%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 90% 70% at 50% 20%, #000 40%, transparent 95%)',
         }}
       />
 
-      {/* ۲. تک‌نور امبینت بسیار ملایم در بالای صفحه (تک‌رنگ، بدون آزار چشم) */}
-      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-indigo-600/[0.04] rounded-full blur-3xl" />
+      {/* ۲. نورافکن‌های تئاتری بالا (Theatrical Spotlights - AuthKit Signature) */}
+      <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[650px] overflow-hidden">
+        {/* مخروط نوری چپ (-18deg) */}
+        <div 
+          className="absolute top-0 left-1/2 w-[520px] h-[600px] origin-top opacity-35"
+          style={{
+            transform: 'translateX(-65%) rotate(-18deg)',
+            background: 'conic-gradient(from 180deg at 50% 0%, transparent 35%, rgba(99, 102, 241, 0.15) 50%, transparent 65%)',
+            filter: 'blur(30px)',
+          }}
+        />
 
-      {/* ==============================================================
-          گوشه ۱: بالا - راست (مکعب ایزومتریک خطی سه‌بعدی)
-          نمایش در دسکتاپ و موبایل (در موبایل کوچک‌تر و بدون تداخل با محتوا)
-          ============================================================== */}
-      <div className="absolute top-16 right-3 sm:top-24 sm:right-10 opacity-30 sm:opacity-40 transition-opacity">
-        <div className="w-14 h-14 sm:w-20 sm:h-20 [perspective:800px]">
-          <div 
-            className="w-full h-full relative [transform-style:preserve-3d] animate-float-slow"
-            style={{ transform: 'rotateX(30deg) rotateY(-45deg)' }}
-          >
-            {/* وجه پایه مکعب */}
-            <div className="absolute inset-0 border border-zinc-600/60 rounded-xl bg-zinc-900/30 shadow-lg shadow-black/40" />
-            {/* وجه معلق بالاتر با عمق سه‌بعدی */}
-            <div 
-              className="absolute inset-1.5 sm:inset-2 border border-indigo-400/40 rounded-lg bg-indigo-950/10"
-              style={{ transform: 'translateZ(20px)' }}
-            />
-            {/* خطوط اتصال‌دهنده پرسپکتیو */}
-            <div 
-              className="absolute w-2 h-2 rounded-full bg-indigo-400/60"
-              style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%) translateZ(28px)' }}
-            />
-          </div>
-        </div>
+        {/* مخروط نوری مرکزی (0deg) */}
+        <div 
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[550px] opacity-45"
+          style={{
+            background: 'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(129, 140, 248, 0.18), transparent 70%)',
+            filter: 'blur(25px)',
+          }}
+        />
+
+        {/* مخروط نوری راست (+18deg) */}
+        <div 
+          className="absolute top-0 left-1/2 w-[520px] h-[600px] origin-top opacity-35"
+          style={{
+            transform: 'translateX(-35%) rotate(18deg)',
+            background: 'conic-gradient(from 180deg at 50% 0%, transparent 35%, rgba(168, 85, 247, 0.12) 50%, transparent 65%)',
+            filter: 'blur(30px)',
+          }}
+        />
       </div>
 
-      {/* ==============================================================
-          گوشه ۲: بالا - چپ (مدار و حلقه ژیروسکوپی ایزومتریک سه‌بعدی)
-          ============================================================== */}
-      <div className="absolute top-16 left-3 sm:top-24 sm:left-10 opacity-25 sm:opacity-35 transition-opacity">
-        <div className="w-14 h-14 sm:w-20 sm:h-20 [perspective:800px]">
-          <div 
-            className="w-full h-full relative [transform-style:preserve-3d] animate-float-reverse"
-            style={{ transform: 'rotateX(55deg) rotateZ(20deg)' }}
-          >
-            {/* حلقه بیرونی */}
-            <div className="w-full h-full rounded-full border border-zinc-600/60 shadow-sm" />
-            {/* حلقه داخلی با زاویه سه‌بعدی معکوس */}
-            <div 
-              className="absolute inset-2 sm:inset-3 rounded-full border border-dashed border-zinc-500/50"
-              style={{ transform: 'translateZ(12px) rotateY(25deg)' }}
-            />
-            {/* نقطه کانونی */}
-            <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-zinc-400/50"
-              style={{ transform: 'translateZ(18px)' }}
-            />
-          </div>
-        </div>
+      {/* ۳. خطوط مویی هدایت‌کننده مدرن AuthKit (Hairline Grid Lines) */}
+      <div className="absolute inset-0 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* خط راهنمای عمودی چپ */}
+        <div className="absolute left-6 top-0 bottom-0 w-[1px] bg-gradient-to-b from-white/[0.08] via-white/[0.04] to-transparent hidden md:block" />
+        {/* خط راهنمای عمودی راست */}
+        <div className="absolute right-6 top-0 bottom-0 w-[1px] bg-gradient-to-b from-white/[0.08] via-white/[0.04] to-transparent hidden md:block" />
       </div>
 
-      {/* ==============================================================
-          گوشه ۳: پایین - راست (صفحه پله‌ای ژئومتریک سه‌بعدی)
-          ============================================================== */}
-      <div className="absolute bottom-16 right-3 sm:bottom-20 sm:right-10 opacity-25 sm:opacity-35 transition-opacity">
-        <div className="w-14 h-14 sm:w-18 sm:h-18 [perspective:700px]">
-          <div 
-            className="w-full h-full relative [transform-style:preserve-3d] animate-float-reverse"
-            style={{ transform: 'rotateX(40deg) rotateY(35deg)' }}
-          >
-            {/* لایه پایه */}
-            <div className="absolute inset-0 border border-zinc-700/60 rounded-xl bg-zinc-900/20" />
-            {/* لایه میانی با عمق سه‌بعدی */}
-            <div 
-              className="absolute inset-2 border border-zinc-600/50 rounded-lg"
-              style={{ transform: 'translateZ(14px)' }}
-            />
-            {/* لایه بالایی نیلی ملایم */}
-            <div 
-              className="absolute inset-4 border border-indigo-400/40 rounded-md"
-              style={{ transform: 'translateZ(24px)' }}
-            />
-          </div>
-        </div>
+      {/* ۴. نشانگرهای مثبت تلاقی AuthKit (+ Crosshairs) در نقاط کلیدی */}
+      <div className="absolute top-28 left-8 sm:left-16 text-zinc-600/70 font-mono text-xs select-none hidden sm:block">
+        +
       </div>
-
-      {/* ==============================================================
-          گوشه ۴: پایین - چپ (منشور و نگین لوزی سه‌بعدی مینیمال)
-          ============================================================== */}
-      <div className="absolute bottom-16 left-3 sm:bottom-20 sm:left-10 opacity-25 sm:opacity-35 transition-opacity">
-        <div className="w-14 h-14 sm:w-18 sm:h-18 [perspective:700px]">
-          <div 
-            className="w-full h-full relative [transform-style:preserve-3d] animate-float-slow"
-            style={{ transform: 'rotateX(35deg) rotateZ(45deg)' }}
-          >
-            <div className="absolute inset-0 border border-zinc-600/60 rounded-lg bg-zinc-900/20 shadow-md" />
-            <div 
-              className="absolute inset-2 border border-zinc-500/40 rounded-md"
-              style={{ transform: 'translateZ(16px)' }}
-            />
-            <div 
-              className="absolute inset-3 border border-indigo-400/30 rounded-sm"
-              style={{ transform: 'translateZ(26px)' }}
-            />
-          </div>
-        </div>
+      <div className="absolute top-28 right-8 sm:right-16 text-zinc-600/70 font-mono text-xs select-none hidden sm:block">
+        +
+      </div>
+      <div className="absolute top-[480px] left-12 sm:left-24 text-zinc-700/60 font-mono text-xs select-none hidden md:block">
+        +
+      </div>
+      <div className="absolute top-[480px] right-12 sm:right-24 text-zinc-700/60 font-mono text-xs select-none hidden md:block">
+        +
       </div>
     </div>
   );

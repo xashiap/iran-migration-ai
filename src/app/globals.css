@@ -42,7 +42,7 @@
 @tailwind utilities;
 
 :root {
-  --background: #0a0c10;
+  --background: #08090d;
   --foreground: #ededed;
 }
 
@@ -52,10 +52,7 @@ html, body, button, input, select, textarea {
 
 body {
   color: var(--foreground);
-  background-color: #0a0c10;
-  background-image: 
-    radial-gradient(at 50% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 65%),
-    radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.02) 0px, transparent 50%);
+  background-color: #08090d;
   background-attachment: fixed;
   direction: rtl;
   text-align: right;
@@ -63,89 +60,144 @@ body {
 }
 
 /* ==============================================================
-   استایل مینیمال، مدرن و سه‌بعدی با تعداد رنگ کنترل‌شده (Eye-Comfort 3D)
+   زبان طراحی مدرن و مینیمال AuthKit (WorkOS / Radix UI Standard)
    ============================================================== */
 
-/* کارت‌های سه‌بعدی با لبه‌های ظریف و عمق لمسی (Tactile 3D Cards) */
-.glass-panel {
-  background: rgba(16, 20, 29, 0.85) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.07) !important;
-  box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+/* کارت‌های سبک AuthKit با لبه‌های میکرومتری و عمق استاندارد */
+.authkit-card {
+  background: rgba(14, 17, 25, 0.92) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 24px 48px -12px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
 }
 
-/* کارت‌های داخلی ثانویه مینیمال */
+.authkit-card-interactive {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.authkit-card-interactive:hover {
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 28px 54px -12px rgba(0, 0, 0, 0.85),
+    0 0 30px -8px rgba(99, 102, 241, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+/* پنل‌های شیشه‌ای */
+.glass-panel {
+  background: rgba(14, 17, 25, 0.88) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
 .glass-panel-subtle {
-  background: rgba(12, 15, 22, 0.85) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background: rgba(11, 14, 21, 0.88) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
 }
 
-/* بازنویسی رنگ‌های پنل‌ها برای یکدستی مینیمال تیره و مدرن */
+/* هماهنگ‌سازی کلاس‌های Tailwind قدیمی با تم یکدست AuthKit */
 .bg-slate-900,
 .bg-slate-900\/60,
 .bg-slate-900\/70,
 .bg-slate-900\/80,
 .bg-slate-900\/90 {
-  background-color: rgba(16, 20, 29, 0.82) !important;
+  background-color: rgba(14, 17, 25, 0.88) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  border-color: rgba(255, 255, 255, 0.07) !important;
-  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 14px 32px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
 }
 
 .bg-slate-950,
 .bg-slate-950\/60,
 .bg-slate-950\/70,
 .bg-slate-950\/80 {
-  background-color: rgba(12, 15, 22, 0.85) !important;
+  background-color: rgba(10, 13, 19, 0.92) !important;
   border-color: rgba(255, 255, 255, 0.06) !important;
 }
 
 .border-slate-800,
 .border-slate-850,
 .border-slate-700 {
-  border-color: rgba(255, 255, 255, 0.07) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* رنگ متون اصلاح‌شده برای راحتی کامل چشم در مطالعه طولانی */
+/* متون خوانا با کنتراست دقیق سبک AuthKit */
 .text-white {
-  color: #f3f4f6 !important;
+  color: #f4f4f5 !important;
 }
 
 .text-slate-100 {
-  color: #e5e7eb !important;
+  color: #e4e4e7 !important;
 }
 
 .text-slate-200 {
-  color: #d1d5db !important;
+  color: #d4d4d8 !important;
 }
 
 .text-slate-300 {
-  color: #9ca3af !important;
+  color: #a1a1aa !important;
 }
 
 .text-slate-400 {
-  color: #6b7280 !important;
+  color: #71717a !important;
 }
 
-/* ورودی‌ها و سلکت‌های هماهنگ با تم تیره مینیمال */
+/* ورودی‌های عمیق و های‌پریسیژن سبک AuthKit */
 input, select, textarea {
-  background-color: rgba(12, 15, 22, 0.9) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  color: #f3f4f6 !important;
+  background-color: rgba(9, 11, 16, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f4f4f5 !important;
+  border-radius: 12px;
+  transition: all 0.2s ease;
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: rgba(99, 102, 241, 0.6) !important;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15) !important;
+  border-color: rgba(129, 140, 248, 0.8) !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+  outline: none !important;
 }
 
-/* دکمه‌های اصلی مدرن با رنگ نیلی ملایم و عمق سه‌بعدی */
+/* دکمه‌های سبک AuthKit */
+.authkit-button-primary {
+  background: #ffffff !important;
+  color: #090a0f !important;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 0 20px -2px rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.authkit-button-primary:hover {
+  background: #e4e4e7 !important;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.3) !important;
+}
+
+.authkit-button-secondary {
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: #f4f4f5 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(8px) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.authkit-button-secondary:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* دکمه‌های نیلی */
 .bg-indigo-600 {
   background: #4f46e5 !important;
-  box-shadow: 0 4px 14px -2px rgba(79, 70, 229, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 14px -2px rgba(79, 70, 229, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
@@ -153,61 +205,61 @@ input:focus, select:focus, textarea:focus {
   background: #4338ca !important;
 }
 
-/* ==============================================================
-   انیمیشن‌های المان‌های ۳بعدی ۴ گوشه صفحه
-   ============================================================== */
-@keyframes floatSlow {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-12px) rotate(3deg);
-  }
+/* جداکننده خطی متنی بین دکمه‌ها (Between Lines OR) */
+.authkit-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #71717a;
+  font-size: 11px;
+  font-weight: 600;
+  margin: 16px 0;
 }
 
-@keyframes floatReverse {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(12px) rotate(-3deg);
-  }
+.authkit-divider::before,
+.authkit-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-@keyframes spinVerySlow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.authkit-divider:not(:empty)::before {
+  margin-left: 12px;
 }
 
-.animate-float-slow {
-  animation: floatSlow 7s ease-in-out infinite;
+.authkit-divider:not(:empty)::after {
+  margin-right: 12px;
 }
 
-.animate-float-reverse {
-  animation: floatReverse 8s ease-in-out infinite;
+/* نشانگر تلاقی مثبت در ۴ گوشه کارت‌ها (+ Crosshairs) */
+.authkit-crosshair {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  color: rgba(255, 255, 255, 0.25);
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  user-select: none;
 }
 
-.animate-spin-very-slow {
-  animation: spinVerySlow 45s linear infinite;
-}
-
-/* اسکرول‌بار شیشه‌ای */
+/* اسکرول‌بار ظریف */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(8, 12, 22, 0.8);
+  background: #08090d;
 }
 
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
